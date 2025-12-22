@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Merchandise | West Basketball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            primary: '#10b981',
+            accent: '#06d6a0',
+            dark: '#0a0a0a',
+            darker: '#050505',
+            light: '#f8fafc'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
+    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+    .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glow { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
+    .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
+    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
+    .section-fade { opacity: 0; transform: translateY(40px); transition: all 0.8s ease-out; }
+    .section-fade.visible { opacity: 1; transform: translateY(0); }
+    .float-slow { animation: float 14s ease-in-out infinite; }
+    .float-slower { animation: float 18s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-18px); }
+    }
+  </style>
+</head>
+<body class="text-light min-h-screen">
+  <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
+
+  <main class="pt-24">
+    <section class="py-16 px-6 relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl float-slow"></div>
+      <div class="max-w-5xl mx-auto relative">
+        <div class="section-fade">
+          <span id="merch-hero-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Merchandise</span>
+          <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
+            <span id="merch-hero-title">Uniforms &amp;</span> <span id="merch-hero-highlight" class="gradient-text">Gear</span>
+          </h1>
+          <p id="merch-blurb" class="text-xl text-white/70 max-w-2xl leading-relaxed"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 px-6">
+      <div class="max-w-4xl mx-auto section-fade">
+        <div class="glass glow rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl float-slow"></div>
+          <div class="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-3xl float-slower"></div>
+          <div class="relative">
+            <div class="w-20 h-20 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
+              <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            </div>
+            <span id="merch-store-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Official Store</span>
+            <h2 class="text-4xl font-bold mt-4 mb-6"><span id="merch-store-title">Shop</span> <span id="merch-store-highlight" class="gradient-text">Now</span></h2>
+            <p id="merch-store-description" class="text-white/70 mb-8 max-w-lg mx-auto">Order singlets, shorts, hoodies, and accessories online. Rep the club colors with pride!</p>
+            
+            <div id="merch-pillars" class="grid grid-cols-3 gap-6 mb-8 max-w-md mx-auto"></div>
+            
+            <a id="merch-store-link" href="#" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold text-lg">
+              Go to merch store
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 bg-darker mt-16" id="site-footer"></footer>
+
+  <script src="data.js"></script>
+  <script src="common.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNav('merch');
+      renderFooter();
+      renderMerchContent();
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+    });
+
+    window.addEventListener('sitecontent:updated', () => {
+      renderNav('merch');
+      renderFooter();
+      renderMerchContent();
+    });
+  </script>
+</body>
+</html>

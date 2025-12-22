@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sponsors | West Basketball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            primary: '#10b981',
+            accent: '#06d6a0',
+            dark: '#0a0a0a',
+            darker: '#050505',
+            light: '#f8fafc'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
+    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+    .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glow { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
+    .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
+    .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .card-hover:hover { transform: translateY(-8px) scale(1.02); }
+    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
+    .section-fade { opacity: 0; transform: translateY(40px); transition: all 0.8s ease-out; }
+    .section-fade.visible { opacity: 1; transform: translateY(0); }
+    .float-slow { animation: float 14s ease-in-out infinite; }
+    .float-slower { animation: float 18s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-18px); }
+    }
+  </style>
+</head>
+<body class="text-light min-h-screen">
+  <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
+
+  <main class="pt-24">
+    <section class="py-16 px-6 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl float-slow"></div>
+      <div class="max-w-5xl mx-auto relative">
+        <div class="section-fade">
+          <span id="sponsors-hero-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Partners</span>
+          <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
+            <span id="sponsors-hero-title">Thank You to Our</span> <span id="sponsors-hero-highlight" class="gradient-text">Sponsors</span>
+          </h1>
+          <p id="sponsors-hero-desc" class="text-xl text-white/70 max-w-2xl">We proudly display sponsor logos on the home page. Add or remove partners in the admin panel.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 px-6">
+      <div class="max-w-5xl mx-auto section-fade">
+        <div id="sponsor-page-logos" class="grid sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+      </div>
+    </section>
+
+    <section class="py-16 px-6">
+      <div class="max-w-4xl mx-auto section-fade">
+        <div class="glass glow rounded-3xl p-8 md:p-12 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl float-slow"></div>
+          <div class="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-3xl float-slower"></div>
+          <div class="relative grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <span id="sponsors-cta-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Partner With Us</span>
+              <h2 class="text-4xl font-bold mt-4 mb-6"><span id="sponsors-cta-title">Become a</span> <span id="sponsors-cta-highlight" class="gradient-text">Sponsor</span></h2>
+              <p id="sponsors-cta-desc" class="text-white/70 mb-6">We offer court signage, jersey placements, and digital promotion. Let's build something great for local basketball.</p>
+              <a id="sponsors-cta-button" href="mailto:sponsorship@westbasketball.com.au" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold">
+                Get in touch
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </a>
+            </div>
+            <div id="sponsors-features" class="grid grid-cols-2 gap-4"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 bg-darker" id="site-footer"></footer>
+
+  <script src="data.js"></script>
+  <script src="common.js"></script>
+  <script>
+    function renderSponsorsCopy() {
+      const page = window.siteContent.pages?.sponsors ?? {};
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value ?? "";
+      };
+      const arrow = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>';
+      setText("sponsors-hero-tag", page.heroTag);
+      setText("sponsors-hero-title", page.heroTitle);
+      setText("sponsors-hero-highlight", page.heroHighlight);
+      setText("sponsors-hero-desc", page.heroDescription);
+      setText("sponsors-cta-tag", page.ctaTag);
+      setText("sponsors-cta-title", page.ctaTitle);
+      setText("sponsors-cta-highlight", page.ctaHighlight);
+      setText("sponsors-cta-desc", page.ctaDescription);
+      const ctaBtn = document.getElementById("sponsors-cta-button");
+      if (ctaBtn) {
+        ctaBtn.innerHTML = `${page.ctaLabel || "Get in touch"} ${arrow}`;
+        ctaBtn.href = page.ctaHref || "mailto:sponsorship@westbasketball.com.au";
+      }
+      const features = document.getElementById("sponsors-features");
+      if (features) {
+        features.innerHTML = (page.features || [])
+          .map(
+            (feature) => `
+            <div class="glass rounded-2xl p-4 text-center">
+              <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+              </div>
+              <p class="text-sm text-white/80 font-medium">${feature}</p>
+            </div>
+          `
+          )
+          .join("\n");
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNav('sponsors');
+      renderFooter();
+      renderSponsors('sponsor-page-logos');
+      renderSponsorsCopy();
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+    });
+
+    window.addEventListener('sitecontent:updated', () => {
+      renderNav('sponsors');
+      renderFooter();
+      renderSponsors('sponsor-page-logos');
+      renderSponsorsCopy();
+    });
+  </script>
+</body>
+</html>

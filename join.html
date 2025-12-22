@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join the Club | West Basketball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            primary: '#10b981',
+            accent: '#06d6a0',
+            dark: '#0a0a0a',
+            darker: '#050505',
+            light: '#f8fafc'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
+    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+    .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .glow { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
+    .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
+    .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.15); border-color: #10b981; }
+    .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .card-hover:hover { transform: translateY(-8px) scale(1.02); }
+    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
+    .section-fade { opacity: 0; transform: translateY(40px); transition: all 0.8s ease-out; }
+    .section-fade.visible { opacity: 1; transform: translateY(0); }
+    .float-slow { animation: float 14s ease-in-out infinite; }
+    .float-slower { animation: float 18s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-18px); }
+    }
+  </style>
+</head>
+<body class="text-light min-h-screen">
+  <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
+
+  <main class="pt-24">
+    <section class="py-16 px-6 relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl float-slow"></div>
+      <div class="absolute bottom-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl float-slower"></div>
+      <div class="max-w-5xl mx-auto relative">
+        <div class="section-fade">
+          <span id="join-hero-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Join Us</span>
+          <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
+            <span id="join-hero-title">Join the</span> <span id="join-hero-highlight" class="gradient-text">Club</span>
+          </h1>
+          <p id="join-hero-description" class="text-xl text-white/70 max-w-2xl">Choose the right stream for your player. We have programs for every age and skill level.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 px-6">
+      <div class="max-w-5xl mx-auto space-y-8">
+        <div id="join-streams" class="section-fade"></div>
+        <div class="section-fade">
+          <div class="glass glow rounded-3xl p-8 text-center relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-3xl"></div>
+            <div class="relative">
+              <span id="join-help-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium block mb-4">Support</span>
+              <div class="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <h2 class="text-2xl font-bold text-white mb-4"><span id="join-help-title">Need Help?</span></h2>
+              <p id="join-help-text" class="text-white/60 mb-6 max-w-md mx-auto">If you need payment plans or have accessibility needs, reach out. We want everyone to play.</p>
+              <button id="join-help-cta" type="button" data-contact-trigger="true" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold contact-modal-trigger">
+                Talk to us
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </button>
+              <p id="join-help-contact" class="text-white/50 text-sm mt-2"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 bg-darker mt-16" id="site-footer"></footer>
+
+  <script src="data.js"></script>
+  <script src="common.js"></script>
+  <script>
+    function renderJoinContent() {
+      const joinPage = window.siteContent.pages?.join ?? {};
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = formatMultiline(value ?? "");
+      };
+      setText("join-hero-tag", joinPage.heroTag);
+      setText("join-hero-title", joinPage.heroTitle);
+      setText("join-hero-highlight", joinPage.heroHighlight);
+      setText("join-hero-description", joinPage.heroDescription);
+      setText("join-help-tag", joinPage.helpTag);
+      setText("join-help-title", joinPage.helpTitle);
+      setText("join-help-text", joinPage.helpText);
+      const helpCta = document.getElementById("join-help-cta");
+      if (helpCta) {
+        helpCta.innerHTML = `${joinPage.helpCtaLabel ?? "Talk to us"} <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>`;
+        helpCta.setAttribute("data-contact-trigger", "true");
+        helpCta.classList.add("contact-modal-trigger");
+      }
+      const helpContact = document.getElementById("join-help-contact");
+      if (helpContact) {
+        const helpHref = joinPage.helpCtaHref ?? "";
+        helpContact.textContent = helpHref ? `Contact: ${helpHref}` : "";
+        helpContact.classList.toggle("hidden", !helpHref);
+      }
+
+      const container = document.getElementById("join-streams");
+      if (container) {
+        const streams = joinPage.streams || [];
+        if (!streams.length) {
+          container.innerHTML = "";
+          return;
+        }
+        const baseSignUpLabel = joinPage.signUpLabel || "Sign up";
+        const baseSignUpHref = joinPage.signUpHref || joinPage.helpCtaHref || "#";
+        const preferredOrder = ["juniors", "u8u10"];
+        const getStreamKey = (stream) => (stream.id || stream.title || "").toString().toLowerCase();
+        const orderedStreams = streams
+          .map((stream, index) => ({ stream, index }))
+          .sort((a, b) => {
+            const aKey = getStreamKey(a.stream);
+            const bKey = getStreamKey(b.stream);
+            const aRank = preferredOrder.indexOf(aKey);
+            const bRank = preferredOrder.indexOf(bKey);
+            const aScore = aRank === -1 ? preferredOrder.length : aRank;
+            const bScore = bRank === -1 ? preferredOrder.length : bRank;
+            if (aScore !== bScore) return aScore - bScore;
+            return a.index - b.index;
+          })
+          .map((entry) => entry.stream);
+
+        container.innerHTML = `
+          <div class="space-y-2">
+            ${orderedStreams
+              .map((stream) => {
+                const steps = ((stream.steps && stream.steps.length)
+                  ? stream.steps
+                  : (stream.links || []).map((link) => link.label || link.href || "")).filter((s) => (s ?? "").toString().trim());
+                const ctaLabel = stream.ctaLabel || baseSignUpLabel;
+                const ctaHref = stream.ctaHref || baseSignUpHref;
+                return `
+                  ${stream.id ? `<span id="${escapeHtml(stream.id)}" class="block -mt-24 pt-24"></span>` : ""}
+                  <article class="glass rounded-3xl p-6 md:p-8 space-y-5">
+                    <div class="flex flex-wrap items-center gap-3">
+                      ${stream.badge ? `<span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">${escapeHtml(stream.badge)}</span>` : ""}
+                      <span class="text-xs uppercase tracking-[0.2em] text-white/50">Program details</span>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-white">${escapeHtml(stream.title || "Program")}</h2>
+                    ${stream.description ? `<p class="text-white/60 leading-relaxed">${formatMultiline(stream.description)}</p>` : ""}
+                    <div class="glass rounded-2xl p-5 space-y-3">
+                      ${
+                        steps.length
+                          ? steps
+                              .map(
+                                (step, idx) => `
+                          <div class="flex items-start gap-3">
+                            <span class="w-8 h-8 rounded-full bg-primary/15 text-primary font-semibold flex items-center justify-center">${idx + 1}</span>
+                            <p class="text-white/80 leading-relaxed">${formatMultiline(step || "")}</p>
+                          </div>
+                        `
+                              )
+                              .join("")
+                          : '<p class="text-white/50 text-sm">Add steps in the admin panel.</p>'
+                      }
+                    </div>
+                    <div class="pt-2">
+                      <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="${escapeHtml(ctaHref)}">
+                        ${escapeHtml(ctaLabel)}
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                      </a>
+                    </div>
+                  </article>
+                `;
+              })
+              .join("")}
+          </div>
+        `;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNav('join');
+      renderFooter();
+      renderJoinContent();
+      initContactModal();
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+    });
+
+    window.addEventListener('sitecontent:updated', () => {
+      renderNav('join');
+      renderFooter();
+      renderJoinContent();
+      initContactModal();
+    });
+  </script>
+</body>
+</html>

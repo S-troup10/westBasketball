@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin | West Basketball</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            primary: '#10b981',
+            accent: '#06d6a0',
+            danger: '#ef4444',
+            dark: '#0a0a0a',
+            darker: '#050505',
+            light: '#f8fafc'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
+    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+    .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
+    .btn-danger { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); transition: all 0.3s ease; }
+    .btn-danger:hover { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.5); }
+    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
+    .input-field { 
+      background: rgba(255,255,255,0.05); 
+      border: 1px solid rgba(255,255,255,0.1); 
+      transition: all 0.3s ease;
+    }
+    .input-field:focus { 
+      border-color: #10b981; 
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    .input-field::placeholder { color: rgba(255,255,255,0.3); }
+  </style>
+</head>
+<body class="text-light min-h-screen">
+  <!-- PASSWORD MODAL (DARK THEME) -->
+<div id="password-modal"
+     class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
+
+  <div class="bg-clubDark/90 rounded-3xl border border-emerald-700/30 shadow-card p-8 w-[90%] max-w-sm space-y-6 animate-fadeIn text-white">
+
+    <div class="space-y-2 text-center">
+      <p class="text-xs uppercase tracking-[0.3em] text-emerald-300">Restricted Access</p>
+      <h2 class="text-2xl font-semibold text-white">Enter Password</h2>
+      <p class="text-emerald-100 text-sm">Authorised members only</p>
+    </div>
+
+    <input id="password-input"
+      type="password"
+      placeholder="Password"
+      class="w-full px-4 py-3 rounded-2xl border border-emerald-700 bg-black/30 
+             text-white placeholder-emerald-300/50 shadow-inner
+             focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none" />
+
+    <button id="password-submit"
+      class="w-full rounded-full bg-emerald-500 hover:bg-emerald-600 
+             text-white py-3 font-semibold shadow-card transition">
+      Unlock
+    </button>
+
+    <p id="password-error" class="text-red-400 text-sm text-center hidden">
+      Incorrect password. Redirecting…
+    </p>
+
+  </div>
+</div>
+
+<!-- SAVE CONFIRM MODAL -->
+<div id="save-confirm-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-[9998]">
+  <div class="glass rounded-3xl border border-primary/30 p-8 w-[90%] max-w-md text-center space-y-4">
+    <div class="w-12 h-12 mx-auto rounded-full bg-primary/20 flex items-center justify-center">
+      <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    </div>
+    <h3 class="text-xl font-semibold text-white">Changes Saved</h3>
+    <p class="text-white/70 text-sm">Updates may take up to 10 minutes to appear on other devices. Local cache was cleared.</p>
+    <button id="save-confirm-close" class="btn-primary rounded-full px-6 py-3 text-white font-semibold w-full">OK</button>
+  </div>
+</div>
+
+<script>
+  const modal = document.getElementById("password-modal");
+  const input = document.getElementById("password-input");
+  const submitBtn = document.getElementById("password-submit");
+  const errorMsg = document.getElementById("password-error");
+  const ttlMs = 60 * 60 * 1000; // 1 hour
+  const apiBase = (window.API_BASE && window.API_BASE) || "http://localhost:8000";
+
+  function sessionValid() {
+    const accessExpires = parseInt(localStorage.getItem("adminAccessExpires") || "0", 10);
+    const tokenExpires = parseInt(localStorage.getItem("adminApiTokenExpires") || "0", 10);
+    const hasToken = !!localStorage.getItem("adminApiToken");
+    return (
+      accessExpires > Date.now() &&
+      tokenExpires > Date.now() &&
+      hasToken &&
+      localStorage.getItem("adminAccess") === "granted"
+    );
+  }
+
+  // If already unlocked and not expired, skip modal
+  if (sessionValid()) {
+    modal.classList.add("opacity-0", "pointer-events-none");
+    setTimeout(() => modal.remove(), 150);
+    window.dispatchEvent(new Event("admin:unlocked"));
+  } else {
+    setTimeout(() => input.focus(), 150);
+  }
+
+  async function submitPassword() {
+    const value = input.value.trim();
+
+    try {
+      const res = await fetch(`${apiBase}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: value })
+      });
+      if (!res.ok) throw new Error("bad credentials");
+      const { token } = await res.json();
+      if (!token) throw new Error("no token");
+
+      const expires = Date.now() + ttlMs;
+      localStorage.setItem("adminAccess", "granted");
+      localStorage.setItem("adminAccessExpires", expires.toString());
+      localStorage.setItem("adminApiToken", token);
+      localStorage.setItem("adminApiTokenExpires", expires.toString());
+      localStorage.removeItem("adminPassword");
+      modal.classList.add("opacity-0", "pointer-events-none");
+      setTimeout(() => modal.remove(), 300);
+      window.dispatchEvent(new Event("admin:unlocked"));
+    } catch (err) {
+      errorMsg.classList.remove("hidden");
+      setTimeout(() => { window.location.href = "index.html"; }, 1200);
+    }
+  }
+
+  submitBtn.addEventListener("click", submitPassword);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") submitPassword();
+  });
+</script>
+
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .animate-fadeIn { animation: fadeIn .25s ease-out; }
+</style>
+
+
+  <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
+
+  <main class="max-w-6xl mx-auto px-6 pb-16 pt-28 space-y-10">
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div>
+        <span class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Admin</span>
+        <h1 class="text-4xl font-bold mt-2">Manage <span class="gradient-text">Website Content</span></h1>
+        <p class="text-white/60 mt-2">Edits save to your browser's localStorage. Refresh public pages to see changes.</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <button id="save-admin" class="btn-primary rounded-full px-6 py-3 text-white font-semibold">Save Changes</button>
+        <button id="reset-admin" class="btn-danger rounded-full px-6 py-3 text-white font-medium">Reset</button>
+        <button id="export-json" class="rounded-full px-6 py-3 text-white font-medium border border-white/10 bg-white/5 hover:border-primary/50 hover:text-primary transition-all">Download JSON</button>
+        <button id="import-json" class="rounded-full px-6 py-3 text-white font-medium border border-white/10 bg-white/5 hover:border-primary/50 hover:text-primary transition-all">Upload JSON</button>
+        <input type="file" id="import-json-input" accept="application/json" class="hidden" />
+      </div>
+    </div>
+    <p id="admin-toast" class="text-sm text-primary hidden glass rounded-xl px-4 py-2 inline-block">Saved</p>
+
+        <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg>
+          </span>
+          News
+        </h2>
+        <span class="text-xs text-white/40">Shown on landing page</span>
+      </div>
+      <div id="news-list"></div>
+    </section>
+
+
+        <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          </span>
+          Photo Gallery
+        </h2>
+        <span class="text-xs text-white/40">Manage gallery photos</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 text-sm text-white/60">
+        <button id="gallery-bulk-upload" type="button" class="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-white hover:border-primary/50 hover:text-primary transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          Upload multiple photos
+        </button>
+        <input id="gallery-bulk-input" type="file" accept="image/*" multiple class="hidden" />
+        <span class="text-xs text-white/40">Images save to your browser until you click save.</span>
+      </div>
+      <div id="gallery-list"></div>
+    </section>
+
+
+    <section class="grid md:grid-cols-2 gap-6">
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+            </span>
+            Quick Links
+          </h2>
+          <span class="text-xs text-white/40">Shown on landing page</span>
+        </div>
+        <div id="quick-links-list"></div>
+      </div>
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </span>
+            Sponsors
+          </h2>
+          <span class="text-xs text-white/40">Shown on landing + sponsors page</span>
+        </div>
+        <div id="sponsor-list"></div>
+      </div>
+    </section>
+   
+
+    <section class="grid md:grid-cols-2 gap-6">
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
+          </span>
+          Hero Section
+        </h2>
+        <input id="hero-headline" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Headline" />
+        <textarea id="hero-subhead" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Subhead"></textarea>
+        <div class="grid grid-cols-2 gap-3">
+          <input id="hero-primary-label" class="input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Primary button label" />
+          <input id="hero-primary-href" class="input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Primary button link" />
+          <input id="hero-secondary-label" class="input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Secondary button label" />
+          <input id="hero-secondary-href" class="input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Secondary button link" />
+        </div>
+      </div>
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+          </span>
+          Club Info
+        </h2>
+        <input id="club-tagline" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Tagline" />
+        <textarea id="club-intro" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Landing page intro"></textarea>
+      </div>
+    </section>
+
+   
+
+
+
+
+    <section class="grid md:grid-cols-2 gap-6">
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            </span>
+            Homepage Programs
+          </h2>
+          <span class="text-xs text-white/40">Cards on landing page</span>
+        </div>
+        <div id="home-programs-list"></div>
+      </div>
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold text-white flex items-center gap-2">
+            <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
+            </span>
+            Homepage Featured Photos
+          </h2>
+          <span class="text-xs text-white/40">Large gallery cards</span>
+        </div>
+        <div id="home-featured-photos"></div>
+      </div>
+    </section>
+
+    <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6m-7 4h8m-9 4h10m-11 4h12"></path></svg>
+          </span>
+          Homepage Story Blocks
+        </h2>
+        <span class="text-xs text-white/40">History, last season, awards</span>
+      </div>
+      <p class="text-white/50 text-sm">Each block uses a heading, short blurb, and dot points.</p>
+      <div class="grid md:grid-cols-3 gap-3">
+        <input id="home-story-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Section tag" />
+        <input id="home-story-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Section title" />
+        <textarea id="home-story-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none md:col-span-3" placeholder="Section subtitle"></textarea>
+      </div>
+      <div id="home-story-list"></div>
+    </section>
+
+    <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path></svg>
+          </span>
+          Homepage Quote
+        </h2>
+        <span class="text-xs text-white/40">Shown on landing gallery section</span>
+      </div>
+      <textarea id="home-quote-text-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Quote text"></textarea>
+      <input id="home-quote-attrib-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Attribution" />
+    </section>
+
+
+
+
+
+    <section class="grid md:grid-cols-2 gap-6">
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <h2 class="text-xl font-bold text-white">About Page</h2>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="about-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
+          <input id="about-hero-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero title" />
+          <input id="about-hero-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero highlight" />
+          <input id="about-history-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="History heading" />
+          <input id="about-values-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Values heading" />
+          <input id="about-life-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Life members heading" />
+        </div>
+        <textarea id="about-intro-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Intro"></textarea>
+        <textarea id="about-history-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="History"></textarea>
+        <textarea id="about-values-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Values (one per line)"></textarea>
+        <textarea id="about-members-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Life members (one per line)"></textarea>
+        <textarea id="about-life-desc-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Life members description"></textarea>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="about-contact-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Contact tag" />
+          <input id="about-contact-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Contact title" />
+          <input id="about-contact-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Contact highlight" />
+          <input id="about-contact-cta-label" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Contact CTA label" />
+          <input id="about-contact-cta-href" class="input-field rounded-xl px-4 py-3 text-white" placeholder="mailto:info@..." />
+        </div>
+        <textarea id="about-contact-desc-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Contact description"></textarea>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="about-extra-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Extra section tag" />
+          <input id="about-extra-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Extra section title" />
+        </div>
+        <textarea id="about-extra-text-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Extra section text"></textarea>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Club Snapshot</p>
+            <span class="text-xs text-white/40">Numbers on the about page</span>
+          </div>
+          <input id="about-snapshot-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Snapshot heading" />
+          <textarea id="about-snapshot-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Snapshot subtitle"></textarea>
+          <div id="about-snapshot-stats-list"></div>
+        </div>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Coaching Pillars</p>
+            <span class="text-xs text-white/40">Cards under "How we coach"</span>
+          </div>
+          <input id="about-pillars-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Pillars heading" />
+          <textarea id="about-pillars-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Pillars subtitle"></textarea>
+          <div id="about-pillars-list"></div>
+        </div>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Programs &amp; Community</p>
+            <span class="text-xs text-white/40">Support cards on the about page</span>
+          </div>
+          <input id="about-initiatives-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Programs heading" />
+          <textarea id="about-initiatives-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Programs subtitle"></textarea>
+          <div id="about-initiatives-list"></div>
+        </div>
+      </div>
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <h2 class="text-xl font-bold text-white">Join Page</h2>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="join-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
+          <input id="join-hero-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero title" />
+          <input id="join-hero-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero highlight" />
+        </div>
+        <textarea id="join-hero-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Hero description"></textarea>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="join-help-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Help tag" />
+          <input id="join-help-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Help title" />
+          <input id="join-help-cta-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Help CTA label" />
+          <input id="join-help-cta-href-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Help CTA link" />
+        </div>
+        <textarea id="join-help-text-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Help description"></textarea>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="join-signup-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Sign up label" />
+          <input id="join-signup-href-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Sign up link" />
+        </div>
+      </div>
+    </section>
+
+    <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          </span>
+          Join Streams
+        </h2>
+        <span class="text-xs text-white/40">Steps shown on join page</span>
+      </div>
+      <p class="text-white/50 text-sm">One heading per stream and dot-point steps (one step per line). Anchors set the # link on the page.</p>
+      <div id="join-streams-list"></div>
+    </section>
+
+    <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m-7 6h7a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v7a2 2 0 002 2z"></path></svg>
+          </span>
+          About Page Photos
+        </h2>
+        <span class="text-xs text-white/40">Used on about page collage</span>
+      </div>
+      <div id="about-photos-list"></div>
+    </section>
+
+
+
+    <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </span>
+          Gallery Page Copy
+        </h2>
+        <span class="text-xs text-white/40">Headlines for gallery page</span>
+      </div>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="gallery-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
+        <input id="gallery-hero-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero title" />
+        <input id="gallery-hero-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero highlight" />
+      </div>
+      <textarea id="gallery-hero-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Hero description"></textarea>
+      <div class="grid md:grid-cols-2 gap-3">
+        <div class="space-y-1.5">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Gallery order</label>
+          <div class="relative" data-dropdown>
+            <button type="button" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white flex items-center justify-between focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" data-dropdown-trigger>
+              <span data-dropdown-label></span>
+              <svg class="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="hidden absolute z-20 mt-2 w-full rounded-xl border border-white/10 bg-dark/95 shadow-xl overflow-hidden" data-dropdown-menu>
+              <button type="button" class="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/10" data-dropdown-option data-value="fixed">Fixed order</button>
+              <button type="button" class="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/10" data-dropdown-option data-value="random">Random each load</button>
+            </div>
+            <input type="hidden" id="gallery-order-field" value="fixed" data-dropdown-input />
+          </div>
+        </div>
+        <input id="gallery-all-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="All photos label" />
+        <input id="gallery-empty-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Empty state title" />
+      </div>
+      <textarea id="gallery-empty-desc-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Empty state description"></textarea>
+    </section>
+
+
+
+  <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          </span>
+          Sponsors Page
+        </h2>
+        <span class="text-xs text-white/40">Hero + CTA copy</span>
+      </div>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="sponsors-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
+        <input id="sponsors-hero-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero title" />
+        <input id="sponsors-hero-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero highlight" />
+      </div>
+      <textarea id="sponsors-hero-desc-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Hero description"></textarea>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="sponsors-cta-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA tag" />
+        <input id="sponsors-cta-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA title" />
+        <input id="sponsors-cta-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA highlight" />
+        <input id="sponsors-cta-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA label" />
+        <input id="sponsors-cta-href-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA link" />
+      </div>
+      <textarea id="sponsors-cta-desc-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="CTA description"></textarea>
+      <textarea id="sponsors-features-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Feature bullets (one per line)"></textarea>
+    </section>
+
+
+
+    <section class="glass rounded-3xl p-6 space-y-4">
+      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+        <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+        </span>
+        Site Images
+      </h2>
+      <p class="text-white/50 text-sm">Upload or change key images used across the site. Images are stored in your browser.</p>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="space-y-3">
+          <label class="text-sm font-medium text-white/70">Hero Background Image</label>
+          <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('hero-image-input').click()">
+            <img id="hero-image-preview" src="" alt="Hero preview" class="hidden w-full h-32 object-cover rounded-lg mb-3" />
+            <div id="hero-image-placeholder" class="space-y-2">
+              <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              <p class="text-sm text-white/50">Click to upload hero image</p>
+            </div>
+            <input type="file" id="hero-image-input" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'heroBackground', 'hero-image-preview', 'hero-image-placeholder')" />
+          </div>
+        </div>
+        <div class="space-y-3">
+          <label class="text-sm font-medium text-white/70">Club Logo</label>
+          <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('logo-image-input').click()">
+            <img id="logo-image-preview" src="" alt="Logo preview" class="hidden w-24 h-24 object-contain mx-auto rounded-lg mb-3" />
+            <div id="logo-image-placeholder" class="space-y-2">
+              <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+              <p class="text-sm text-white/50">Click to upload logo</p>
+            </div>
+            <input type="file" id="logo-image-input" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'logo', 'logo-image-preview', 'logo-image-placeholder')" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    
+    <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v18l7-4 7 4V3H5z"></path></svg>
+          </span>
+          Homepage Copy
+        </h2>
+        <span class="text-xs text-white/40">Headings and CTA text</span>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Hero kicker</label>
+          <input id="home-hero-kicker-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="e.g. Youth Basketball in Newcastle" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Hero title</label>
+          <input id="home-hero-title-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="First line" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Hero highlight</label>
+          <input id="home-hero-highlight-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Highlighted word(s)" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Programs tag</label>
+          <input id="home-programs-tag-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Programs" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Programs title</label>
+          <input id="home-programs-title-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Pathways for every player" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Gallery tag</label>
+          <input id="home-gallery-tag-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Gallery" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Gallery title</label>
+          <input id="home-gallery-title-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="On Court &amp; In the Stands" />
+        </div>
+        <div class="space-y-2 md:col-span-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Gallery subtitle</label>
+          <textarea id="home-gallery-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Gallery blurb"></textarea>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">News tag</label>
+          <input id="home-news-tag-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Latest" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">News title</label>
+          <input id="home-news-title-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Club News" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Quick links tag</label>
+          <input id="home-links-tag-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Navigate" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Quick links title</label>
+          <input id="home-links-title-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Quick Links" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Links card title</label>
+          <input id="home-links-card-title-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Game Day Essentials" />
+        </div>
+        <div class="space-y-2 md:col-span-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Links card text</label>
+          <textarea id="home-links-card-text-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Card blurb"></textarea>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Sponsors tag</label>
+          <input id="home-sponsors-tag-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Partners" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Sponsors title</label>
+          <input id="home-sponsors-title-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Our Sponsors" />
+        </div>
+        <div class="space-y-2 md:col-span-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Sponsors description</label>
+          <textarea id="home-sponsors-desc-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Sponsors blurb"></textarea>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Sponsors CTA label</label>
+          <input id="home-sponsors-cta-label" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Become a sponsor" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Sponsors CTA link</label>
+          <input id="home-sponsors-cta-href" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="sponsors.html" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA tag</label>
+          <input id="home-cta-tag-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Ready to play?" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA title</label>
+          <input id="home-cta-title-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Join West Basketball" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA highlight</label>
+          <input id="home-cta-highlight-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Today" />
+        </div>
+        <div class="space-y-2 md:col-span-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA description</label>
+          <textarea id="home-cta-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="CTA blurb"></textarea>
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA primary label</label>
+          <input id="home-cta-primary-label-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Register Now" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA primary link</label>
+          <input id="home-cta-primary-href-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="join.html" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA secondary label</label>
+          <input id="home-cta-secondary-label-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Volunteer With Us" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA secondary link</label>
+          <input id="home-cta-secondary-href-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="coaches.html" />
+        </div>
+      </div>
+    </section>
+
+
+    <section class="grid md:grid-cols-2 gap-6">
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <h2 class="text-xl font-bold text-white">Merchandise Page</h2>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="merch-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
+          <input id="merch-hero-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero title" />
+          <input id="merch-hero-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero highlight" />
+          <input id="merch-store-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Store tag" />
+          <input id="merch-store-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Store title" />
+          <input id="merch-store-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Store highlight" />
+        </div>
+        <textarea id="merch-blurb-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Merchandise description"></textarea>
+        <textarea id="merch-store-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Store description"></textarea>
+        <input id="merch-store-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Store URL" />
+        <textarea id="merch-pillars-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Pillars (one per line)"></textarea>
+        <input id="merch-cta-label-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="CTA label" />
+      </div>
+      <div class="glass rounded-3xl p-6 space-y-4">
+        <h2 class="text-xl font-bold text-white">Coaches Page</h2>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="coaches-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
+          <input id="coaches-hero-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero title" />
+          <input id="coaches-hero-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero highlight" />
+        </div>
+        <textarea id="coaches-blurb-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Coaches description"></textarea>
+        <div>
+          <p class="text-sm text-white/60 mb-2">Resource cards</p>
+          <div id="coaches-resources-list"></div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="coaches-cta-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA tag" />
+          <input id="coaches-cta-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA title" />
+          <input id="coaches-cta-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA highlight" />
+          <input id="coaches-cta-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA label" />
+          <input id="coaches-cta-href-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="CTA link" />
+        </div>
+        <textarea id="coaches-cta-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="CTA description"></textarea>
+      </div>
+    </section>
+
+   
+  </main>
+
+  <footer class="border-t border-white/10 bg-darker" id="site-footer"></footer>
+
+  <script src="data.js"></script>
+  <script src="common.js"></script>
+  <script src="/admin/admin.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNav();
+      renderFooter();
+    });
+  </script>
+</body>
+</html>

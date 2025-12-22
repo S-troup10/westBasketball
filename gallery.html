@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Gallery | West Basketball Club</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            primary: '#10b981',
+            accent: '#06d6a0',
+            dark: '#0a0a0a',
+            darker: '#050505',
+            light: '#f8fafc'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
+    .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-4px); border-color: rgba(16, 185, 129, 0.3); box-shadow: 0 20px 40px rgba(16, 185, 129, 0.1); }
+    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
+    .section-fade { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    .section-fade.visible { opacity: 1; transform: translateY(0); }
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 1000; align-items: center; justify-content: center; }
+    .lightbox.active { display: flex; }
+    .lightbox img { max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 1rem; }
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .lightbox-nav:hover { background: rgba(16, 185, 129, 0.3); border-color: #10b981; }
+    .lightbox-prev { left: 20px; }
+    .lightbox-next { right: 20px; }
+    .lightbox-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+    .lightbox-close:hover { background: rgba(239, 68, 68, 0.3); border-color: #ef4444; }
+    .page-glow {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 400px;
+      background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body class="text-light min-h-screen">
+  <div class="page-glow"></div>
+
+  <header id="site-nav" class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5"></header>
+
+  <main class="relative z-10 pt-24 pb-16">
+    <section class="px-6">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12 section-fade">
+          <span id="gallery-hero-tag" class="text-primary text-sm font-semibold tracking-widest uppercase">Our Moments</span>
+          <h1 class="text-5xl md:text-6xl font-black mt-4">
+            <span id="gallery-hero-title">Photo</span> <span id="gallery-hero-highlight" class="gradient-text">Gallery</span>
+          </h1>
+          <p id="gallery-hero-description" class="mt-6 text-xl text-white/60 max-w-2xl mx-auto">
+            Capturing the spirit, teamwork, and memorable moments of West Basketball Club.
+          </p>
+        </div>
+
+        <div id="gallery-filters" class="mb-8 flex flex-wrap gap-3 justify-center section-fade"></div>
+
+        <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 section-fade"></div>
+
+        <div id="empty-gallery" class="hidden text-center py-20 section-fade">
+          <div class="w-20 h-20 mx-auto mb-6 rounded-full bg-white/5 flex items-center justify-center">
+            <svg class="w-10 h-10 text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <h3 id="gallery-empty-title" class="text-xl font-bold text-white/60 mb-2">No photos yet</h3>
+          <p id="gallery-empty-desc" class="text-white/40">Photos can be added through the admin panel.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="lightbox" class="lightbox">
+    <button class="lightbox-close" onclick="closeLightbox()">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+    <button class="lightbox-nav lightbox-prev" onclick="prevImage()">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    </button>
+    <div class="text-center">
+      <img id="lightbox-img" src="" alt="" />
+      <p id="lightbox-caption" class="mt-4 text-white/80 text-lg"></p>
+    </div>
+    <button class="lightbox-nav lightbox-next" onclick="nextImage()">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+  </div>
+
+  <footer id="site-footer" class="relative z-10 border-t border-white/10 bg-darker"></footer>
+
+  <script src="data.js"></script>
+  <script src="common.js"></script>
+  <script>
+    let currentImageIndex = 0;
+    let currentFilter = 'all';
+    let filteredGallery = [];
+    const getGalleryOrder = () =>
+      Array.isArray(window.galleryRenderOrder) ? window.galleryRenderOrder : (window.siteContent.gallery ?? []);
+    const setText = (id, value) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value ?? "";
+    };
+
+    function renderGalleryPageCopy() {
+      const page = window.siteContent.pages?.gallery ?? {};
+      setText("gallery-hero-tag", page.heroTag);
+      setText("gallery-hero-title", page.heroTitle);
+      setText("gallery-hero-highlight", page.heroHighlight);
+      setText("gallery-hero-description", page.heroDescription);
+      setText("gallery-empty-title", page.emptyTitle);
+      setText("gallery-empty-desc", page.emptyDescription);
+      currentFilter = 'all';
+      renderGalleryFilters(page);
+    }
+
+    function renderGalleryFilters(page) {
+      const filtersEl = document.getElementById('gallery-filters');
+      if (!filtersEl) return;
+      const gallery = window.siteContent.gallery ?? [];
+      const categories = Array.from(new Set(gallery.map((p) => p.category).filter(Boolean)));
+      const buttons = [{ label: page?.allLabel || "All Photos", value: "all" }, ...categories.map((cat) => ({ label: cat, value: cat }))];
+      filtersEl.innerHTML = buttons
+        .map(
+          (btn, idx) => `
+            <button class="filter-btn px-5 py-2 rounded-full text-sm font-medium transition-all ${idx === 0 ? "bg-primary/20 text-primary" : "bg-white/5 text-white/70 hover:bg-white/10"}" data-filter="${btn.value}">
+              ${btn.label}
+            </button>
+          `
+        )
+        .join("\n");
+      filtersEl.querySelectorAll(".filter-btn").forEach((btn) => {
+        btn.addEventListener("click", () => filterGallery(btn.dataset.filter));
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNav('gallery');
+      renderFooter();
+      renderGalleryPageCopy();
+      renderGallery('gallery-grid');
+      updateFilteredGallery();
+      checkEmptyGallery();
+      filterGallery(currentFilter);
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+
+      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+    });
+
+    function updateFilteredGallery() {
+      const gallery = getGalleryOrder();
+      if (currentFilter === 'all') {
+        filteredGallery = gallery;
+      } else {
+        filteredGallery = gallery.filter(p => p.category === currentFilter);
+      }
+    }
+
+    function filterGallery(category) {
+      currentFilter = category;
+      updateFilteredGallery();
+
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.dataset.filter === category) {
+          btn.classList.add('bg-primary/20', 'text-primary');
+          btn.classList.remove('bg-white/5', 'text-white/70');
+        } else {
+          btn.classList.remove('bg-primary/20', 'text-primary');
+          btn.classList.add('bg-white/5', 'text-white/70');
+        }
+      });
+
+      const grid = document.getElementById('gallery-grid');
+      const items = grid.querySelectorAll('.gallery-item');
+
+      items.forEach(item => {
+        const img = item.querySelector('img');
+        const src = img.getAttribute('src');
+        const photo = (window.siteContent.gallery ?? []).find(p => p.src === src);
+
+        if (category === 'all' || (photo && photo.category === category)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      checkEmptyGallery();
+    }
+
+    function checkEmptyGallery() {
+      const gallery = getGalleryOrder();
+      const emptyEl = document.getElementById('empty-gallery');
+      const gridEl = document.getElementById('gallery-grid');
+
+      if (gallery.length === 0) {
+        emptyEl.classList.remove('hidden');
+        gridEl.classList.add('hidden');
+      } else {
+        emptyEl.classList.add('hidden');
+        gridEl.classList.remove('hidden');
+      }
+    }
+
+    function openLightbox(index) {
+      const gallery = getGalleryOrder();
+      if (index < 0 || index >= gallery.length) return;
+
+      currentImageIndex = index;
+      const photo = gallery[index];
+
+      document.getElementById('lightbox-img').src = photo.src;
+      document.getElementById('lightbox-caption').textContent = photo.caption || '';
+      document.getElementById('lightbox').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function nextImage() {
+      const gallery = getGalleryOrder();
+      currentImageIndex = (currentImageIndex + 1) % gallery.length;
+      openLightbox(currentImageIndex);
+    }
+
+    function prevImage() {
+      const gallery = getGalleryOrder();
+      currentImageIndex = (currentImageIndex - 1 + gallery.length) % gallery.length;
+      openLightbox(currentImageIndex);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!document.getElementById('lightbox').classList.contains('active')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'ArrowLeft') prevImage();
+    });
+
+    window.addEventListener('sitecontent:updated', () => {
+      renderNav('gallery');
+      renderFooter();
+      renderGalleryPageCopy();
+      renderGallery('gallery-grid');
+      updateFilteredGallery();
+      checkEmptyGallery();
+      filterGallery(currentFilter);
+    });
+  </script>
+</body>
+</html>
