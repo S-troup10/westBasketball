@@ -22,7 +22,27 @@ function formatMultiline(text = "") {
   return escapeHtml(text).replace(/\n/g, "<br>");
 }
 
+function ensureNavStyles() {
+  if (document.getElementById("nav-runtime-styles")) return;
+  const style = document.createElement("style");
+  style.id = "nav-runtime-styles";
+  style.textContent = `
+    .site-nav-links { display: none; }
+    .site-nav-toggle { display: inline-flex; }
+    .site-mobile-menu { display: none; }
+    .site-mobile-menu.is-open { display: block; }
+    @media (min-width: 1024px) {
+      .site-nav-links { display: flex; }
+      .site-nav-toggle { display: none; }
+      .site-mobile-menu,
+      .site-mobile-menu.is-open { display: none; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 function renderNav(activeKey) {
+  ensureNavStyles();
   const container = document.getElementById("site-nav");
   if (!container) return;
   const siteContent = window.siteContent || {};
@@ -44,7 +64,7 @@ function renderNav(activeKey) {
           <p class="text-xs text-white/50">${club?.tagline?.substring(0, 40) ?? ""}...</p>
         </div>
       </a>
-      <nav class="hidden lg:flex items-center gap-1">
+      <nav class="site-nav-links items-center gap-1">
         ${links
           .map((link) => {
             const active = link.key === activeKey;
@@ -57,13 +77,13 @@ function renderNav(activeKey) {
           .join("")}
       </nav>
       <div class="flex items-center gap-3">
-        <button id="mobile-menu-btn" type="button" class="lg:hidden inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 text-white/80 hover:text-white hover:bg-white/10 transition" aria-label="Toggle navigation" aria-controls="mobile-menu" aria-expanded="false">
+        <button id="mobile-menu-btn" type="button" class="site-nav-toggle items-center gap-2 px-3 py-2 rounded-full bg-white/5 text-white/80 hover:text-white hover:bg-white/10 transition" aria-label="Toggle navigation" aria-controls="mobile-menu" aria-expanded="false">
           <span class="text-sm font-medium">Menu</span>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
       </div>
     </div>
-    <div id="mobile-menu" class="hidden lg:hidden border-t border-white/5 bg-dark/95 backdrop-blur-xl">
+    <div id="mobile-menu" class="site-mobile-menu border-t border-white/5 bg-dark/95 backdrop-blur-xl">
       <div class="px-6 py-4 space-y-2">
         ${links
           .map((link) => {
@@ -83,12 +103,12 @@ function renderNav(activeKey) {
   const mobileMenu = document.getElementById('mobile-menu');
   if (mobileBtn && mobileMenu) {
     mobileBtn.addEventListener('click', () => {
-      const isHidden = mobileMenu.classList.toggle('hidden');
-      mobileBtn.setAttribute('aria-expanded', (!isHidden).toString());
+      const isOpen = mobileMenu.classList.toggle('is-open');
+      mobileBtn.setAttribute('aria-expanded', isOpen.toString());
     });
     mobileMenu.querySelectorAll('a').forEach((link) => {
       link.addEventListener('click', () => {
-        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('is-open');
         mobileBtn.setAttribute('aria-expanded', 'false');
       });
     });
@@ -670,4 +690,5 @@ function initContactModal() {
 function refreshContent() {
   window.siteContent = loadSiteData();
 }
+
 
