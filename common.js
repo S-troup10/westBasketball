@@ -25,8 +25,10 @@ function formatMultiline(text = "") {
 function renderNav(activeKey) {
   const container = document.getElementById("site-nav");
   if (!container) return;
-  const { club, images } = window.siteContent;
-  const navConfig = window.siteContent.navigation;
+  const siteContent = window.siteContent || {};
+  const club = siteContent.club || {};
+  const images = siteContent.images || {};
+  const navConfig = siteContent.navigation || {};
   const links = navConfig?.links ?? navLinks;
   const adminLabel = navConfig?.adminLabel ?? "Admin";
   const logoSrc = images?.logo || 'logo.png';
@@ -54,9 +56,12 @@ function renderNav(activeKey) {
           })
           .join("")}
       </nav>
-
-      
-
+      <div class="flex items-center gap-3">
+        <button id="mobile-menu-btn" type="button" class="lg:hidden inline-flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 text-white/80 hover:text-white hover:bg-white/10 transition" aria-label="Toggle navigation" aria-controls="mobile-menu" aria-expanded="false">
+          <span class="text-sm font-medium">Menu</span>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+      </div>
     </div>
     <div id="mobile-menu" class="hidden lg:hidden border-t border-white/5 bg-dark/95 backdrop-blur-xl">
       <div class="px-6 py-4 space-y-2">
@@ -73,18 +78,19 @@ function renderNav(activeKey) {
       </div>
     </div>
   `;
-  //      <div class="flex items-center gap-3">
-  //      <a href="admin.html" class="text-xs rounded-full border border-white/10 bg-white/5 px-4 py-2 text-white/70 hover:border-primary/50 hover:text-primary transition-all">${adminLabel}</a>
-  //      <button id="mobile-menu-btn" class="lg:hidden p-2 rounded-lg bg-white/5 text-white/70 hover:text-white">
-  //        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-  //      </button>
-  //    </div>
   
   const mobileBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
   if (mobileBtn && mobileMenu) {
     mobileBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
+      const isHidden = mobileMenu.classList.toggle('hidden');
+      mobileBtn.setAttribute('aria-expanded', (!isHidden).toString());
+    });
+    mobileMenu.querySelectorAll('a').forEach((link) => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.add('hidden');
+        mobileBtn.setAttribute('aria-expanded', 'false');
+      });
     });
   }
 }
@@ -664,3 +670,4 @@ function initContactModal() {
 function refreshContent() {
   window.siteContent = loadSiteData();
 }
+
