@@ -283,7 +283,7 @@ function renderSponsors(targetId) {
     .map(
       (sponsor) => `
         <a href="${sponsor.url ?? "#"}" class="flex items-center justify-center p-4 min-h-24 transition-transform hover:scale-110" aria-label="${sponsor.name}">
-          <img src="${sponsor.logo}" alt="${sponsor.name}" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" />
+          <img src="${sponsor.logo}" alt="${sponsor.name}" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" loading="lazy" decoding="async" />
         </a>`
     )
     .join("\n");
@@ -639,6 +639,47 @@ function initContactModal() {
     return window.contactModalControls;
   }
 
+  if (!document.getElementById("contact-modal-styles")) {
+    const style = document.createElement("style");
+    style.id = "contact-modal-styles";
+    style.textContent = `
+      .contact-modal {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease;
+      }
+      .contact-modal.is-open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .contact-modal__overlay {
+        opacity: 0;
+        transition: opacity 0.5s ease;
+      }
+      .contact-modal.is-open .contact-modal__overlay {
+        opacity: 1;
+      }
+      .contact-modal__card {
+        opacity: 0;
+        transform: translateY(14px) scale(0.98);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .contact-modal.is-open .contact-modal__card {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .contact-modal,
+        .contact-modal__overlay,
+        .contact-modal__card {
+          transition: none;
+          transform: none;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   const resolveContactApiBase = () => {
     if (window.CONTACT_API_BASE) return window.CONTACT_API_BASE;
     if (location.port && location.port !== "8000") {
@@ -649,11 +690,11 @@ function initContactModal() {
 
   const modal = document.createElement("div");
   modal.id = "contact-modal";
-  modal.className = "fixed inset-0 z-[120] hidden";
+  modal.className = "contact-modal fixed inset-0 z-[120] hidden";
   modal.innerHTML = `
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" data-modal-close></div>
+    <div class="contact-modal__overlay absolute inset-0 bg-black/60 backdrop-blur-sm" data-modal-close></div>
     <div class="relative min-h-full flex items-center justify-center py-10 px-4">
-      <div class="glass rounded-3xl p-8 max-w-xl w-full shadow-2xl relative" id="contact-modal-card">
+      <div class="contact-modal__card glass rounded-3xl p-8 max-w-xl w-full shadow-2xl relative" id="contact-modal-card">
         <button type="button" class="absolute top-4 right-4 text-white/60 hover:text-white" aria-label="Close contact form" data-modal-close>
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
@@ -715,6 +756,8 @@ function initContactModal() {
   const bodySection = modal.querySelector("#contact-modal-body");
   const loaderSection = modal.querySelector("#contact-modal-loader");
   const successSection = modal.querySelector("#contact-modal-success");
+  let closeTimer = null;
+  let openFrame = null;
 
   const setStatus = (type, text) => {
     statusEl.textContent = text || "";
@@ -735,11 +778,19 @@ function initContactModal() {
   };
 
   const closeModal = () => {
-    modal.classList.add("hidden");
+    if (openFrame) {
+      window.cancelAnimationFrame(openFrame);
+      openFrame = null;
+    }
+    modal.classList.remove("is-open");
     document.body.classList.remove("overflow-hidden");
     form.reset();
     showState("form");
     setStatus("", "");
+    if (closeTimer) window.clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(() => {
+      modal.classList.add("hidden");
+    }, 640);
   };
 
   const openModal = (subject) => {
@@ -747,6 +798,12 @@ function initContactModal() {
       subjectInput.value = subject;
     }
     modal.classList.remove("hidden");
+    if (closeTimer) window.clearTimeout(closeTimer);
+    if (openFrame) window.cancelAnimationFrame(openFrame);
+    openFrame = window.requestAnimationFrame(() => {
+      modal.classList.add("is-open");
+      openFrame = null;
+    });
     document.body.classList.add("overflow-hidden");
     setTimeout(() => nameInput?.focus(), 50);
   };

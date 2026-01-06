@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="preload" as="image" href="images/U14-West-Raiders.jpg">
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -40,6 +41,13 @@
       min-height: 700px;
       overflow: hidden;
     }
+
+    @supports (content-visibility: auto) {
+      .lazy-section {
+        content-visibility: auto;
+        contain-intrinsic-size: 800px 1000px;
+      }
+    }
     
     .parallax-bg {
       position: absolute;
@@ -58,9 +66,17 @@
       width: 100%;
       height: 120%;
       object-fit: cover;
+      object-position: center;
       opacity: 0.4;
       z-index: 1;
       will-change: transform;
+      transform: translateY(0);
+    }
+
+    @media (prefers-reduced-motion: reduce), (hover: none) and (pointer: coarse) {
+      .parallax-image {
+        transform: translateY(0) !important;
+      }
     }
     
     .parallax-overlay {
@@ -436,7 +452,7 @@
   <main>
     <section class="parallax-hero">
       <div class="parallax-bg"></div>
-      <img src="images/U14-West-Raiders.jpg" alt="Basketball players" class="parallax-image" id="parallax-img" />
+      <img class="parallax-image" id="parallax-img" src="images/U14-West-Raiders.jpg" alt="Basketball players" loading="eager" decoding="async" fetchpriority="high" />
       <div class="parallax-overlay"></div>
       <div class="parallax-bottom-fade"></div>
       
@@ -477,7 +493,7 @@
 
 
     
-    <section class="programs-section py-20 px-6 relative border-t border-white/5 bg-black/20">
+    <section class="programs-section lazy-section py-20 px-6 relative border-t border-white/5 bg-black/20">
       <div aria-hidden="true" class="programs-backdrop"></div>
       <div aria-hidden="true" class="section-top-fade"></div>
       <div class="max-w-6xl mx-auto relative">
@@ -494,7 +510,7 @@
         
         <div id="programs-list" class="programs-showcase section-fade">
           <a class="program-tile" href="join.html#u8s">
-            <img class="program-tile__image" src="images/mini-hoops.jpg" alt="U8s mini hoops players" />
+            <img class="program-tile__image" src="images/mini-hoops.jpg" alt="U8s mini hoops players" loading="lazy" decoding="async" />
             <div class="program-tile__body">
               <span class="program-tile__kicker">U8s</span>
               <h3 class="program-tile__title">Mini Hoops (U8s)</h3>
@@ -504,7 +520,7 @@
           </a>
 
           <a class="program-tile" href="join.html#u10s">
-            <img class="program-tile__image" src="images/u10s.jpg" alt="U10s players" />
+            <img class="program-tile__image" src="images/u10s.jpg" alt="U10s players" loading="lazy" decoding="async" />
             <div class="program-tile__body">
               <span class="program-tile__kicker">U10s</span>
               <h3 class="program-tile__title">U10s Competition</h3>
@@ -514,7 +530,7 @@
           </a>
 
           <a class="program-tile" href="join.html#winter-junior">
-            <img class="program-tile__image" src="images/U14-West-Raiders.jpg" alt="Winter junior competition players" />
+            <img class="program-tile__image" src="images/U14-West-Raiders.jpg" alt="Winter junior competition players" loading="lazy" decoding="async" />
             <div class="program-tile__body">
               <span class="program-tile__kicker">Winter</span>
               <h3 class="program-tile__title">Winter Junior Competition</h3>
@@ -524,7 +540,7 @@
           </a>
 
           <a class="program-tile" href="join.html#summer-junior">
-            <img class="program-tile__image" src="images/U12-Knights.jpg" alt="Summer junior competition players" />
+            <img class="program-tile__image" src="images/U12-Knights.jpg" alt="Summer junior competition players" loading="lazy" decoding="async" />
             <div class="program-tile__body">
               <span class="program-tile__kicker">Summer</span>
               <h3 class="program-tile__title">Summer Junior Competition</h3>
@@ -534,7 +550,7 @@
           </a>
 
           <a class="program-tile" href="join.html#development-programs">
-            <img class="program-tile__image" src="images/prez.jpg" alt="Development programs" />
+            <img class="program-tile__image" src="images/prez.jpg" alt="Development programs" loading="lazy" decoding="async" />
             <div class="program-tile__body">
               <span class="program-tile__kicker">Programs</span>
               <h3 class="program-tile__title">Development & holiday Camps</h3>
@@ -544,7 +560,7 @@
           </a>
 
           <a class="program-tile" href="join.html#referee-pathways">
-            <img class="program-tile__image" src="images/awards.jpg" alt="Referee pathways" />
+            <img class="program-tile__image" src="images/awards.jpg" alt="Referee pathways" loading="lazy" decoding="async" />
             <div class="program-tile__body">
               <span class="program-tile__kicker">Referees</span>
               <h3 class="program-tile__title">Referee Pathways</h3>
@@ -558,7 +574,7 @@
 
 
     
-    <section class="py-24 px-6 relative overflow-hidden border-t border-white/5 bg-black/15">
+    <section class="lazy-section py-12 px-6 relative overflow-hidden border-t border-white/5 bg-black/15">
       <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
       <div class="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
       
@@ -577,10 +593,10 @@
         
         <div id="home-featured-gallery" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 section-fade">
           <div class="image-card card-hover lg:col-span-2 lg:row-span-2">
-            <img src="images/prezq.jpg" alt="Featured photo" class="w-full h-full object-cover" style="min-height: 400px;" />
+            <img src="images/prezq.jpg" alt="Featured photo" class="w-full h-full object-cover" style="min-height: 400px;" loading="lazy" decoding="async" />
           </div>
           <div class="image-card card-hover">
-            <img src="images/prez.jpg" alt="Featured photo" class="w-full h-full object-cover" />
+            <img src="images/prez.jpg" alt="Featured photo" class="w-full h-full object-cover" loading="lazy" decoding="async" />
           </div>
           <div class="glass-dark card-hover rounded-3xl p-8 flex flex-col justify-between min-h-64">
             <div>
@@ -595,7 +611,7 @@
       </div>
     </section>
 
-    <section id="news" class="py-24 px-6 border-t border-white/5">
+    <section id="news" class="lazy-section py-12 px-6 border-t border-white/5">
       <div class="max-w-5xl mx-auto">
         <div class="space-y-8 section-fade">
           <div>
@@ -640,7 +656,7 @@
       </div>
     </section>
 
-    <section class="py-24 px-6 relative border-t border-white/5 bg-black/20">
+    <section class="lazy-section py-12 px-6 relative border-t border-white/5 bg-black/20">
       <div class="max-w-6xl mx-auto relative">
         <div class="section-fade">
           <div class="flex items-center gap-4 mb-4">
@@ -656,13 +672,13 @@
         
         <div id="sponsor-logos" class="grid grid-cols-2 md:grid-cols-3 gap-6 section-fade">
           <a href="https://iathletic.com.au" class="flex items-center justify-center p-4 min-h-24 transition-transform hover:scale-110" aria-label="iAthletic">
-            <img src="https://dummyimage.com/240x110/0f172a/22d3ee&text=iAthletic" alt="iAthletic" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" />
+            <img src="https://dummyimage.com/240x110/0f172a/22d3ee&text=iAthletic" alt="iAthletic" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" loading="lazy" decoding="async" />
           </a>
           <a href="https://example.com" class="flex items-center justify-center p-4 min-h-24 transition-transform hover:scale-110" aria-label="West Group">
-            <img src="https://dummyimage.com/240x110/0f172a/34d399&text=West+Group" alt="West Group" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" />
+            <img src="https://dummyimage.com/240x110/0f172a/34d399&text=West+Group" alt="West Group" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" loading="lazy" decoding="async" />
           </a>
           <a href="https://example.com" class="flex items-center justify-center p-4 min-h-24 transition-transform hover:scale-110" aria-label="Major Uniform Sponsors (TBC)">
-            <img src="https://dummyimage.com/240x110/0f172a/f59e0b&text=Major+Sponsors+TBC" alt="Major Uniform Sponsors (TBC)" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" />
+            <img src="https://dummyimage.com/240x110/0f172a/f59e0b&text=Major+Sponsors+TBC" alt="Major Uniform Sponsors (TBC)" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" loading="lazy" decoding="async" />
           </a>
         </div>
         
@@ -675,7 +691,7 @@
       </div>
     </section>
 
-    <section class="py-24 px-6 border-t border-white/5 bg-black/15">
+    <section class="lazy-section py-12 px-6 border-t border-white/5 bg-black/15">
       <div class="max-w-4xl mx-auto section-fade">
         <div class="glass glow rounded-3xl p-8 md:p-12 relative overflow-hidden">
           <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
@@ -711,6 +727,47 @@
   <script src="data.js"></script>
   <script src="common.js"></script>
   <script>
+    let heroParallaxInitialized = false;
+    let heroParallaxRaf = 0;
+
+    function applyHeroBackground() {
+      const heroBackground = window.siteContent?.images?.heroBackground;
+      const heroImage = document.getElementById("parallax-img");
+      if (heroImage && heroBackground) {
+        if (heroImage.tagName === "IMG") {
+          heroImage.src = heroBackground;
+        } else {
+          heroImage.style.backgroundImage = `url(${JSON.stringify(heroBackground)})`;
+        }
+      }
+    }
+
+    function initHeroParallax() {
+      if (heroParallaxInitialized) return;
+      const heroImage = document.getElementById("parallax-img");
+      if (!heroImage) return;
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const isCoarse = window.matchMedia("(pointer: coarse)").matches;
+      if (prefersReduced || isCoarse) return;
+
+      heroParallaxInitialized = true;
+
+      const updateParallax = () => {
+        heroParallaxRaf = 0;
+        const scrolled = window.pageYOffset || window.scrollY || 0;
+        heroImage.style.transform = `translateY(${scrolled * 0.5}px)`;
+      };
+
+      const onScroll = () => {
+        if (heroParallaxRaf) return;
+        heroParallaxRaf = requestAnimationFrame(updateParallax);
+      };
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll, { passive: true });
+      updateParallax();
+    }
+
     function renderHomePage() {
       if (!hasOverrides()) return;
       const data = window.siteContent || {};
@@ -843,7 +900,7 @@
 
               return `
                 <a class="program-tile" href="${escapeHtml(ctaHref)}">
-                  <img class="program-tile__image" src="${escapeHtml(image)}" alt="${escapeHtml(badge)}" />
+                  <img class="program-tile__image" src="${escapeHtml(image)}" alt="${escapeHtml(badge)}" loading="lazy" decoding="async" />
                   <div class="program-tile__body">
                     <span class="program-tile__kicker">${escapeHtml(badge)}</span>
                     <h3 class="program-tile__title">
@@ -878,7 +935,7 @@
             ` : "";
           return `
             <div class="image-card card-hover ${spanClasses}">
-              <img src="${photo.src}" alt="${photo.title || "Featured photo"}" class="w-full h-full object-cover" ${minHeight} />
+              <img src="${photo.src}" alt="${photo.title || "Featured photo"}" class="w-full h-full object-cover" ${minHeight} loading="lazy" decoding="async" />
               ${captionBlock}
             </div>
           `;
@@ -924,88 +981,39 @@
       }
     }
 
-      document.addEventListener('DOMContentLoaded', () => {
-        renderNav('home');
-        renderFooter();
-        renderHero();
-        renderHomePage();
-        renderNews('news-grid');
-        renderSponsors('sponsor-logos');
-        initContactModal();
-      
-      // Load dynamic hero background image
-      const parallaxImg = document.getElementById('parallax-img');
-      if (hasOverrides()) {
-        const heroBackground = window.siteContent?.images?.heroBackground;
-        if (heroBackground && parallaxImg) {
-          parallaxImg.src = heroBackground;
-        }
+    function scheduleNonCritical(work) {
+      if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(work, { timeout: 800 });
+      } else {
+        window.setTimeout(work, 150);
       }
-      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const hero = document.querySelector('.parallax-hero');
-      if (parallaxImg && hero && !prefersReduced) {
-        const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-        const parallaxFactor = 0.35;
-        const pauseEvent = new CustomEvent('parallax-bg:toggle', { detail: { paused: true } });
-        const resumeEvent = new CustomEvent('parallax-bg:toggle', { detail: { paused: false } });
+    }
 
-        let heroTop = 0;
-        let heroHeight = 1;
-        let rafId = 0;
-        let active = false;
-
-        const updateMetrics = () => {
-          const rect = hero.getBoundingClientRect();
-          heroTop = rect.top + window.pageYOffset;
-          heroHeight = Math.max(1, rect.height);
-        };
-
-        const render = () => {
-          if (!active) {
-            rafId = 0;
-            return;
-          }
-          const scrollY = window.pageYOffset || 0;
-          const progress = clamp((scrollY - heroTop) / heroHeight, 0, 1);
-          const translate = progress * heroHeight * parallaxFactor;
-          parallaxImg.style.transform = `translate3d(0, ${translate.toFixed(2)}px, 0)`;
-          rafId = requestAnimationFrame(render);
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              active = true;
-              window.dispatchEvent(pauseEvent);
-              if (!rafId) rafId = requestAnimationFrame(render);
-            } else {
-              active = false;
-              if (rafId) cancelAnimationFrame(rafId);
-              rafId = 0;
-              window.dispatchEvent(resumeEvent);
-            }
-          });
-        }, { rootMargin: '200px 0px 200px 0px' });
-
-        updateMetrics();
-        parallaxImg.style.transform = 'translate3d(0, 0, 0)';
-        observer.observe(hero);
-        window.addEventListener('resize', updateMetrics);
-      }
-      
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNav('home');
+      renderFooter();
+      renderHero();
+      renderHomePage();
+      applyHeroBackground();
+      initHeroParallax();
+      renderNews('news-grid');
+      renderSponsors('sponsor-logos');
+      scheduleNonCritical(initContactModal);
       const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
       };
-      
+
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
             entry.target.classList.add('visible');
+          } else {
+            entry.target.classList.remove('visible');
           }
         });
       }, observerOptions);
-      
+
       document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
     });
 
@@ -1017,8 +1025,9 @@
       renderNews('news-grid');
       renderSponsors('sponsor-logos');
       initContactModal();
+      applyHeroBackground();
+      initHeroParallax();
     });
   </script>
-  <script src="parallax-bg.js"></script>
 </body>
 </html>

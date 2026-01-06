@@ -450,8 +450,8 @@ const defaultSiteData = {
       scheduleTitle: "Training schedule",
       scheduleDescription:
         "A training schedule will be shared once teams and courts are confirmed.",
-      scheduleCtaLabel: "View training schedule",
-      scheduleCtaHref: "",
+      scheduleCtaLabel: "Schedule",
+      scheduleCtaHref: "training-schedule.pdf",
       locationsTag: "Facilities",
       locationsTitle: "Newcastle Basketball Training Facilities",
       locations: ["Newcastle Basketball Stadium"]

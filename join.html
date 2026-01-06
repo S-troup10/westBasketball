@@ -44,6 +44,10 @@
       border: 1px solid rgba(255,255,255,.10);
     }
 
+    .glow {
+      box-shadow: 0 0 40px rgba(16,185,129, 0.3);
+    }
+
     .gradient-text {
       background: linear-gradient(135deg, #10b981 0%, #06d6a0 55%, #34d399 100%);
       -webkit-background-clip: text;
@@ -84,6 +88,173 @@
     /* reveal */
     .section-fade { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
     .section-fade.visible { opacity: 1; transform: translateY(0); }
+
+    .programs-showcase {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .program-tile {
+      position: relative;
+      border-radius: 24px;
+      display: grid;
+      grid-template-columns: minmax(240px, 0.9fr) 1.6fr;
+      overflow: hidden;
+      background: rgba(7,10,14,0.85);
+      color: #f8fafc;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+
+    .program-tile:hover {
+      transform: translateY(-3px);
+      border-color: rgba(16,185,129,0.22);
+      box-shadow:
+        0 20px 42px rgba(0,0,0,0.4),
+        0 0 18px rgba(16,185,129,0.05);
+    }
+
+    .program-tile::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(16,185,129,0.12), transparent 42%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .program-tile:hover::before {
+      opacity: 1;
+    }
+
+    .program-tile:hover .program-tile__image {
+      transform: scale(1.04);
+    }
+
+    .program-tile__media {
+      position: relative;
+      min-height: 220px;
+      background: #0b0f14;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .program-tile__image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.05);
+      transition: transform 0.6s ease;
+    }
+
+    .program-tile__media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.55), transparent 60%);
+      pointer-events: none;
+    }
+
+    .program-tile__tag {
+      position: absolute;
+      left: 18px;
+      bottom: 18px;
+      z-index: 1;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.75);
+      backdrop-filter: blur(6px);
+    }
+
+    .program-tile__body {
+      padding: 20px 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .program-tile__kicker {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .program-tile__title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .program-tile__summary {
+      color: rgba(255,255,255,0.72);
+      line-height: 1.65;
+    }
+
+    .program-tile__steps {
+      display: grid;
+      gap: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.72);
+      padding-left: 18px;
+    }
+
+    .program-tile__steps li::marker {
+      color: rgba(16,185,129,0.85);
+    }
+
+    .program-tile__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-top: auto;
+    }
+
+    .program-anchor {
+      scroll-margin-top: 120px;
+    }
+
+    @media (max-width: 900px) {
+      .program-tile {
+        grid-template-columns: 1fr;
+      }
+
+      .program-tile__media {
+        min-height: 240px;
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .programs-showcase {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .programs-showcase {
+        grid-template-columns: 1fr;
+      }
+    }
 
     /* ambient blobs */
     .blob { filter: blur(60px); opacity: .65; }
@@ -166,12 +337,12 @@
 
   <main class="pt-24">
     <!-- HERO -->
-    <section class="py-16 px-6 relative overflow-hidden">
+    <section class="pt-16 pb-0 px-6 relative overflow-hidden">
       <div class="absolute -top-16 -left-16 w-[32rem] h-[32rem] bg-primary/14 rounded-full blob"></div>
       <div class="absolute -bottom-24 -right-20 w-[26rem] h-[26rem] bg-accent/12 rounded-full blob"></div>
 
       <div class="max-w-5xl mx-auto relative">
-        <div class="section-fade">
+        <div class="section-fade w-full md:max-w-[50vw] mx-auto">
           <!-- KEEPING IDS SAME -->
           <span id="join-hero-tag" class="inline-flex items-center gap-2 text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold">
             Join Us
@@ -196,7 +367,7 @@
     <section class="py-10 px-6">
       <div class="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8 items-center section-fade" id="join-feature">
         <div id="join-feature-image" class="image-card card-hover rounded-3xl overflow-hidden bg-white/5 border border-white/10">
-          <img src="images/U12-Knights.jpg" alt="West Basketball family" class="w-full h-auto max-h-[360px] object-contain bg-black/40" loading="lazy" />
+          <img src="images/U12-Knights.jpg" alt="West Basketball family" class="w-full h-[320px] sm:h-[360px] lg:h-[400px] object-cover" loading="eager" decoding="async" />
         </div>
         <div class="glass rounded-3xl p-7 sm:p-8 shadow-soft">
           <span id="join-quote-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
@@ -213,24 +384,19 @@
       <div class="max-w-5xl mx-auto space-y-10">
         <!-- KEEPING ID SAME -->
         <div id="join-streams" class="section-fade">
-          <div class="space-y-3">
-            <span id="u8s" class="block -mt-24 pt-24"></span>
-            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
-                  U8s
-                </span>
-                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+          <div class="programs-showcase">
+            <article id="u8s" class="program-tile program-anchor">
+              <div class="program-tile__media">
+                <img class="program-tile__image" src="images/mini-hoops.jpg" alt="U8s mini hoops players" loading="eager" decoding="async" />
+                <span class="program-tile__tag">U8s</span>
               </div>
-
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">U8s</h2>
-
-              <p class="text-white/65 leading-relaxed">
-                This competition is for players turning 5, 6 or 7 during the calendar year. Run on a Saturday morning, players will participate in a 3v3 style of game, with help from on floor coaches and additional skills training throughout the season. The U8s competitions are run each term, and we can ensure friends are kept together on teams - or it is a great chance to make new friends! Keep an eye on our Facebook page and website for registration information towards the end of each term.<br>More information can be found under the Development tab on the Newcastle Basketball website.
-              </p>
-
-              <div class="pt-2">
-                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/">
+              <div class="program-tile__body">
+                <span class="program-tile__kicker">Program details</span>
+                <h2 class="program-tile__title">U8s</h2>
+                <p class="program-tile__summary">
+                  This competition is for players turning 5, 6 or 7 during the calendar year. Run on a Saturday morning, players will participate in a 3v3 style of game, with help from on floor coaches and additional skills training throughout the season. The U8s competitions are run each term, and we can ensure friends are kept together on teams - or it is a great chance to make new friends! Keep an eye on our Facebook page and website for registration information towards the end of each term.<br>More information can be found under the Development tab on the Newcastle Basketball website.
+                </p>
+                <a class="program-tile__cta" href="https://www.newcastlebasketball.com.au/">
                   Development info
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -239,23 +405,18 @@
               </div>
             </article>
 
-            <span id="u10s" class="block -mt-24 pt-24"></span>
-            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
-                  U10s
-                </span>
-                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+            <article id="u10s" class="program-tile program-anchor">
+              <div class="program-tile__media">
+                <img class="program-tile__image" src="images/u10s.jpg" alt="U10s players" loading="eager" decoding="async" />
+                <span class="program-tile__tag">U10s</span>
               </div>
-
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">U10s</h2>
-
-              <p class="text-white/65 leading-relaxed">
-                For players turning 8 or 9 during the calendar year, the U10s competition is a great introduction to 5v5 basketball. Played on a Thursday afternoon, each team will have a designated coach and are invited to participate in two skills sessions (held on select Sundays) throughout the term. This competition is run in Term 4, then again in Term 1, followed by a longer winter season to align with the Junior Competition as an 18-week competition during Terms 2 and 3. Keep an eye on our Facebook page and website for registration information as it comes to hand, friend requests will be accommodated where possible.<br>More information can be found under the Development tab on the Newcastle Basketball website.
-              </p>
-
-              <div class="pt-2">
-                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/">
+              <div class="program-tile__body">
+                <span class="program-tile__kicker">Program details</span>
+                <h2 class="program-tile__title">U10s</h2>
+                <p class="program-tile__summary">
+                  For players turning 8 or 9 during the calendar year, the U10s competition is a great introduction to 5v5 basketball. Played on a Thursday afternoon, each team will have a designated coach and are invited to participate in two skills sessions (held on select Sundays) throughout the term. This competition is run in Term 4, then again in Term 1, followed by a longer winter season to align with the Junior Competition as an 18-week competition during Terms 2 and 3. Keep an eye on our Facebook page and website for registration information as it comes to hand, friend requests will be accommodated where possible.<br>More information can be found under the Development tab on the Newcastle Basketball website.
+                </p>
+                <a class="program-tile__cta" href="https://www.newcastlebasketball.com.au/">
                   Development info
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -264,23 +425,18 @@
               </div>
             </article>
 
-            <span id="winter-junior" class="block -mt-24 pt-24"></span>
-            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
-                  Winter
-                </span>
-                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+            <article id="winter-junior" class="program-tile program-anchor">
+              <div class="program-tile__media">
+                <img class="program-tile__image" src="images/U14-West-Raiders.jpg" alt="Winter junior competition players" loading="eager" decoding="async" />
+                <span class="program-tile__tag">Winter</span>
               </div>
-
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Winter Junior Competition</h2>
-
-              <p class="text-white/65 leading-relaxed">
-                Catering for U12 through to U18 players, the Winter Competition is the premier competition facilitated by Newcastle Basketball and runs through Terms 2 and 3 each year. West Basketball coordinates teams across all age groups and divisions, allocates coaches, coordinates training and skill development, and strives to ensure each player is placed in a team that suits their ability and preferences (e.g. friend requests, level of division, etc).<br>More information will be shared once registrations for 2026 open.
-              </p>
-
-              <div class="pt-2">
-                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="about.html#contact">
+              <div class="program-tile__body">
+                <span class="program-tile__kicker">Program details</span>
+                <h2 class="program-tile__title">Winter Junior Competition</h2>
+                <p class="program-tile__summary">
+                  Catering for U12 through to U18 players, the Winter Competition is the premier competition facilitated by Newcastle Basketball and runs through Terms 2 and 3 each year. West Basketball coordinates teams across all age groups and divisions, allocates coaches, coordinates training and skill development, and strives to ensure each player is placed in a team that suits their ability and preferences (e.g. friend requests, level of division, etc).<br>More information will be shared once registrations for 2026 open.
+                </p>
+                <a class="program-tile__cta" href="about.html#contact">
                   Contact us
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -289,23 +445,18 @@
               </div>
             </article>
 
-            <span id="summer-junior" class="block -mt-24 pt-24"></span>
-            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
-                  Summer
-                </span>
-                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+            <article id="summer-junior" class="program-tile program-anchor">
+              <div class="program-tile__media">
+                <img class="program-tile__image" src="images/U12-Knights.jpg" alt="Summer junior competition players" loading="eager" decoding="async" />
+                <span class="program-tile__tag">Summer</span>
               </div>
-
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Summer Junior Competition</h2>
-
-              <p class="text-white/65 leading-relaxed">
-                Catering for U11 through to U17 players, this competition is facilitated by Newcastle Basketball and the clubs are not involved in putting teams together for this competition.
-              </p>
-
-              <div class="pt-2">
-                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/summer-junior-competition/">
+              <div class="program-tile__body">
+                <span class="program-tile__kicker">Program details</span>
+                <h2 class="program-tile__title">Summer Junior Competition</h2>
+                <p class="program-tile__summary">
+                  Catering for U11 through to U17 players, this competition is facilitated by Newcastle Basketball and the clubs are not involved in putting teams together for this competition.
+                </p>
+                <a class="program-tile__cta" href="https://www.newcastlebasketball.com.au/summer-junior-competition/">
                   Newcastle Basketball info
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -314,23 +465,18 @@
               </div>
             </article>
 
-            <span id="development-programs" class="block -mt-24 pt-24"></span>
-            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
-                  Programs
-                </span>
-                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+            <article id="development-programs" class="program-tile program-anchor">
+              <div class="program-tile__media">
+                <img class="program-tile__image" src="images/prez.jpg" alt="Development programs" loading="eager" decoding="async" />
+                <span class="program-tile__tag">Programs</span>
               </div>
-
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Development Programs and Holiday Camps</h2>
-
-              <p class="text-white/65 leading-relaxed">
-                Newcastle Basketball facilitate a range of development programs and holiday camps to cater for all levels of basketball. From Mini Hoops (ages 3-5) through to representative programs, visit their website to find out more.
-              </p>
-
-              <div class="pt-2">
-                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/">
+              <div class="program-tile__body">
+                <span class="program-tile__kicker">Program details</span>
+                <h2 class="program-tile__title">Development Programs and Holiday Camps</h2>
+                <p class="program-tile__summary">
+                  Newcastle Basketball facilitate a range of development programs and holiday camps to cater for all levels of basketball. From Mini Hoops (ages 3-5) through to representative programs, visit their website to find out more.
+                </p>
+                <a class="program-tile__cta" href="https://www.newcastlebasketball.com.au/">
                   Newcastle Basketball programs
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -339,23 +485,18 @@
               </div>
             </article>
 
-            <span id="referee-pathways" class="block -mt-24 pt-24"></span>
-            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
-              <div class="flex flex-wrap items-center gap-3">
-                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
-                  Referees
-                </span>
-                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+            <article id="referee-pathways" class="program-tile program-anchor">
+              <div class="program-tile__media">
+                <img class="program-tile__image" src="images/awards.jpg" alt="Referee pathways" loading="eager" decoding="async" />
+                <span class="program-tile__tag">Referees</span>
               </div>
-
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Referee Pathways</h2>
-
-              <p class="text-white/65 leading-relaxed">
-                Newcastle Basketball have a referee pathways program for juniors aged 12 years and over. A great way to increase your basketball knowledge, get involved in the sport and earn some money along the way.
-              </p>
-
-              <div class="pt-2">
-                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/referees/">
+              <div class="program-tile__body">
+                <span class="program-tile__kicker">Program details</span>
+                <h2 class="program-tile__title">Referee Pathways</h2>
+                <p class="program-tile__summary">
+                  Newcastle Basketball have a referee pathways program for juniors aged 12 years and over. A great way to increase your basketball knowledge, get involved in the sport and earn some money along the way.
+                </p>
+                <a class="program-tile__cta" href="https://www.newcastlebasketball.com.au/referees/">
                   Referee pathways
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
@@ -366,47 +507,39 @@
           </div>
         </div>
 
-        <div class="section-fade">
-          <div class="glass rounded-3xl p-7 sm:p-8 relative overflow-hidden shadow-soft">
-            <div class="absolute -top-16 -right-12 w-72 h-72 bg-primary/16 rounded-full blob"></div>
+        <div class="section-fade ">
+          <div class="mt-20 glass glow rounded-3xl p-7 sm:p-8 relative overflow-hidden w-full max-w-[50rem] mx-auto">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-accent/20 rounded-full blur-3xl"></div>
 
-            <div class="relative text-center">
+            <div class="relative text-center space-y-5">
               <!-- KEEPING IDS SAME -->
-              <span id="join-help-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
+              <span id="join-help-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-medium">
                 Support
               </span>
 
-              <div class="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/25 flex items-center justify-center mx-auto mb-4">
-                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                  </path>
-                </svg>
-              </div>
-
-              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-3">
+              <h2 class="text-3xl md:text-4xl font-bold text-white">
                 <span id="join-help-title">Need Help?</span>
               </h2>
 
-              <p id="join-help-text" class="text-white/65 leading-relaxed mb-6 max-w-lg mx-auto">
+              <p id="join-help-text" class="text-white/70 text-base sm:text-lg max-w-lg mx-auto">
                 For any further queries, please don't hesitate to contact us.
               </p>
 
-              <!-- KEEPING ID SAME -->
-              <button
-                id="join-help-cta"
-                type="button"
-                data-contact-trigger="true"
-                class="btn-primary inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-white font-semibold contact-modal-trigger"
-              >
-                Contact us
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                </svg>
-              </button>
-
-              <!-- KEEPING ID SAME -->
-              <p id="join-help-contact" class="text-white/50 text-sm mt-3">Contact: about.html#contact</p>
+              <div class="flex flex-wrap justify-center gap-4 pt-1">
+                <!-- KEEPING ID SAME -->
+                <button
+                  id="join-help-cta"
+                  type="button"
+                  data-contact-trigger="true"
+                  class="btn-primary inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-white font-semibold text-base sm:text-lg contact-modal-trigger"
+                >
+                  Contact us
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -443,7 +576,7 @@
         const imageSrc = joinPage.featureImage || "";
         const imageAlt = joinPage.featureAlt || "Join West Basketball";
         featureImage.innerHTML = imageSrc
-          ? `<img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" class="w-full h-auto max-h-[360px] object-contain bg-black/40" loading="lazy" />`
+          ? `<img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" class="w-full h-[320px] sm:h-[360px] lg:h-[400px] object-cover" loading="eager" decoding="async" />`
           : "";
       }
       if (featureSection) {
@@ -483,6 +616,15 @@
 
         const baseSignUpLabel = joinPage.signUpLabel || "Register";
         const baseSignUpHref = joinPage.signUpHref || "";
+        const programImages = [
+          "images/mini-hoops.jpg",
+          "images/u10s.jpg",
+          "images/U14-West-Raiders.jpg",
+          "images/U12-Knights.jpg",
+          "images/prez.jpg",
+          "images/awards.jpg",
+          "images/prezq.jpg",
+        ];
 
         const preferredOrder = ["juniors", "u8u10"];
         const getStreamKey = (stream) => (stream.id || stream.title || "").toString().toLowerCase();
@@ -502,8 +644,8 @@
           .map((entry) => entry.stream);
 
         container.innerHTML = `
-          <div class="space-y-3">
-            ${orderedStreams.map((stream) => {
+          <div class="programs-showcase">
+            ${orderedStreams.map((stream, index) => {
               const steps = ((stream.steps && stream.steps.length)
                 ? stream.steps
                 : (stream.links || []).map((link) => link.label || link.href || "")).filter((s) => (s ?? "").toString().trim());
@@ -511,58 +653,39 @@
               const ctaLabel = stream.ctaLabel || baseSignUpLabel;
               const ctaHref = (stream.ctaHref || baseSignUpHref || "").trim();
               const hasCta = !!ctaHref;
+              const imageSrc = (stream.image || stream.imageSrc || stream.photo || "").toString().trim() || programImages[index % programImages.length];
+              const imageAlt = (stream.imageAlt || stream.badge || stream.title || "Program").toString();
+              const badge = (stream.badge || stream.title || "Program").toString();
+              const kicker = (stream.kicker || "Program details").toString();
+              const title = (stream.title || badge || "Program").toString();
+              const description = stream.description ? formatMultiline(stream.description) : "";
+              const anchorId = (stream.id || "").toString().trim();
+              const anchorAttr = anchorId ? `id="${escapeHtml(anchorId)}"` : "";
 
               return `
-                ${stream.id ? `<span id="${escapeHtml(stream.id)}" class="block -mt-24 pt-24"></span>` : ""}
-
-                <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
-                  <div class="flex flex-wrap items-center gap-3">
-                    ${stream.badge ? `
-                      <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
-                        ${escapeHtml(stream.badge)}
-                      </span>
-                    ` : ""}
-                    <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+                <article ${anchorAttr} class="program-tile program-anchor">
+                  <div class="program-tile__media">
+                    <img class="program-tile__image" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" loading="eager" decoding="async" />
+                    <span class="program-tile__tag">${escapeHtml(badge)}</span>
                   </div>
-
-                  <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
-                    ${escapeHtml(stream.title || "Program")}
-                  </h2>
-
-                  ${stream.description ? `
-                    <p class="text-white/65 leading-relaxed">
-                      ${formatMultiline(stream.description)}
-                    </p>
-                  ` : ""}
-
-                  ${
-                    steps.length
-                      ? `<div class="glass rounded-2xl p-5 space-y-3 border border-white/10">
-                          ${steps.map((step, idx) => `
-                            <div class="flex items-start gap-3">
-                              <span class="w-8 h-8 rounded-full bg-primary/15 text-primary font-semibold flex items-center justify-center shrink-0">
-                                ${idx + 1}
-                              </span>
-                              <p class="text-white/80 leading-relaxed">
-                                ${formatMultiline(step || "")}
-                              </p>
-                            </div>
-                          `).join("")}
-                        </div>`
-                      : ""
-                  }
-
-                  ${hasCta ? `
-                    <div class="pt-2">
-                      <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold"
-                         href="${escapeHtml(ctaHref)}">
+                  <div class="program-tile__body">
+                    <span class="program-tile__kicker">${escapeHtml(kicker)}</span>
+                    <h2 class="program-tile__title">${escapeHtml(title)}</h2>
+                    ${description ? `<p class="program-tile__summary">${description}</p>` : ""}
+                    ${steps.length ? `
+                      <ul class="program-tile__steps">
+                        ${steps.map((step) => `<li>${formatMultiline(step || "")}</li>`).join("")}
+                      </ul>
+                    ` : ""}
+                    ${hasCta ? `
+                      <a class="program-tile__cta" href="${escapeHtml(ctaHref)}">
                         ${escapeHtml(ctaLabel)}
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
                         </svg>
                       </a>
-                    </div>
-                  ` : ""}
+                    ` : ""}
+                  </div>
                 </article>
               `;
             }).join("")}
@@ -593,6 +716,5 @@
       initContactModal();
     });
   </script>
-  <script src="parallax-bg.js"></script>
 </body>
 </html>

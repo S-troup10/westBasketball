@@ -151,7 +151,7 @@
   <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
 
   <main class="pt-24">
-    <section class="py-16 px-6 relative overflow-hidden">
+    <section class="pt-16 px-6 relative overflow-hidden">
       <div class="absolute -top-16 -left-16 w-[32rem] h-[32rem] bg-primary/14 rounded-full blob"></div>
       <div class="absolute -bottom-24 -right-20 w-[26rem] h-[26rem] bg-accent/12 rounded-full blob"></div>
 
@@ -175,9 +175,9 @@
       </div>
     </section>
 
-    <section class="py-14 px-6">
+    <section class="pt-14 px-6 pb-6">
       <div class="max-w-5xl mx-auto grid gap-6 lg:grid-cols-2">
-        <article class="glass rounded-3xl p-7 sm:p-8 shadow-soft section-fade">
+        <article class="glass rounded-3xl p-7 sm:p-8 shadow-soft section-fade flex flex-col">
           <span id="training-season-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
             Winter Season
           </span>
@@ -189,7 +189,7 @@
           </p>
         </article>
 
-        <article class="glass rounded-3xl p-7 sm:p-8 shadow-soft section-fade">
+        <article class="glass rounded-3xl p-7 sm:p-8 shadow-soft section-fade flex flex-col">
           <span id="training-schedule-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
             Schedule
           </span>
@@ -199,8 +199,8 @@
           <p id="training-schedule-text" class="text-white/65 leading-relaxed mb-6">
             A training schedule will be shared once teams and courts are confirmed.
           </p>
-          <a id="training-schedule-cta" href="#" class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold hidden">
-            View training schedule
+          <a id="training-schedule-cta" href="training-schedule.pdf" download class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold mt-auto self-start">
+            Schedule
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
             </svg>
@@ -209,7 +209,7 @@
       </div>
     </section>
 
-    <section class="py-14 px-6">
+    <section class="pb-14 px-6">
       <div class="max-w-5xl mx-auto">
         <article class="glass rounded-3xl p-7 sm:p-8 shadow-soft section-fade">
           <span id="training-locations-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
@@ -220,7 +220,18 @@
           </h2>
           <ul id="training-locations" class="space-y-2 text-white/70">
             <li>Newcastle Basketball Stadium</li>
+            <li>27 Young Road, Broadmeadow, NSW 2292, Australia</li>
           </ul>
+          <div class="mt-6 overflow-hidden rounded-2xl border border-white/10">
+            <iframe
+              title="27 Young Road, Broadmeadow map"
+              src="https://www.google.com/maps?q=27%20Young%20Road%2C%20Broadmeadow%2C%20NSW%202292%2C%20Australia&output=embed"
+              class="h-72 w-full"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen
+            ></iframe>
+          </div>
         </article>
       </div>
     </section>
@@ -292,6 +303,5 @@
       renderTrainingContent();
     });
   </script>
-  <script src="parallax-bg.js"></script>
 </body>
 </html>

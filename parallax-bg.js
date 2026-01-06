@@ -1,4 +1,7 @@
 (() => {
+  const parallaxEnabled = false;
+  if (!parallaxEnabled) return;
+
   const layers = Array.from(document.querySelectorAll(".parallax-layer"));
   if (!layers.length) return;
 
