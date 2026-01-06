@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>West Basketball — Background Only (Innovated Parallax + Bokeh Smear + Breathing)</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    :root{
+      --bg0:#05070a;
+      --grid: rgba(255,255,255,.05);
+      --grid2: rgba(255,255,255,.022);
+      --noise: rgba(255,255,255,.04);
+    }
+
+    html { scroll-behavior: smooth; }
+    body { margin:0; background: var(--bg0); }
+
+    .parallax-layer{
+      will-change: transform, filter, opacity;
+      transform: translate3d(0,0,0);
+      pointer-events:none;
+    }
+
+    /* Soft procedural noise */
+    .noise::before{
+      content:"";
+      position:absolute; inset:-35%;
+      background-image:
+        radial-gradient(circle at 20% 30%, var(--noise) 0 1px, transparent 1px),
+        radial-gradient(circle at 70% 60%, var(--noise) 0 1px, transparent 1px),
+        radial-gradient(circle at 40% 80%, var(--noise) 0 1px, transparent 1px),
+        radial-gradient(circle at 85% 15%, var(--noise) 0 1px, transparent 1px);
+      background-size: 120px 120px, 170px 170px, 220px 220px, 280px 280px;
+      opacity:.22;
+      transform: rotate(8deg);
+      mix-blend-mode: overlay;
+      filter: blur(.25px);
+    }
+
+    /* Macro grid */
+    .grid-overlay::after{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+      background-size: 64px 64px;
+      opacity:.15;
+      pointer-events:none;
+      mask-image: radial-gradient(circle at 50% 18%, black 0 58%, transparent 78%);
+      -webkit-mask-image: radial-gradient(circle at 50% 18%, black 0 58%, transparent 78%);
+    }
+
+    /* Micro grid */
+    .subgrid::after{
+      content:"";
+      position:absolute; inset:0;
+      background-image:
+        linear-gradient(to right, var(--grid2) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid2) 1px, transparent 1px);
+      background-size: 18px 18px;
+      opacity:.14;
+      pointer-events:none;
+      mask-image: radial-gradient(circle at 50% 26%, black 0 52%, transparent 84%);
+      -webkit-mask-image: radial-gradient(circle at 50% 26%, black 0 52%, transparent 84%);
+    }
+
+    /* Streaks */
+    .streaks::before{
+      content:"";
+      position:absolute; inset:-30%;
+      background:
+        linear-gradient(115deg,
+          transparent 0%,
+          rgba(22,163,74,.12) 18%,
+          transparent 26%,
+          rgba(239,68,68,.09) 48%,
+          transparent 56%,
+          rgba(22,163,74,.08) 78%,
+          transparent 86%
+        );
+      opacity:.44;
+      transform: rotate(-7deg);
+      mix-blend-mode: screen;
+      filter: blur(.55px);
+      pointer-events:none;
+    }
+
+    /* Court motif */
+    .court-lines{
+      background:
+        radial-gradient(circle at 50% 62%, rgba(255,255,255,.050) 0 1px, transparent 1px),
+        radial-gradient(circle at 50% 62%, rgba(255,255,255,.040) 0 2px, transparent 2px),
+        radial-gradient(circle at 50% 62%, transparent 0 140px, rgba(255,255,255,.030) 140px 141px, transparent 141px),
+        linear-gradient(to right, transparent 0 49.72%, rgba(255,255,255,.038) 49.72% 50.28%, transparent 50.28% 100%),
+        radial-gradient(circle at 15% 72%, transparent 0 70px, rgba(255,255,255,.024) 70px 71px, transparent 71px),
+        radial-gradient(circle at 85% 72%, transparent 0 70px, rgba(255,255,255,.024) 70px 71px, transparent 71px);
+      background-repeat:no-repeat;
+      background-position:center;
+      opacity:.14;
+      filter: blur(.2px);
+      mask-image: linear-gradient(to bottom, black 0 55%, transparent 92%);
+      -webkit-mask-image: linear-gradient(to bottom, black 0 55%, transparent 92%);
+    }
+
+    /* Seamless wave */
+    .wave-field{
+      background:
+        radial-gradient(1200px 900px at 20% 15%, rgba(239,68,68,.08), transparent 62%),
+        radial-gradient(1300px 950px at 80% 25%, rgba(22,163,74,.08), transparent 64%),
+        radial-gradient(1400px 1000px at 50% 60%, rgba(255,255,255,.03), transparent 66%);
+      opacity:.70;
+      mix-blend-mode: soft-light;
+    }
+
+    /* Nebula (no obvious circles) */
+    .nebula{
+      opacity:.40;
+      mix-blend-mode: screen;
+      filter: blur(28px);
+      mask-image:
+        radial-gradient(1200px 700px at 35% 35%, black 0 55%, transparent 75%),
+        radial-gradient(1100px 650px at 70% 55%, black 0 50%, transparent 76%),
+        linear-gradient(to bottom, black, black);
+      -webkit-mask-image:
+        radial-gradient(1200px 700px at 35% 35%, black 0 55%, transparent 75%),
+        radial-gradient(1100px 650px at 70% 55%, black 0 50%, transparent 76%),
+        linear-gradient(to bottom, black, black);
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+    .nebula-a{
+      background:
+        radial-gradient(900px 500px at 18% 30%, rgba(22,163,74,.20), transparent 65%),
+        radial-gradient(800px 520px at 45% 45%, rgba(255,255,255,.06), transparent 70%),
+        radial-gradient(900px 600px at 70% 35%, rgba(239,68,68,.13), transparent 68%),
+        radial-gradient(1200px 700px at 80% 70%, rgba(22,163,74,.09), transparent 72%),
+        radial-gradient(1200px 900px at 40% 85%, rgba(239,68,68,.06), transparent 76%);
+    }
+    .nebula-b{
+      opacity:.32;
+      mix-blend-mode: soft-light;
+      background:
+        radial-gradient(900px 650px at 75% 25%, rgba(239,68,68,.13), transparent 70%),
+        radial-gradient(1100px 700px at 25% 70%, rgba(22,163,74,.11), transparent 72%),
+        radial-gradient(1200px 800px at 50% 55%, rgba(255,255,255,.04), transparent 75%),
+        radial-gradient(1200px 900px at 15% 40%, rgba(255,255,255,.03), transparent 78%);
+    }
+
+    /* Fog bands */
+    .fog-bands{
+      opacity:.20;
+      mix-blend-mode: soft-light;
+      filter: blur(14px);
+      background:
+        linear-gradient(to bottom,
+          transparent 0%,
+          rgba(255,255,255,.028) 14%,
+          transparent 30%,
+          rgba(255,255,255,.022) 46%,
+          transparent 62%,
+          rgba(255,255,255,.018) 78%,
+          transparent 100%
+        );
+      mask-image: radial-gradient(circle at 50% 40%, black 0 70%, transparent 92%);
+      -webkit-mask-image: radial-gradient(circle at 50% 40%, black 0 70%, transparent 92%);
+    }
+
+    /* Shafts */
+    .shafts{
+      opacity:.15;
+      mix-blend-mode: screen;
+      filter: blur(2px);
+      background:
+        linear-gradient(100deg, transparent 0 18%, rgba(255,255,255,.08) 22%, transparent 30%),
+        linear-gradient(110deg, transparent 0 40%, rgba(22,163,74,.07) 46%, transparent 56%),
+        linear-gradient(120deg, transparent 0 62%, rgba(239,68,68,.06) 68%, transparent 78%);
+      mask-image: radial-gradient(circle at 50% 18%, black 0 52%, transparent 82%);
+      -webkit-mask-image: radial-gradient(circle at 50% 18%, black 0 52%, transparent 82%);
+    }
+
+    /* Dust specks */
+    .dust::before{
+      content:"";
+      position:absolute; inset:-30%;
+      background-image:
+        radial-gradient(circle at 12% 22%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+        radial-gradient(circle at 28% 68%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+        radial-gradient(circle at 44% 38%, rgba(255,255,255,.07) 0 1px, transparent 2px),
+        radial-gradient(circle at 61% 82%, rgba(255,255,255,.09) 0 1px, transparent 2px),
+        radial-gradient(circle at 76% 28%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+        radial-gradient(circle at 88% 62%, rgba(255,255,255,.07) 0 1px, transparent 2px);
+      background-size: 240px 240px, 280px 280px, 320px 320px, 360px 360px, 420px 420px, 520px 520px;
+      opacity:.16;
+      mix-blend-mode: screen;
+      filter: blur(.2px);
+      transform: rotate(-6deg);
+    }
+
+    /* Chroma glow */
+    .chroma{
+      opacity:.16;
+      mix-blend-mode: color-dodge;
+      filter: blur(18px);
+      background:
+        radial-gradient(900px 520px at 30% 35%, rgba(22,163,74,.10), transparent 70%),
+        radial-gradient(900px 520px at 68% 42%, rgba(239,68,68,.08), transparent 72%);
+      mask-image: radial-gradient(circle at 50% 35%, black 0 60%, transparent 88%);
+      -webkit-mask-image: radial-gradient(circle at 50% 35%, black 0 60%, transparent 88%);
+    }
+
+    /* NEW: Bokeh smear (not circles) — streaky lens-like blur */
+    .bokeh-smear{
+      opacity:.075;
+      mix-blend-mode: screen;
+      filter: blur(18px);
+      background:
+        conic-gradient(from 210deg at 20% 45%,
+          transparent 0 10%,
+          rgba(255,255,255,.10) 12%,
+          transparent 18%,
+          rgba(22,163,74,.10) 28%,
+          transparent 36%,
+          rgba(239,68,68,.08) 52%,
+          transparent 62%,
+          rgba(255,255,255,.08) 74%,
+          transparent 100%
+        );
+      mask-image:
+        radial-gradient(900px 520px at 24% 42%, black 0 48%, transparent 78%),
+        radial-gradient(1000px 620px at 75% 55%, black 0 44%, transparent 78%),
+        linear-gradient(to bottom, black, black);
+      -webkit-mask-image:
+        radial-gradient(900px 520px at 24% 42%, black 0 48%, transparent 78%),
+        radial-gradient(1000px 620px at 75% 55%, black 0 44%, transparent 78%),
+        linear-gradient(to bottom, black, black);
+      mask-composite: intersect;
+      -webkit-mask-composite: source-in;
+    }
+    .bokeh-smear.bokeh-a{
+      transform: rotate(-10deg);
+    }
+    .bokeh-smear.bokeh-b{
+      opacity:.06;
+      filter: blur(22px);
+      background:
+        conic-gradient(from 120deg at 70% 40%,
+          transparent 0 14%,
+          rgba(22,163,74,.10) 18%,
+          transparent 26%,
+          rgba(255,255,255,.10) 38%,
+          transparent 48%,
+          rgba(239,68,68,.07) 62%,
+          transparent 72%,
+          rgba(255,255,255,.07) 86%,
+          transparent 100%
+        );
+      transform: rotate(8deg);
+    }
+
+    /* Vignette */
+    .vignette{
+      background:
+        radial-gradient(1200px 800px at 50% 10%, rgba(255,255,255,.028), transparent 55%),
+        radial-gradient(900px 600px at 50% 115%, rgba(0,0,0,.86), transparent 55%),
+        radial-gradient(1400px 1000px at 50% 50%, transparent 0 60%, rgba(0,0,0,.62) 78%, rgba(0,0,0,.92) 100%);
+      opacity:.92;
+      pointer-events:none;
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      .parallax-layer{ transform: none !important; filter:none !important; opacity: 1 !important; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-[radial-gradient(1200px_700px_at_50%_-10%,#0a1220_0%,#070b10_40%,#05070a_100%)]">
+
+  <!-- BACKGROUND ONLY -->
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+    <!-- Base gradient wash -->
+    <div class="absolute inset-0"
+      style="background:
+        radial-gradient(1200px 760px at 50% 12%, rgba(22,163,74,.12), transparent 58%),
+        radial-gradient(1000px 700px at 18% 82%, rgba(239,68,68,.10), transparent 58%),
+        radial-gradient(860px 640px at 86% 70%, rgba(22,163,74,.09), transparent 58%),
+        linear-gradient(to bottom, rgba(8,14,22,.55), rgba(5,7,10,1));">
+    </div>
+
+    <!-- Parallax scene -->
+    <div class="absolute inset-0" style="transform-style:preserve-3d; perspective: 900px;">
+      <!-- Far -->
+      <div class="parallax-layer absolute inset-0 wave-field" data-depth="0.04" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 fog-bands"  data-depth="0.06" data-mode="float"></div>
+
+      <!-- Mid -->
+      <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 chroma"         data-depth="0.14" data-mode="float"></div>
+
+      <!-- Details -->
+      <div class="parallax-layer absolute inset-0 court-lines" data-depth="0.09" data-mode="locked"></div>
+      <div class="parallax-layer absolute inset-0 shafts"     data-depth="0.20" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 dust"       data-depth="0.30" data-mode="grain"></div>
+
+      <!-- NEW: Bokeh smear layers (high depth, super subtle) -->
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
+
+      <!-- Foreground shards -->
+      <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
+           data-depth="0.46" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 62%);
+                  border: 1px solid rgba(255,255,255,.10);">
+      </div>
+
+      <div class="parallax-layer absolute right-[14%] top-[32%] h-64 w-64 -rotate-12 rounded-[42px] opacity-[.085]"
+           data-depth="0.54" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(22,163,74,.18), transparent 70%);
+                  border: 1px solid rgba(255,255,255,.09);">
+      </div>
+
+      <div class="parallax-layer absolute right-[30%] top-[62%] h-40 w-40 rotate-6 rounded-[28px] opacity-[.065]"
+           data-depth="0.60" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(239,68,68,.14), transparent 74%);
+                  border: 1px solid rgba(255,255,255,.08);">
+      </div>
+
+      <!-- Spotlight sweep -->
+      <div class="parallax-layer absolute -inset-x-28 top-[-48%] h-[190%] rotate-6 opacity-[.14]"
+           data-depth="0.24" data-mode="float"
+           style="background: radial-gradient(closest-side at 50% 45%, rgba(255,255,255,.10), transparent 62%);">
+      </div>
+    </div>
+
+    <!-- Premium overlays (static) -->
+    <div class="absolute inset-0 streaks"></div>
+    <div class="absolute inset-0 grid-overlay"></div>
+    <div class="absolute inset-0 subgrid"></div>
+    <div class="absolute inset-0 noise"></div>
+    <div class="absolute inset-0 vignette"></div>
+
+    <div class="absolute inset-x-0 bottom-0 h-[36vh] bg-gradient-to-t from-black/85 via-black/22 to-transparent"></div>
+  </div>
+
+  <!-- Long scroll demo -->
+  <div class="h-[520vh]"></div>
+
+  <script>
+    (function () {
+      const layers = Array.from(document.querySelectorAll(".parallax-layer"));
+      if (!layers.length) return;
+
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (prefersReduced) return;
+
+      // ============================
+      // SETTINGS (vars only)
+      // ============================
+      const SETTINGS = {
+        // Core
+        scrollPower: 0.62,
+        driftPower:  26,
+
+        // Smoothing
+        smoothScroll: 0.085,
+        smoothMouse:  0.070,
+
+        // Depth shaping
+        nearBoost: 1.15,
+        farClamp: 0.85,
+        scalePower: 0.020,
+        rotatePower: 0.020,
+
+        // Cinematic response
+        velocityBloom: 0.40,
+        velocityDamp: 0.10,
+        velBlurMax: 0.55,
+
+        // Auto-life drift field (non-cyclic)
+        noiseSpeed: 0.12,
+        noiseScale: 0.55,
+        autoBias: 0.55,
+
+        // NEW: “breathing” modulation
+        breatheAmount: 0.08,       // +/- opacity variation (0.06 = subtle)
+        breatheSpeed: 0.18,        // how fast it breathes
+        breatheScrollMix: 0.35,    // how much breathing is influenced by scroll position
+
+        // NEW: smear behavior
+        smearX: 1.35,              // smear layers move more sideways
+        smearY: 0.35,              // smear layers move less vertically
+        smearScale: 0.10,         // smear layers scale a touch more
+      };
+
+      // Helpers
+      const lerp = (a, b, s) => a + (b - a) * s;
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+      // 2D smooth value noise
+      function hash2(ix, iy){
+        let n = ix * 374761393 + iy * 668265263;
+        n = (n ^ (n >> 13)) * 1274126177;
+        n = n ^ (n >> 16);
+        return (n >>> 0) / 4294967296;
+      }
+      function smoothstep(t){ return t * t * (3 - 2 * t); }
+      function noise2(x, y){
+        const x0 = Math.floor(x), y0 = Math.floor(y);
+        const x1 = x0 + 1, y1 = y0 + 1;
+        const sx = smoothstep(x - x0);
+        const sy = smoothstep(y - y0);
+        const n00 = hash2(x0, y0);
+        const n10 = hash2(x1, y0);
+        const n01 = hash2(x0, y1);
+        const n11 = hash2(x1, y1);
+        const ix0 = lerp(n00, n10, sx);
+        const ix1 = lerp(n01, n11, sx);
+        return (lerp(ix0, ix1, sy) * 2 - 1);
+      }
+
+      // Inputs
+      let targetY = window.scrollY || 0;
+      let y = targetY;
+
+      let targetMX = 0, targetMY = 0;
+      let mx = 0, my = 0;
+
+      let t = 0;
+      let sawMouse = false;
+
+      // Velocity
+      let vy = 0;
+      let lastY = targetY;
+
+      window.addEventListener("scroll", () => {
+        targetY = window.scrollY || 0;
+      }, { passive: true });
+
+      window.addEventListener("mousemove", (e) => {
+        sawMouse = true;
+        const nx = (e.clientX / window.innerWidth) * 2 - 1;
+        const ny = (e.clientY / window.innerHeight) * 2 - 1;
+        targetMX = nx;
+        targetMY = ny;
+      }, { passive: true });
+
+      function depthGain(d){
+        const near = Math.pow(clamp(d / 0.90, 0, 1), 1.25);
+        const far = 1 - near;
+        return far * SETTINGS.farClamp + near * SETTINGS.nearBoost;
+      }
+
+      function modeMix(mode){
+        switch(mode){
+          case "locked": return { scroll: 0.55, drift: 0.35, scale: 0.40, rot: 0.00, op: 0.55 };
+          case "float":  return { scroll: 0.75, drift: 0.55, scale: 0.55, rot: 0.10, op: 0.75 };
+          case "drift":  return { scroll: 0.85, drift: 0.75, scale: 0.65, rot: 0.12, op: 0.90 };
+          case "grain":  return { scroll: 0.95, drift: 0.35, scale: 0.20, rot: 0.00, op: 0.65 };
+          case "tilt":   return { scroll: 1.00, drift: 1.00, scale: 0.90, rot: 1.00, op: 1.00 };
+          case "smear":  return { scroll: 0.35, drift: 1.25, scale: 1.10, rot: 0.25, op: 0.75 };
+          default:       return { scroll: 0.85, drift: 0.70, scale: 0.60, rot: 0.12, op: 0.80 };
+        }
+      }
+
+      // Cache base opacity from computed style so breathing is relative
+      const baseOpacity = new Map();
+      function getBaseOpacity(el){
+        if (baseOpacity.has(el)) return baseOpacity.get(el);
+        const o = parseFloat(getComputedStyle(el).opacity || "1") || 1;
+        baseOpacity.set(el, o);
+        return o;
+      }
+
+      function tick(){
+        // Smooth scroll
+        y = lerp(y, targetY, SETTINGS.smoothScroll);
+
+        // Velocity
+        const rawVy = (targetY - lastY);
+        lastY = targetY;
+        vy = lerp(vy, rawVy, SETTINGS.velocityDamp);
+        const speed = clamp(Math.abs(vy) / 60, 0, 1);
+
+        // Time
+        t += 0.016 * SETTINGS.noiseSpeed;
+
+        // Auto drift field
+        const autoX = noise2(t * 0.9,  10.2) * 0.55 + noise2(t * 0.35, 3.7) * 0.35;
+        const autoY = noise2(7.1, t * 0.8)  * 0.45 + noise2(2.6, t * 0.30) * 0.30;
+
+        const desiredMX = sawMouse ? lerp(autoX, targetMX, 1 - SETTINGS.autoBias) : autoX;
+        const desiredMY = sawMouse ? lerp(autoY, targetMY, 1 - SETTINGS.autoBias) : autoY;
+
+        mx = lerp(mx, desiredMX, SETTINGS.smoothMouse);
+        my = lerp(my, desiredMY, SETTINGS.smoothMouse);
+
+        // Breathing: time + a little scroll influence
+        const scrollPhase = (y / Math.max(1, document.body.scrollHeight)) * Math.PI * 2;
+        const breatheT = (t * (SETTINGS.breatheSpeed * 6.0)) + scrollPhase * SETTINGS.breatheScrollMix;
+
+        for (let i = 0; i < layers.length; i++) {
+          const el = layers[i];
+          const depth = parseFloat(el.getAttribute("data-depth") || "0.15");
+          const mode  = (el.getAttribute("data-mode") || "float").toLowerCase();
+          const mix   = modeMix(mode);
+
+          const dg = depthGain(depth);
+
+          // Foreground curve
+          const fg = clamp((depth - 0.10) / 0.85, 0, 1);
+          const fgCurve = Math.pow(fg, 1.35);
+
+          // Stable per-layer phases
+          const idx = i + 1;
+          const phaseX = noise2(idx * 13.7, 2.1);
+          const phaseY = noise2(4.2, idx * 9.9);
+
+          // Local wobble
+          const wobbleX = noise2(t * 1.1 + idx * 0.07, 1.7) * 0.55;
+          const wobbleY = noise2(2.3, t * 1.0 + idx * 0.06) * 0.55;
+
+          // Scroll translation
+          const scrollY = y * depth * SETTINGS.scrollPower * mix.scroll * dg;
+
+          // Drift base
+          const driftBase = SETTINGS.driftPower * mix.drift * fgCurve * dg;
+
+          // Smear layers: mostly sideways, little vertical
+          const smear = (mode === "smear");
+          const mxUse = smear ? (mx * SETTINGS.smearX) : mx;
+          const myUse = smear ? (my * SETTINGS.smearY) : my;
+
+          const driftX = (mxUse * 1.00 + wobbleX * 0.55 + phaseX * 0.12) * driftBase;
+          const driftY = (myUse * 0.70 + wobbleY * 0.55 + phaseY * 0.12) * driftBase;
+
+          // Scale
+          const scaleBase = SETTINGS.scalePower * mix.scale * fgCurve;
+          const smearScale = smear ? SETTINGS.smearScale * (0.35 + fgCurve) : 0;
+          const scale = 1 + scaleBase + smearScale + (speed * 0.004 * fgCurve);
+
+          // Rotation (tiny)
+          const rot = (mx * 1.6 + wobbleX * 0.6) * SETTINGS.rotatePower * mix.rot * fgCurve;
+
+          // Velocity bloom (subtle)
+          const bloomY = vy * SETTINGS.velocityBloom * depth * 0.10;
+
+          // Blur
+          const baseBlur = Math.max(0, (0.62 - Math.min(depth, 0.62)) * 1.00);
+          const velBlur = speed * SETTINGS.velBlurMax * (0.35 + fgCurve * 0.35);
+          el.style.filter = `blur(${(baseBlur + velBlur).toFixed(2)}px)`;
+
+          // NEW: breathing opacity modulation (subtle, depth-weighted)
+          const baseO = getBaseOpacity(el);
+          const breatheWave =
+            Math.sin(breatheT + idx * 0.9) * 0.55 +
+            Math.sin(breatheT * 0.6 + idx * 0.4) * 0.45;
+          const breathe = breatheWave * SETTINGS.breatheAmount * (0.25 + fgCurve * 0.75) * mix.op;
+
+          el.style.opacity = clamp(baseO * (1 + breathe), 0.02, 1).toFixed(3);
+
+          // Transform
+          el.style.transform =
+            `translate3d(${driftX.toFixed(2)}px, ${(scrollY + driftY + bloomY).toFixed(2)}px, 0)
+             rotate(${rot.toFixed(4)}rad)
+             scale(${scale.toFixed(4)})`;
+        }
+
+        requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    })();
+  </script>
+</body>
+</html>

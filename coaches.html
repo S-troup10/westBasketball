@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coaches | West Basketball</title>
+  <title>Coaching | West Basketball Newcastle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -24,13 +24,14 @@
       }
     };
   </script>
+  <link rel="stylesheet" href="parallax-bg.css" />
   <style>
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
     .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
     .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .glow { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
+    .glow { box-shadow: 0 0 40px rgba(16,185,129, 0.3); }
     .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16,185,129, 0.4); }
     .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .card-hover:hover { transform: translateY(-8px) scale(1.02); }
     .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
@@ -45,6 +46,73 @@
   </style>
 </head>
 <body class="text-light min-h-screen">
+  <!-- Parallax background -->
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+    <!-- Base gradient wash -->
+    <div class="absolute inset-0"
+      style="background:
+        radial-gradient(1200px 760px at 50% 12%, rgba(22,163,74,.12), transparent 58%),
+        radial-gradient(1000px 700px at 18% 82%, rgba(239,68,68,.10), transparent 58%),
+        radial-gradient(860px 640px at 86% 70%, rgba(22,163,74,.09), transparent 58%),
+        linear-gradient(to bottom, rgba(8,14,22,.55), rgba(5,7,10,1));">
+    </div>
+
+    <!-- Parallax scene -->
+    <div class="absolute inset-0" style="transform-style:preserve-3d; perspective: 900px;">
+      <!-- Far -->
+      <div class="parallax-layer absolute inset-0 wave-field" data-depth="0.04" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 fog-bands" data-depth="0.06" data-mode="float"></div>
+
+      <!-- Mid -->
+      <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
+
+      <!-- Details -->
+      <div class="parallax-layer absolute inset-0 court-lines" data-depth="0.09" data-mode="locked"></div>
+      <div class="parallax-layer absolute inset-0 shafts" data-depth="0.20" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 dust" data-depth="0.30" data-mode="grain"></div>
+
+      <!-- Bokeh smear layers -->
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
+
+      <!-- Foreground shards -->
+      <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
+           data-depth="0.46" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 62%);
+                  border: 1px solid rgba(255,255,255,.10);">
+      </div>
+
+      <div class="parallax-layer absolute right-[14%] top-[32%] h-64 w-64 -rotate-12 rounded-[42px] opacity-[.085]"
+           data-depth="0.54" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(22,163,74,.18), transparent 70%);
+                  border: 1px solid rgba(255,255,255,.09);">
+      </div>
+
+      <div class="parallax-layer absolute right-[30%] top-[62%] h-40 w-40 rotate-6 rounded-[28px] opacity-[.065]"
+           data-depth="0.60" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(239,68,68,.14), transparent 74%);
+                  border: 1px solid rgba(255,255,255,.08);">
+      </div>
+
+      <!-- Spotlight sweep -->
+      <div class="parallax-layer absolute -inset-x-28 top-[-48%] h-[190%] rotate-6 opacity-[.14]"
+           data-depth="0.24" data-mode="float"
+           style="background: radial-gradient(closest-side at 50% 45%, rgba(255,255,255,.10), transparent 62%);">
+      </div>
+    </div>
+
+    <!-- Premium overlays (static) -->
+    <div class="absolute inset-0 streaks"></div>
+    <div class="absolute inset-0 grid-overlay"></div>
+    <div class="absolute inset-0 subgrid"></div>
+    <div class="absolute inset-0 noise"></div>
+    <div class="absolute inset-0 vignette"></div>
+
+    <div class="absolute inset-x-0 bottom-0 h-[36vh] bg-gradient-to-t from-black/85 via-black/22 to-transparent"></div>
+  </div>
+
   <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
 
   <main class="pt-24">
@@ -52,18 +120,47 @@
       <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl float-slow"></div>
       <div class="max-w-5xl mx-auto relative">
         <div class="section-fade">
-          <span id="coaches-hero-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Coaches</span>
+          <span id="coaches-hero-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Coaching</span>
           <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
             <span id="coaches-hero-title">Coaching at</span> <span id="coaches-hero-highlight" class="gradient-text">West Basketball</span>
           </h1>
-          <p id="coaches-blurb" class="text-xl text-white/70 max-w-2xl leading-relaxed"></p>
+          <p id="coaches-blurb" class="text-xl text-white/70 max-w-2xl leading-relaxed">Our club prides itself on having passionate and committed coaches helping develop the next generation of basketballers. Supported by a strong committee and an experienced head coach, we support coach development and ensure coaches have access to courses and resources to assist with their development and coaching approach, from basic fundamentals through to higher level structured play.</p>
         </div>
       </div>
     </section>
 
     <section class="py-16 px-6">
       <div class="max-w-5xl mx-auto">
-        <div id="coaches-resources" class="grid md:grid-cols-2 gap-6 section-fade"></div>
+        <div id="coaches-resources" class="grid md:grid-cols-2 gap-6 section-fade">
+          <div class="glass card-hover rounded-3xl p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
+              <div class="relative">
+                <div class="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
+                  <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-3">West Coaching Guide</h2>
+                <p class="text-white/60 mb-6">Session plans, game-day expectations, and safety info for all coaches.</p>
+                <a href="https://example.com/west-coaching-guide.pdf" class="inline-flex items-center gap-2 text-primary font-medium group">
+                  Open guide 
+                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </a>
+            </div>
+          </div>
+          <div class="glass card-hover rounded-3xl p-8 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-accent/10 rounded-full blur-2xl"></div>
+              <div class="relative">
+                <div class="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mb-4">
+                  <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-3">West Coaching Templates</h2>
+                <p class="text-white/60 mb-6">Printable drills, warm-ups, and development trackers for your sessions.</p>
+                <a href="https://example.com/west-coaching-templates.zip" class="inline-flex items-center gap-2 text-primary font-medium group">
+                  Download templates 
+                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -78,8 +175,8 @@
             </div>
             <span id="coaches-cta-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Get Involved</span>
             <h2 class="text-4xl font-bold mt-4 mb-6"><span id="coaches-cta-title">Want to</span> <span id="coaches-cta-highlight" class="gradient-text">Coach?</span></h2>
-            <p id="coaches-cta-desc" class="text-white/70 mb-8 max-w-lg mx-auto">We support new and experienced coaches with resources and mentoring. Reach out to get involved.</p>
-            <a id="coaches-cta-button" href="mailto:coaching@westbasketball.com.au" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold">
+            <p id="coaches-cta-desc" class="text-white/70 mb-8 max-w-lg mx-auto">If you are interested in being part of our positive and collaborative club through coaching for us in 2026, we'd love to hear from you. Please fill out a Contact Us form and we will be in touch soon!</p>
+            <a id="coaches-cta-button" href="about.html#contact" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold">
               Contact us
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             </a>
@@ -114,5 +211,8 @@
       renderCoachesContent();
     });
   </script>
+  <script src="parallax-bg.js"></script>
 </body>
 </html>
+
+

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Merchandise | West Basketball</title>
+  <title>Merchandise | West Basketball Newcastle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -24,13 +24,14 @@
       }
     };
   </script>
+  <link rel="stylesheet" href="parallax-bg.css" />
   <style>
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
     .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
     .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .glow { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
+    .glow { box-shadow: 0 0 40px rgba(16,185,129, 0.3); }
     .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16,185,129, 0.4); }
     .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
     .section-fade { opacity: 0; transform: translateY(40px); transition: all 0.8s ease-out; }
     .section-fade.visible { opacity: 1; transform: translateY(0); }
@@ -43,6 +44,73 @@
   </style>
 </head>
 <body class="text-light min-h-screen">
+  <!-- Parallax background -->
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+    <!-- Base gradient wash -->
+    <div class="absolute inset-0"
+      style="background:
+        radial-gradient(1200px 760px at 50% 12%, rgba(22,163,74,.12), transparent 58%),
+        radial-gradient(1000px 700px at 18% 82%, rgba(239,68,68,.10), transparent 58%),
+        radial-gradient(860px 640px at 86% 70%, rgba(22,163,74,.09), transparent 58%),
+        linear-gradient(to bottom, rgba(8,14,22,.55), rgba(5,7,10,1));">
+    </div>
+
+    <!-- Parallax scene -->
+    <div class="absolute inset-0" style="transform-style:preserve-3d; perspective: 900px;">
+      <!-- Far -->
+      <div class="parallax-layer absolute inset-0 wave-field" data-depth="0.04" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 fog-bands" data-depth="0.06" data-mode="float"></div>
+
+      <!-- Mid -->
+      <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
+
+      <!-- Details -->
+      <div class="parallax-layer absolute inset-0 court-lines" data-depth="0.09" data-mode="locked"></div>
+      <div class="parallax-layer absolute inset-0 shafts" data-depth="0.20" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 dust" data-depth="0.30" data-mode="grain"></div>
+
+      <!-- Bokeh smear layers -->
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
+
+      <!-- Foreground shards -->
+      <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
+           data-depth="0.46" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 62%);
+                  border: 1px solid rgba(255,255,255,.10);">
+      </div>
+
+      <div class="parallax-layer absolute right-[14%] top-[32%] h-64 w-64 -rotate-12 rounded-[42px] opacity-[.085]"
+           data-depth="0.54" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(22,163,74,.18), transparent 70%);
+                  border: 1px solid rgba(255,255,255,.09);">
+      </div>
+
+      <div class="parallax-layer absolute right-[30%] top-[62%] h-40 w-40 rotate-6 rounded-[28px] opacity-[.065]"
+           data-depth="0.60" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(239,68,68,.14), transparent 74%);
+                  border: 1px solid rgba(255,255,255,.08);">
+      </div>
+
+      <!-- Spotlight sweep -->
+      <div class="parallax-layer absolute -inset-x-28 top-[-48%] h-[190%] rotate-6 opacity-[.14]"
+           data-depth="0.24" data-mode="float"
+           style="background: radial-gradient(closest-side at 50% 45%, rgba(255,255,255,.10), transparent 62%);">
+      </div>
+    </div>
+
+    <!-- Premium overlays (static) -->
+    <div class="absolute inset-0 streaks"></div>
+    <div class="absolute inset-0 grid-overlay"></div>
+    <div class="absolute inset-0 subgrid"></div>
+    <div class="absolute inset-0 noise"></div>
+    <div class="absolute inset-0 vignette"></div>
+
+    <div class="absolute inset-x-0 bottom-0 h-[36vh] bg-gradient-to-t from-black/85 via-black/22 to-transparent"></div>
+  </div>
+
   <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
 
   <main class="pt-24">
@@ -54,7 +122,12 @@
           <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
             <span id="merch-hero-title">Uniforms &amp;</span> <span id="merch-hero-highlight" class="gradient-text">Gear</span>
           </h1>
-          <p id="merch-blurb" class="text-xl text-white/70 max-w-2xl leading-relaxed"></p>
+          <p id="merch-blurb" class="text-xl text-white/70 max-w-2xl leading-relaxed">
+            We are proud to be partnering with iAthletic to provide options of high-quality merchandise to our players.<br>
+            The only compulsory item are green and red playing shorts (and if you have shorts from previous years, these are fine to continue wearing). All other merch is optional.<br>
+            IMPORTANT<br>
+            Items will be shipped to you within a couple of days of ordering, and should arrive within a week, EXCEPT for West Playing Shorts which are custom made for our club. We keep a small stock of shorts for direct sale and will have an ordering period prior to the 2026 season where you can order directly through the website. Please reach out directly to us if you are requiring shorts and we will advise the best option for purchasing.
+          </p>
         </div>
       </div>
     </section>
@@ -70,12 +143,31 @@
             </div>
             <span id="merch-store-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Official Store</span>
             <h2 class="text-4xl font-bold mt-4 mb-6"><span id="merch-store-title">Shop</span> <span id="merch-store-highlight" class="gradient-text">Now</span></h2>
-            <p id="merch-store-description" class="text-white/70 mb-8 max-w-lg mx-auto">Order singlets, shorts, hoodies, and accessories online. Rep the club colors with pride!</p>
+            <p id="merch-store-description" class="text-white/70 mb-8 max-w-lg mx-auto">Order West Basketball merchandise online through iAthletic.</p>
             
-            <div id="merch-pillars" class="grid grid-cols-3 gap-6 mb-8 max-w-md mx-auto"></div>
+            <div id="merch-pillars" class="grid grid-cols-3 gap-6 mb-8 max-w-md mx-auto">
+              <div class="text-center">
+                <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-2">
+                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <p class="text-sm text-white/60">Quality</p>
+              </div>
+              <div class="text-center">
+                <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-2">
+                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <p class="text-sm text-white/60">Fast Delivery</p>
+              </div>
+              <div class="text-center">
+                <div class="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mx-auto mb-2">
+                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <p class="text-sm text-white/60">Club Pride</p>
+              </div>
+            </div>
             
-            <a id="merch-store-link" href="#" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold text-lg">
-              Go to merch store
+            <a id="merch-store-link" href="https://iathletic.com.au/collections/west-basketball" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold text-lg">
+              ORDER HERE
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
             </a>
           </div>
@@ -109,5 +201,6 @@
       renderMerchContent();
     });
   </script>
+  <script src="parallax-bg.js"></script>
 </body>
 </html>

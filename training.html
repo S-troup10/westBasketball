@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Training | West Basketball Newcastle</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
+          colors: {
+            primary: '#10b981',
+            accent: '#06d6a0',
+            dark: '#0a0a0a',
+            darker: '#050505',
+            light: '#f8fafc'
+          },
+          boxShadow: {
+            soft: '0 18px 60px rgba(0,0,0,.55)',
+            glow: '0 0 60px rgba(16,185,129,.22)'
+          }
+        }
+      }
+    };
+  </script>
+
+  <link rel="stylesheet" href="parallax-bg.css" />
+  <style>
+    :root { color-scheme: dark; }
+    body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
+
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #06d6a0 55%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-blur {
+      background: rgba(10,10,10,.72);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    :focus-visible {
+      outline: 3px solid rgba(16,185,129,.55);
+      outline-offset: 3px;
+      border-radius: 14px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 14px 40px rgba(16,185,129,.22);
+      transition: box-shadow .2s ease, filter .2s ease;
+    }
+    .btn-primary:hover { filter: brightness(1.03); box-shadow: 0 18px 55px rgba(16,185,129,.28); }
+    .btn-primary:active { filter: brightness(.98); }
+
+    .section-fade { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
+    .section-fade.visible { opacity: 1; transform: translateY(0); }
+
+    .blob { filter: blur(60px); opacity: .65; }
+    @media (prefers-reduced-motion: reduce) {
+      .section-fade { transition: none; transform: none; opacity: 1; }
+    }
+  </style>
+</head>
+
+<body class="text-light min-h-screen">
+  <!-- Parallax background -->
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+    <!-- Base gradient wash -->
+    <div class="absolute inset-0"
+      style="background:
+        radial-gradient(1200px 760px at 50% 12%, rgba(22,163,74,.12), transparent 58%),
+        radial-gradient(1000px 700px at 18% 82%, rgba(239,68,68,.10), transparent 58%),
+        radial-gradient(860px 640px at 86% 70%, rgba(22,163,74,.09), transparent 58%),
+        linear-gradient(to bottom, rgba(8,14,22,.55), rgba(5,7,10,1));">
+    </div>
+
+    <!-- Parallax scene -->
+    <div class="absolute inset-0" style="transform-style:preserve-3d; perspective: 900px;">
+      <!-- Far -->
+      <div class="parallax-layer absolute inset-0 wave-field" data-depth="0.04" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 fog-bands" data-depth="0.06" data-mode="float"></div>
+
+      <!-- Mid -->
+      <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
+
+      <!-- Details -->
+      <div class="parallax-layer absolute inset-0 court-lines" data-depth="0.09" data-mode="locked"></div>
+      <div class="parallax-layer absolute inset-0 shafts" data-depth="0.20" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 dust" data-depth="0.30" data-mode="grain"></div>
+
+      <!-- Bokeh smear layers -->
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
+
+      <!-- Foreground shards -->
+      <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
+           data-depth="0.46" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 62%);
+                  border: 1px solid rgba(255,255,255,.10);">
+      </div>
+
+      <div class="parallax-layer absolute right-[14%] top-[32%] h-64 w-64 -rotate-12 rounded-[42px] opacity-[.085]"
+           data-depth="0.54" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(22,163,74,.18), transparent 70%);
+                  border: 1px solid rgba(255,255,255,.09);">
+      </div>
+
+      <div class="parallax-layer absolute right-[30%] top-[62%] h-40 w-40 rotate-6 rounded-[28px] opacity-[.065]"
+           data-depth="0.60" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(239,68,68,.14), transparent 74%);
+                  border: 1px solid rgba(255,255,255,.08);">
+      </div>
+
+      <!-- Spotlight sweep -->
+      <div class="parallax-layer absolute -inset-x-28 top-[-48%] h-[190%] rotate-6 opacity-[.14]"
+           data-depth="0.24" data-mode="float"
+           style="background: radial-gradient(closest-side at 50% 45%, rgba(255,255,255,.10), transparent 62%);">
+      </div>
+    </div>
+
+    <!-- Premium overlays (static) -->
+    <div class="absolute inset-0 streaks"></div>
+    <div class="absolute inset-0 grid-overlay"></div>
+    <div class="absolute inset-0 subgrid"></div>
+    <div class="absolute inset-0 noise"></div>
+    <div class="absolute inset-0 vignette"></div>
+
+    <div class="absolute inset-x-0 bottom-0 h-[36vh] bg-gradient-to-t from-black/85 via-black/22 to-transparent"></div>
+  </div>
+
+  <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
+
+  <main class="pt-24">
+    <section class="py-16 px-6 relative overflow-hidden">
+      <div class="absolute -top-16 -left-16 w-[32rem] h-[32rem] bg-primary/14 rounded-full blob"></div>
+      <div class="absolute -bottom-24 -right-20 w-[26rem] h-[26rem] bg-accent/12 rounded-full blob"></div>
+
+      <div class="max-w-5xl mx-auto relative">
+        <div class="section-fade">
+          <span id="training-hero-tag" class="inline-flex items-center gap-2 text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold">
+            Training
+          </span>
+
+          <h1 class="text-5xl md:text-6xl font-extrabold mt-4 mb-5 leading-[1.05]">
+            <span id="training-hero-title">Training</span>
+            <span id="training-hero-highlight" class="gradient-text">Sessions</span>
+          </h1>
+
+          <p id="training-hero-description" class="text-lg sm:text-xl text-white/70 max-w-2xl leading-relaxed">
+            Weekly training opportunities for all teams and players.
+          </p>
+
+          <div class="mt-8 h-px w-full max-w-2xl bg-gradient-to-r from-white/5 via-white/15 to-white/5"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-14 px-6">
+      <div class="max-w-5xl mx-auto grid gap-6 lg:grid-cols-2">
+        <article class="glass rounded-3xl p-7 sm:p-8 shadow-soft section-fade">
+          <span id="training-season-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
+            Winter Season
+          </span>
+          <h2 id="training-season-title" class="text-2xl sm:text-3xl font-extrabold text-white mb-4">
+            How training works
+          </h2>
+          <p id="training-season-text" class="text-white/65 leading-relaxed">
+            During the Winter Competition we facilitate weekly training opportunities for all our teams and players. This may be a mix of individual team trainings, squad trainings and structured skills sessions, run by our experienced and well supported coaches. More information will be shared as we coordinate our teams and get ready to start the season, and a training schedule will be included on our website.
+          </p>
+        </article>
+
+        <article class="glass rounded-3xl p-7 sm:p-8 shadow-soft section-fade">
+          <span id="training-schedule-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
+            Schedule
+          </span>
+          <h2 id="training-schedule-title" class="text-2xl sm:text-3xl font-extrabold text-white mb-4">
+            Training schedule
+          </h2>
+          <p id="training-schedule-text" class="text-white/65 leading-relaxed mb-6">
+            A training schedule will be shared once teams and courts are confirmed.
+          </p>
+          <a id="training-schedule-cta" href="#" class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold hidden">
+            View training schedule
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <section class="py-14 px-6">
+      <div class="max-w-5xl mx-auto">
+        <article class="glass rounded-3xl p-7 sm:p-8 shadow-soft section-fade">
+          <span id="training-locations-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
+            Facilities
+          </span>
+          <h2 id="training-locations-title" class="text-2xl sm:text-3xl font-extrabold text-white mb-4">
+            Newcastle Basketball Training Facilities
+          </h2>
+          <ul id="training-locations" class="space-y-2 text-white/70">
+            <li>Newcastle Basketball Stadium</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 bg-darker mt-16" id="site-footer"></footer>
+
+  <script src="data.js"></script>
+  <script src="common.js"></script>
+  <script>
+    function renderTrainingContent() {
+      if (!hasOverrides()) return;
+      const trainingPage = window.siteContent.pages?.training ?? {};
+      const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = formatMultiline(value ?? "");
+      };
+
+      setText("training-hero-tag", trainingPage.heroTag);
+      setText("training-hero-title", trainingPage.heroTitle);
+      setText("training-hero-highlight", trainingPage.heroHighlight);
+      setText("training-hero-description", trainingPage.heroDescription);
+      setText("training-season-tag", trainingPage.seasonTag);
+      setText("training-season-title", trainingPage.seasonTitle);
+      setText("training-season-text", trainingPage.seasonDescription);
+      setText("training-schedule-tag", trainingPage.scheduleTag);
+      setText("training-schedule-title", trainingPage.scheduleTitle);
+      setText("training-schedule-text", trainingPage.scheduleDescription);
+      setText("training-locations-tag", trainingPage.locationsTag);
+      setText("training-locations-title", trainingPage.locationsTitle);
+
+      const locationsList = document.getElementById("training-locations");
+      if (locationsList) {
+        const locations = trainingPage.locations || [];
+        locationsList.innerHTML = locations.length
+          ? locations.map((location) => `<li>${escapeHtml(location)}</li>`).join("")
+          : "<li>Add training locations in the admin panel.</li>";
+      }
+
+      const scheduleCta = document.getElementById("training-schedule-cta");
+      if (scheduleCta) {
+        const label = trainingPage.scheduleCtaLabel ?? "View training schedule";
+        scheduleCta.innerHTML = `${escapeHtml(label)}
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>`;
+        scheduleCta.href = trainingPage.scheduleCtaHref ?? "#";
+        scheduleCta.classList.toggle("hidden", !trainingPage.scheduleCtaHref);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderNav('training');
+      renderFooter();
+      renderTrainingContent();
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.12 });
+
+      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+    });
+
+    window.addEventListener('sitecontent:updated', () => {
+      renderNav('training');
+      renderFooter();
+      renderTrainingContent();
+    });
+  </script>
+  <script src="parallax-bg.js"></script>
+</body>
+</html>

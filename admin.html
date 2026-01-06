@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin | West Basketball</title>
+  <title>Admin | West Basketball Newcastle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -25,12 +25,13 @@
       }
     };
   </script>
+  <link rel="stylesheet" href="parallax-bg.css" />
   <style>
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
     .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
     .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16,185,129, 0.4); }
     .btn-danger { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); transition: all 0.3s ease; }
     .btn-danger:hover { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.5); }
     .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
@@ -42,12 +43,79 @@
     .input-field:focus { 
       border-color: #10b981; 
       outline: none;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      box-shadow: 0 0 0 3px rgba(16,185,129, 0.1);
     }
     .input-field::placeholder { color: rgba(255,255,255,0.3); }
   </style>
 </head>
 <body class="text-light min-h-screen">
+  <!-- Parallax background -->
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+    <!-- Base gradient wash -->
+    <div class="absolute inset-0"
+      style="background:
+        radial-gradient(1200px 760px at 50% 12%, rgba(22,163,74,.12), transparent 58%),
+        radial-gradient(1000px 700px at 18% 82%, rgba(239,68,68,.10), transparent 58%),
+        radial-gradient(860px 640px at 86% 70%, rgba(22,163,74,.09), transparent 58%),
+        linear-gradient(to bottom, rgba(8,14,22,.55), rgba(5,7,10,1));">
+    </div>
+
+    <!-- Parallax scene -->
+    <div class="absolute inset-0" style="transform-style:preserve-3d; perspective: 900px;">
+      <!-- Far -->
+      <div class="parallax-layer absolute inset-0 wave-field" data-depth="0.04" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 fog-bands" data-depth="0.06" data-mode="float"></div>
+
+      <!-- Mid -->
+      <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
+
+      <!-- Details -->
+      <div class="parallax-layer absolute inset-0 court-lines" data-depth="0.09" data-mode="locked"></div>
+      <div class="parallax-layer absolute inset-0 shafts" data-depth="0.20" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 dust" data-depth="0.30" data-mode="grain"></div>
+
+      <!-- Bokeh smear layers -->
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
+
+      <!-- Foreground shards -->
+      <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
+           data-depth="0.46" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 62%);
+                  border: 1px solid rgba(255,255,255,.10);">
+      </div>
+
+      <div class="parallax-layer absolute right-[14%] top-[32%] h-64 w-64 -rotate-12 rounded-[42px] opacity-[.085]"
+           data-depth="0.54" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(22,163,74,.18), transparent 70%);
+                  border: 1px solid rgba(255,255,255,.09);">
+      </div>
+
+      <div class="parallax-layer absolute right-[30%] top-[62%] h-40 w-40 rotate-6 rounded-[28px] opacity-[.065]"
+           data-depth="0.60" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(239,68,68,.14), transparent 74%);
+                  border: 1px solid rgba(255,255,255,.08);">
+      </div>
+
+      <!-- Spotlight sweep -->
+      <div class="parallax-layer absolute -inset-x-28 top-[-48%] h-[190%] rotate-6 opacity-[.14]"
+           data-depth="0.24" data-mode="float"
+           style="background: radial-gradient(closest-side at 50% 45%, rgba(255,255,255,.10), transparent 62%);">
+      </div>
+    </div>
+
+    <!-- Premium overlays (static) -->
+    <div class="absolute inset-0 streaks"></div>
+    <div class="absolute inset-0 grid-overlay"></div>
+    <div class="absolute inset-0 subgrid"></div>
+    <div class="absolute inset-0 noise"></div>
+    <div class="absolute inset-0 vignette"></div>
+
+    <div class="absolute inset-x-0 bottom-0 h-[36vh] bg-gradient-to-t from-black/85 via-black/22 to-transparent"></div>
+  </div>
+
   <!-- PASSWORD MODAL (DARK THEME) -->
 <div id="password-modal"
      class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]">
@@ -271,6 +339,10 @@
           </span>
           Club Info
         </h2>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="club-name" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Club name" />
+          <input id="club-short-name" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Short name" />
+        </div>
         <input id="club-tagline" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Tagline" />
         <textarea id="club-intro" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Landing page intro"></textarea>
       </div>
@@ -376,6 +448,18 @@
         <textarea id="about-extra-text-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Extra section text"></textarea>
         <div class="border-t border-white/10 pt-4 space-y-3">
           <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">FAQs</p>
+            <span class="text-xs text-white/40">Questions shown on about page</span>
+          </div>
+          <div class="grid md:grid-cols-2 gap-3">
+            <input id="about-faq-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="FAQ tag" />
+            <input id="about-faq-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="FAQ title" />
+          </div>
+          <textarea id="about-faq-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="FAQ subtitle"></textarea>
+          <div id="about-faqs-list"></div>
+        </div>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
             <p class="text-sm font-semibold text-white">Club Snapshot</p>
             <span class="text-xs text-white/40">Numbers on the about page</span>
           </div>
@@ -410,6 +494,29 @@
           <input id="join-hero-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero highlight" />
         </div>
         <textarea id="join-hero-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Hero description"></textarea>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <p class="text-sm font-semibold text-white">Join Feature</p>
+          <div class="grid md:grid-cols-2 gap-3">
+            <input id="join-quote-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Quote tag" />
+            <input id="join-quote-attrib-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Quote attribution" />
+          </div>
+          <textarea id="join-quote-text-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Quote text"></textarea>
+          <div class="grid md:grid-cols-2 gap-3">
+            <input id="join-feature-alt-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Feature image alt text" />
+            <input id="join-feature-image-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Feature image URL (optional)" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Feature image upload</label>
+            <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('join-feature-image-input').click()">
+              <img id="join-feature-image-preview" src="" alt="Join feature preview" class="hidden w-full h-32 object-cover rounded-lg mb-3" />
+              <div id="join-feature-image-placeholder" class="space-y-2">
+                <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <p class="text-sm text-white/50">Click to upload feature image</p>
+              </div>
+              <input type="file" id="join-feature-image-input" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'joinFeatureImage', 'join-feature-image-preview', 'join-feature-image-placeholder')" />
+            </div>
+          </div>
+        </div>
         <div class="grid md:grid-cols-2 gap-3">
           <input id="join-help-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Help tag" />
           <input id="join-help-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Help title" />
@@ -436,6 +543,43 @@
       </div>
       <p class="text-white/50 text-sm">One heading per stream and dot-point steps (one step per line). Anchors set the # link on the page.</p>
       <div id="join-streams-list"></div>
+    </section>
+
+    <section class="glass rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v18l7-4 7 4V3H5z"></path></svg>
+          </span>
+          Training Page
+        </h2>
+        <span class="text-xs text-white/40">Hero, season details, and locations</span>
+      </div>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="training-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
+        <input id="training-hero-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero title" />
+        <input id="training-hero-highlight-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero highlight" />
+      </div>
+      <textarea id="training-hero-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Hero description"></textarea>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="training-season-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Season tag" />
+        <input id="training-season-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Season title" />
+      </div>
+      <textarea id="training-season-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Season description"></textarea>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="training-schedule-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Schedule tag" />
+        <input id="training-schedule-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Schedule title" />
+      </div>
+      <textarea id="training-schedule-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Schedule description"></textarea>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="training-schedule-cta-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Schedule CTA label" />
+        <input id="training-schedule-cta-href-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Schedule CTA link" />
+      </div>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="training-locations-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Locations tag" />
+        <input id="training-locations-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Locations title" />
+      </div>
+      <textarea id="training-locations-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Locations (one per line)"></textarea>
     </section>
 
     <section class="glass rounded-3xl p-6 space-y-4">
@@ -675,6 +819,14 @@
           <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA secondary link</label>
           <input id="home-cta-secondary-href-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="coaches.html" />
         </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA tertiary label</label>
+          <input id="home-cta-tertiary-label-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Contact us" />
+        </div>
+        <div class="space-y-2">
+          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">CTA tertiary link</label>
+          <input id="home-cta-tertiary-href-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="about.html#contact" />
+        </div>
       </div>
     </section>
 
@@ -733,5 +885,8 @@
       renderFooter();
     });
   </script>
+  <script src="parallax-bg.js"></script>
 </body>
 </html>
+
+

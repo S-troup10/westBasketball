@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>About | West Basketball Club</title>
+  <title>About | West Basketball Newcastle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -24,13 +24,14 @@
       }
     };
   </script>
+  <link rel="stylesheet" href="parallax-bg.css" />
   <style>
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
     .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
     .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .glow { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
+    .glow { box-shadow: 0 0 40px rgba(16,185,129, 0.3); }
     .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16,185,129, 0.4); }
     .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .card-hover:hover { transform: translateY(-8px) scale(1.02); }
     .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
@@ -48,6 +49,73 @@
   </style>
 </head>
 <body class="text-light min-h-screen">
+  <!-- Parallax background -->
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+    <!-- Base gradient wash -->
+    <div class="absolute inset-0"
+      style="background:
+        radial-gradient(1200px 760px at 50% 12%, rgba(22,163,74,.12), transparent 58%),
+        radial-gradient(1000px 700px at 18% 82%, rgba(239,68,68,.10), transparent 58%),
+        radial-gradient(860px 640px at 86% 70%, rgba(22,163,74,.09), transparent 58%),
+        linear-gradient(to bottom, rgba(8,14,22,.55), rgba(5,7,10,1));">
+    </div>
+
+    <!-- Parallax scene -->
+    <div class="absolute inset-0" style="transform-style:preserve-3d; perspective: 900px;">
+      <!-- Far -->
+      <div class="parallax-layer absolute inset-0 wave-field" data-depth="0.04" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 fog-bands" data-depth="0.06" data-mode="float"></div>
+
+      <!-- Mid -->
+      <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
+
+      <!-- Details -->
+      <div class="parallax-layer absolute inset-0 court-lines" data-depth="0.09" data-mode="locked"></div>
+      <div class="parallax-layer absolute inset-0 shafts" data-depth="0.20" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 dust" data-depth="0.30" data-mode="grain"></div>
+
+      <!-- Bokeh smear layers -->
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
+
+      <!-- Foreground shards -->
+      <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
+           data-depth="0.46" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 62%);
+                  border: 1px solid rgba(255,255,255,.10);">
+      </div>
+
+      <div class="parallax-layer absolute right-[14%] top-[32%] h-64 w-64 -rotate-12 rounded-[42px] opacity-[.085]"
+           data-depth="0.54" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(22,163,74,.18), transparent 70%);
+                  border: 1px solid rgba(255,255,255,.09);">
+      </div>
+
+      <div class="parallax-layer absolute right-[30%] top-[62%] h-40 w-40 rotate-6 rounded-[28px] opacity-[.065]"
+           data-depth="0.60" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(239,68,68,.14), transparent 74%);
+                  border: 1px solid rgba(255,255,255,.08);">
+      </div>
+
+      <!-- Spotlight sweep -->
+      <div class="parallax-layer absolute -inset-x-28 top-[-48%] h-[190%] rotate-6 opacity-[.14]"
+           data-depth="0.24" data-mode="float"
+           style="background: radial-gradient(closest-side at 50% 45%, rgba(255,255,255,.10), transparent 62%);">
+      </div>
+    </div>
+
+    <!-- Premium overlays (static) -->
+    <div class="absolute inset-0 streaks"></div>
+    <div class="absolute inset-0 grid-overlay"></div>
+    <div class="absolute inset-0 subgrid"></div>
+    <div class="absolute inset-0 noise"></div>
+    <div class="absolute inset-0 vignette"></div>
+
+    <div class="absolute inset-x-0 bottom-0 h-[36vh] bg-gradient-to-t from-black/85 via-black/22 to-transparent"></div>
+  </div>
+
   <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
 
   <main class="pt-24">
@@ -59,7 +127,10 @@
           <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
             <span id="about-hero-title">About</span> <span id="about-hero-highlight" class="gradient-text">West Basketball</span>
           </h1>
-          <p id="about-intro" class="text-xl text-white/70 max-w-2xl leading-relaxed"></p>
+          <p id="about-intro" class="text-xl text-white/70 max-w-2xl leading-relaxed">
+            West Basketball Newcastle is one of the largest and oldest basketball clubs in Newcastle, with a history spanning 60 years.<br>
+            We provide opportunities for players aged U8 to U18 in healthy, safe, and fun basketball activities within a family-oriented environment. Our club is run by a group of passionate and committed individuals who have overseen the club doubling in size over the past five years. In 2025 we fielded 68 teams in the U12-U18 Winter Competition, and over 20 teams across the U8 and U10 competitions.
+          </p>
         </div>
       </div>
     </section>
@@ -68,7 +139,14 @@
       <div class="max-w-6xl mx-auto">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
           <div class="section-fade">
-            <div id="about-photos" class="grid grid-cols-2 gap-4"></div>
+            <div id="about-photos" class="grid grid-cols-2 gap-4">
+              <div class="image-card card-hover">
+                <img src="images/U12-Knights.jpg" alt="Club moment" class="rounded-2xl object-contain w-full h-auto max-h-64 bg-black/40" loading="lazy" />
+              </div>
+              <div class="image-card card-hover">
+                <img src="images/U14-West-Raiders.jpg" alt="Club moment" class="rounded-2xl object-contain w-full h-auto max-h-64 bg-black/40" loading="lazy" />
+              </div>
+            </div>
           </div>
           <div class="space-y-8 section-fade">
             <div>
@@ -78,16 +156,26 @@
                 </div>
                 <h2 id="about-history-title" class="text-2xl font-bold text-white">Our History</h2>
               </div>
-              <p id="about-history" class="text-white/60 leading-relaxed"></p>
+              <p id="about-history" class="text-white/60 leading-relaxed">
+                We are proud to have many juniors represent across local and state-wide events and development programs including selections for the NSW U12 Jamboree, U14 Australian Club Nationals, U16 &amp; U18 NSW Country teams, BNSW Talented Athlete Program, Southern Cross Challenge and additional BNSW Tournaments.<br>
+                Many of our juniors also represent in school regional and state teams across the PSSA, CHS, CIS and CCS programs, as well as the Newcastle Falcons representative program. To find out more about the pathways to higher level representation please reach out to us.
+              </p>
             </div>
             <div id="values">
               <div class="flex items-center gap-3 mb-4">
                 <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
                   <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
                 </div>
-                <h2 id="about-values-title" class="text-2xl font-bold text-white">Our Values</h2>
+                <h2 id="about-values-title" class="text-2xl font-bold text-white">West Values</h2>
               </div>
-              <ul id="about-values" class="grid grid-cols-2 gap-3"></ul>
+              <ul id="about-values" class="grid grid-cols-2 gap-3">
+                <li class="px-4 py-3 rounded-xl glass text-white">Inclusive, safe, and enjoyable basketball for every family</li>
+                <li class="px-4 py-3 rounded-xl glass text-white">Teamwork, fair play, and respect for all</li>
+                <li class="px-4 py-3 rounded-xl glass text-white">Effort and improvement over results</li>
+                <li class="px-4 py-3 rounded-xl glass text-white">Positive sideline voices and strong club culture</li>
+                <li class="px-4 py-3 rounded-xl glass text-white">Player development at every age group</li>
+                <li class="px-4 py-3 rounded-xl glass text-white">Community connections that last beyond the season</li>
+              </ul>
             </div>
           </div>
         </div>
@@ -100,13 +188,73 @@
       <div class="absolute -right-20 bottom-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl float-slower"></div>
       <div class="max-w-6xl mx-auto relative">
         <div class="section-fade text-center space-y-3 mb-12">
-          <span id="home-story-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Our Club</span>
+          <span id="home-story-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">2025 Season</span>
           <h2 class="text-4xl md:text-5xl font-bold text-white">
-            <span id="home-story-title" class="gradient-text">More than game day</span>
+            <span id="home-story-title" class="gradient-text">Awards &amp; Results</span>
           </h2>
-          <p id="home-story-subtitle" class="text-white/60 max-w-3xl mx-auto">Three snapshots of who we are, where we've been, and how we celebrate our people.</p>
+          <p id="home-story-subtitle" class="text-white/60 max-w-3xl mx-auto">Celebrating our people and teams from the 2025 season.</p>
         </div>
-        <div id="home-story-blocks" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 section-fade"></div>
+        <div id="home-story-blocks" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 section-fade">
+          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
+            <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Awards</span>
+            <h3 class="text-2xl font-bold text-white">Celebrating our People</h3>
+            <p class="text-white/60 leading-relaxed">Congratulations to the 2025 winners of our perpetual awards.</p>
+            <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
+              <li>Al Herrington Volunteer of the Year: Peta Rafty</li>
+              <li>Junior Club Person of the Year: Poppy Harman</li>
+              <li>Karen Audet Club Person of the Year: Wendy Blackmore</li>
+              <li>Eric Harvey Junior Coach of the Year: Kiara Barr</li>
+              <li>Club Coach of the Year: Angelo Iosif</li>
+            </ul>
+          </article>
+          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
+            <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">2025 Season</span>
+            <h3 class="text-2xl font-bold text-white">2025 Wrap-up</h3>
+            <p class="text-white/60 leading-relaxed">68 teams competed in the Winter Club Competition, with 23 teams reaching the Grand Final and 10 champions.</p>
+            <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
+              <li>68 teams across the Winter Competition</li>
+              <li>23 teams reached the Grand Final</li>
+              <li>10 teams crowned champions</li>
+            </ul>
+          </article>
+          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
+            <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Champions</span>
+            <h3 class="text-2xl font-bold text-white">2025 Winners</h3>
+            <p class="text-white/60 leading-relaxed">Winter Competition champions.</p>
+            <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
+              <li>U12 Div5 West Kings</li>
+              <li>U14 Div2 West Golden Eagles</li>
+              <li>U14 Div3 West Gems</li>
+              <li>U14 Div3 West Speedies</li>
+              <li>U14 Div4 West Blazers</li>
+              <li>U16 Div2 West Bulls</li>
+              <li>U16 Div3 West Rollers</li>
+              <li>U16 Div4 West Clippers</li>
+              <li>U16 Div6 West Jayhawks</li>
+              <li>U18 Div1 West Titans</li>
+            </ul>
+          </article>
+          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
+            <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Finalists</span>
+            <h3 class="text-2xl font-bold text-white">2025 Runners Up</h3>
+            <p class="text-white/60 leading-relaxed">Grand Finalists finishing runners up.</p>
+            <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
+              <li>U12 Div1 West Mystics</li>
+              <li>U12 Div3 West Pirates</li>
+              <li>U14 Div1 West Vikings</li>
+              <li>U14 Div5 West Wolverines</li>
+              <li>U16 Div1 West Flyers</li>
+              <li>U16 Div2 West Gladiators</li>
+              <li>U16 Div3 West Rockets</li>
+              <li>U16 Div4 West Lynx</li>
+              <li>U18 Div2 West Magic</li>
+              <li>U18 Div3 West Flames</li>
+              <li>U18 Div3 West Rebounders</li>
+              <li>U18 Div4 West Rangers</li>
+              <li>U18 Div5 West Chiefs</li>
+            </ul>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -117,15 +265,15 @@
       <div class="absolute -right-10 bottom-0 w-80 h-80 bg-accent/5 rounded-full blur-3xl float-slower"></div>
       <div class="max-w-6xl mx-auto relative space-y-10">
         <div class="section-fade space-y-3">
-          <span id="about-extra-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Club Story</span>
-          <h2 id="about-extra-title" class="text-3xl md:text-4xl font-bold text-white">Why We Play</h2>
+          <span id="about-extra-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Pathways</span>
+          <h2 id="about-extra-title" class="text-3xl md:text-4xl font-bold text-white">Higher level representation</h2>
           <p id="about-extra-text" class="text-white/70 max-w-4xl leading-relaxed">
-            Add a short paragraph about the club here.
+            We are proud of the pathways our players take into representative and school programs. If you would like to know more about development opportunities, please reach out to us.
           </p>
         </div>
         <div class="section-fade">
           <div id="about-feature-image" class="image-card card-hover rounded-3xl overflow-hidden bg-white/5 border border-white/10">
-            <img src="U12-Knights.jpg" alt="Club highlight" class="w-full h-auto max-h-[420px] object-contain" loading="lazy" />
+            <img src="images/U12-Knights.jpg" alt="Club highlight" class="w-full h-auto max-h-[420px] object-contain" loading="lazy" />
           </div>
         </div>
       </div>
@@ -140,11 +288,79 @@
               <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
                 <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
               </div>
-              <h2 id="about-life-title" class="text-2xl font-bold text-white">Life Members</h2>
+              <h2 id="about-life-title" class="text-2xl font-bold text-white">Awards</h2>
             </div>
-            <p id="about-life-description" class="text-white/60 mb-6">Honoring those who have made lasting contributions to our club.</p>
-            <ul id="about-life-members" class="grid md:grid-cols-3 gap-4"></ul>
+            <p id="about-life-description" class="text-white/60 mb-6">Celebrating our people.</p>
+            <ul id="about-life-members" class="grid md:grid-cols-3 gap-4">
+              <li class="text-white/80">Al Herrington Volunteer of the Year: Peta Rafty</li>
+              <li class="text-white/80">Junior Club Person of the Year: Poppy Harman</li>
+              <li class="text-white/80">Karen Audet Club Person of the Year: Wendy Blackmore</li>
+              <li class="text-white/80">Eric Harvey Junior Coach of the Year: Kiara Barr</li>
+              <li class="text-white/80">Club Coach of the Year: Angelo Iosif</li>
+            </ul>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about-faqs" class="py-16 px-6 relative overflow-hidden">
+      <div class="absolute -right-10 top-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl float-slow"></div>
+      <div class="absolute -left-10 bottom-0 w-80 h-80 bg-accent/5 rounded-full blur-3xl float-slower"></div>
+      <div class="max-w-6xl mx-auto relative">
+        <div class="section-fade space-y-3 mb-10">
+          <span id="about-faq-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">FAQs</span>
+          <h2 id="about-faq-title" class="text-3xl md:text-4xl font-bold text-white">Frequently Asked Questions</h2>
+          <p id="about-faq-subtitle" class="text-white/60 max-w-3xl"></p>
+        </div>
+        <div id="about-faq-list" class="grid md:grid-cols-2 gap-6 section-fade">
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">When will the registrations open for the 2026 season?</h3>
+            <p class="text-white/60 leading-relaxed">We expect registrations to open in February, to allow clubs enough time to put together teams, coaches, training schedules, and be ready to start the competition in Term 2. The best way to keep across registrations opening is to follow us (and Newcastle Basketball) on Facebook, or keep an eye on our website where we will share information as it comes to hand. This will include information such as fees, playing nights, dates, and more.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">I would like to play with my friends, how do I arrange that?</h3>
+            <p class="text-white/60 leading-relaxed">During the registration process there will be a field where you can add up to three friends you would like to play with (this is the only option the system provides). Please include this information so that when we are forming our teams we can try and accommodate requests where possible. If you have further requests please email us at westbasketballclubnewcastle@gmail.com so we can note this down. Equally, if you don't know anyone else playing or are happy to meet new friends we will find a team for you.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">The registration form asks for &quot;Registration Division&quot;, how do I answer this?</h3>
+            <p class="text-white/60 leading-relaxed">This gives us some information about your playing level and self rated ability. For example, if you are wanting to trial for a Division 1 team (top division), it is important to list Division 1 here so that we add you to our trial lists. If you are currently playing Division 4 in Summer Comp and competing well, then we suggest you put Division 4 or 5 as a preference (winter comp is normally stronger than summer comp with all rep players obligated to play winter). If you are new to the sport and would like to start in a team with other new players, list Division 8. These division preferences are a guide only and your final division may be different, but we will try to keep it as close as possible.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">What game nights will I play or train?</h3>
+            <p class="text-white/60 leading-relaxed">Most of our West teams have their training on a Sunday afternoon at Broadmeadow Stadium, but there may be some teams training mid-week depending on coach preference and availability. Game nights will be confirmed by Newcastle Basketball closer to the season start.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">How much are registration fees?</h3>
+            <p class="text-white/60 leading-relaxed">In 2025 the winter season fees were $330 for the 18 week season, plus Annual Registration if yours is due: 8-11yrs ($93.50), 12-17yrs ($124.50). Prices for 2026 will be confirmed by Newcastle Basketball when competition information is released (around February).</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">Do I need to buy a uniform?</h3>
+            <p class="text-white/60 leading-relaxed">We provide you a West singlet to wear for the season, to be returned after your final game. West shorts (green and red) are required, and there will be an opportunity to purchase them through our merchandise store once competition registrations open.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">I am keen to coach a team, where do I express my interest?</h3>
+            <p class="text-white/60 leading-relaxed">Great! Please send us a message via Contact Us. All levels of experience are welcomed. We have experienced club coaches who can help with resources, suggestions, and even a visit to help run a training session for those new to coaching.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">I am interested in helping with the team, but can't commit to coaching, how can I help?</h3>
+            <p class="text-white/60 leading-relaxed">Each team requires a team manager, which is a great way to help out. The role helps with setting a team chat, communicating information from the coach around training times and games, handing out singlets at the start of the season, and sharing messages from us. Let us know if you are keen to help.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">When will I find out my team?</h3>
+            <p class="text-white/60 leading-relaxed">We aim to have this information released before the April school holidays via direct email. Training will normally start on the final weekend of school holidays, and games start in Week 1 of Term 2. We will also send contact lists to coaches and managers so they can set up a team chat for communications.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">What do I need to do if I want to play for a different club from last year's comp?</h3>
+            <p class="text-white/60 leading-relaxed">Unless you are a representative player, you are free to choose your club of choice. There is no need for any formal transfer or request. Just wait until registrations open up at all clubs for new players and register to the club of your choice (all links will be available on Newcastle Basketball's website and social media). We have no issues if players prefer to move to another club. Equally, we are always happy to welcome new players.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">I would love to get more involved in the club, can I help at all?</h3>
+            <p class="text-white/60 leading-relaxed">Glad you asked! We would love to have you involved, and welcome all volunteers whether you have a lot of time to give or a little. Our club operations (including season start up and presentation day) run on the fuel of many and are a great way to get involved in a fun and enthusiastic committee. Drop us an email at westbasketballclubnewcastle@gmail.com.</p>
+          </article>
+          <article class="glass rounded-3xl p-6 space-y-3">
+            <h3 class="text-xl font-semibold text-white">HELP - I'm having trouble with my Basketball Connect profile, and need some assistance. Can you help?</h3>
+            <p class="text-white/60 leading-relaxed">It is best to contact Newcastle Basketball for help with any Basketball Connect profile issues, as they have full access to the backend to resolve issues. We are limited in what we can see beyond player registrations and team allocations. Best to call during business hours on 4961 3185.</p>
+          </article>
         </div>
       </div>
     </section>
@@ -158,7 +374,7 @@
             <h2 class="text-4xl font-bold mt-4 mb-6"> <span id="about-contact-title">Contact</span> <span id="about-contact-highlight" class="gradient-text">Us</span></h2>
             <p id="about-contact-desc" class="text-white/70 mb-8 max-w-lg mx-auto">Have questions about joining, volunteering, or sponsoring? We'd love to hear from you.</p>
             <button id="about-contact-cta" type="button" data-contact-trigger="true" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold contact-modal-trigger">
-              Send us an email
+              Send us a message
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             </button>
           </div>
@@ -194,5 +410,6 @@
       initContactModal();
     });
   </script>
+  <script src="parallax-bg.js"></script>
 </body>
 </html>

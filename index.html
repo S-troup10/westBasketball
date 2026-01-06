@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>West Basketball Club</title>
+  <title>West Basketball Newcastle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -24,6 +24,7 @@
       }
     };
   </script>
+  <link rel="stylesheet" href="parallax-bg.css" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
@@ -74,6 +75,22 @@
         rgba(10,10,10,0.95) 100%);
       z-index: 2;
     }
+
+    .parallax-bottom-fade {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 45%;
+      background: linear-gradient(
+        to top,
+        rgba(5,5,5,0.95) 0%,
+        rgba(5,5,5,0.55) 55%,
+        rgba(5,5,5,0) 100%
+      );
+      pointer-events: none;
+      z-index: 2;
+    }
     
     .hero-content {
       position: relative;
@@ -100,11 +117,11 @@
     }
     
     .glow {
-      box-shadow: 0 0 40px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 0 40px rgba(16,185,129, 0.3);
     }
     
     .glow-text {
-      text-shadow: 0 0 40px rgba(16, 185, 129, 0.5);
+      text-shadow: 0 0 40px rgba(16,185,129, 0.5);
     }
     
     .btn-primary {
@@ -114,7 +131,7 @@
     
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 10px 40px rgba(16,185,129, 0.4);
     }
     
     .btn-secondary {
@@ -140,6 +157,129 @@
     .stat-card {
       background: linear-gradient(135deg, rgba(16,185,129,0.1) 0%, rgba(6,214,160,0.05) 100%);
       border: 1px solid rgba(16,185,129,0.2);
+    }
+
+    .programs-section {
+      position: relative;
+      isolation: isolate;
+    }
+
+    .programs-backdrop {
+      position: absolute;
+      inset: -140px 0 -120px;
+      background:
+        radial-gradient(900px 280px at 10% 0%, rgba(16,185,129,0.18), transparent 65%),
+        radial-gradient(900px 280px at 90% 15%, rgba(239,68,68,0.14), transparent 70%),
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent 45%);
+      opacity: 0.65;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .section-top-fade {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: 160px;
+      background: linear-gradient(
+        to bottom,
+        rgba(5,5,5,0.95) 0%,
+        rgba(5,5,5,0.6) 45%,
+        rgba(5,5,5,0) 100%
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .programs-section .max-w-6xl {
+      z-index: 1;
+    }
+
+    .programs-showcase {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 24px;
+    }
+
+    .program-tile {
+      position: relative;
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: rgba(7,10,14,0.85);
+      color: #f8fafc;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow:
+        0 18px 40px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+    }
+
+    .program-tile:hover {
+      transform: translateY(-3px);
+      border-color: rgba(16,185,129,0.22);
+      box-shadow:
+        0 20px 42px rgba(0,0,0,0.4),
+        0 0 18px rgba(16,185,129,0.05);
+    }
+
+    .program-tile__image {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+      filter: saturate(1.05);
+    }
+
+    .program-tile__body {
+      padding: 20px 22px 24px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .program-tile__kicker {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+
+    .program-tile__title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .program-tile__summary {
+      color: rgba(255,255,255,0.72);
+      line-height: 1.65;
+    }
+
+    .program-tile__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+    }
+
+    @media (max-width: 1100px) {
+      .programs-showcase {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .programs-showcase {
+        grid-template-columns: 1fr;
+      }
     }
     
     .section-fade {
@@ -224,28 +364,93 @@
   </style>
 </head>
 <body class="text-light min-h-screen">
+  <!-- Parallax background -->
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+    <!-- Base gradient wash -->
+    <div class="absolute inset-0"
+      style="background:
+        radial-gradient(1200px 760px at 50% 12%, rgba(22,163,74,.12), transparent 58%),
+        radial-gradient(1000px 700px at 18% 82%, rgba(239,68,68,.10), transparent 58%),
+        radial-gradient(860px 640px at 86% 70%, rgba(22,163,74,.09), transparent 58%),
+        linear-gradient(to bottom, rgba(8,14,22,.55), rgba(5,7,10,1));">
+    </div>
+
+    <!-- Parallax scene -->
+    <div class="absolute inset-0" style="transform-style:preserve-3d; perspective: 900px;">
+      <!-- Far -->
+      <div class="parallax-layer absolute inset-0 wave-field" data-depth="0.04" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 fog-bands" data-depth="0.06" data-mode="float"></div>
+
+      <!-- Mid -->
+      <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
+
+      <!-- Details -->
+      <div class="parallax-layer absolute inset-0 court-lines" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 shafts" data-depth="0.20" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 dust" data-depth="0.30" data-mode="grain"></div>
+
+      <!-- Bokeh smear layers -->
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
+
+      <!-- Foreground shards -->
+      <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
+           data-depth="0.46" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 62%);
+                  border: 1px solid rgba(255,255,255,.10);">
+      </div>
+
+      <div class="parallax-layer absolute right-[14%] top-[32%] h-64 w-64 -rotate-12 rounded-[42px] opacity-[.085]"
+           data-depth="0.54" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(22,163,74,.18), transparent 70%);
+                  border: 1px solid rgba(255,255,255,.09);">
+      </div>
+
+      <div class="parallax-layer absolute right-[30%] top-[62%] h-40 w-40 rotate-6 rounded-[28px] opacity-[.065]"
+           data-depth="0.60" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(239,68,68,.14), transparent 74%);
+                  border: 1px solid rgba(255,255,255,.08);">
+      </div>
+
+      <!-- Spotlight sweep -->
+      <div class="parallax-layer absolute -inset-x-28 top-[-48%] h-[190%] rotate-6 opacity-[.14]"
+           data-depth="0.24" data-mode="float"
+           style="background: radial-gradient(closest-side at 50% 45%, rgba(255,255,255,.10), transparent 62%);">
+      </div>
+    </div>
+
+    <!-- Premium overlays (static) -->
+    <div class="absolute inset-0 streaks"></div>
+    <div class="absolute inset-0 grid-overlay"></div>
+    <div class="absolute inset-0 subgrid"></div>
+    <div class="absolute inset-0 noise"></div>
+    <div class="absolute inset-0 vignette"></div>
+
+    <div class="absolute inset-x-0 bottom-0 h-[36vh] bg-gradient-to-t from-black/85 via-black/22 to-transparent"></div>
+  </div>
+
   <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
 
   <main>
     <section class="parallax-hero">
       <div class="parallax-bg"></div>
-      <img src="U12-Knights.jpg" alt="Basketball players" class="parallax-image" id="parallax-img" />
+      <img src="images/U14-West-Raiders.jpg" alt="Basketball players" class="parallax-image" id="parallax-img" />
       <div class="parallax-overlay"></div>
+      <div class="parallax-bottom-fade"></div>
       
       <div class="hero-content h-full flex items-center justify-center px-6">
         <div class="max-w-5xl mx-auto text-center space-y-8">
-          <div class="inline-flex items-center gap-3 glass rounded-full px-5 py-2.5 mb-4">
-            <span class="w-2 h-2 rounded-full bg-primary pulse-glow"></span>
-            <span id="home-hero-kicker" class="text-sm font-medium tracking-wider uppercase text-white/80">Youth Basketball in Newcastle</span>
-          </div>
+
           
-          <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight">
-            <span id="hero-title" class="block text-white">Where Champions</span>
-            <span id="hero-highlight" class="block gradient-text glow-text">Are Made</span>
+          <h1 class="mt-20 text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold leading-tight">
+            <span id="hero-title" class="block text-white">Building skills,</span>
+            <span id="hero-highlight" class="block gradient-text glow-text">confidence, and community</span>
           </h1>
           
           <p id="hero-sub" class="text-xl md:text-2xl text-white/70 max-w-2xl mx-auto leading-relaxed">
-            From U8s starting out to U18s chasing championships, we're here to teach skills, values, and love for the game.
+            We are committed to creating an inclusive, safe and enjoyable environment for junior basketball players and their families in Newcastle, helping them reach their potential while learning teamwork, fair play and respect.
           </p>
           
           <div class="flex flex-wrap justify-center gap-4 pt-4">
@@ -253,7 +458,7 @@
               Join the Club
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
             </a>
-            <a id="hero-secondary" href="coaches.html" class="btn-secondary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-medium text-lg">
+            <a id="hero-secondary" href="coaches.html" class="btn-secondary hidden inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-medium text-lg">
               Meet our coaches
             </a>
           </div>
@@ -272,8 +477,9 @@
 
 
     
-    <section class="py-24 px-6 relative">
-      <div class="absolute inset-0 bg-gradient-to-b from-dark via-transparent to-transparent"></div>
+    <section class="programs-section py-20 px-6 relative border-t border-white/5 bg-black/20">
+      <div aria-hidden="true" class="programs-backdrop"></div>
+      <div aria-hidden="true" class="section-top-fade"></div>
       <div class="max-w-6xl mx-auto relative">
         <div class="section-fade">
           <div class="flex items-center gap-4 mb-4">
@@ -282,17 +488,77 @@
             <div class="h-px flex-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
           </div>
           <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">
-            <span id="home-programs-title" class="gradient-text">Pathways for Every Player</span>
+            <span id="home-programs-title" class="gradient-text">Pathways for every player</span>
           </h2>
         </div>
         
-        <div id="programs-list" class="grid md:grid-cols-2 gap-6 section-fade"></div>
+        <div id="programs-list" class="programs-showcase section-fade">
+          <a class="program-tile" href="join.html#u8s">
+            <img class="program-tile__image" src="images/mini-hoops.jpg" alt="U8s mini hoops players" />
+            <div class="program-tile__body">
+              <span class="program-tile__kicker">U8s</span>
+              <h3 class="program-tile__title">Mini Hoops (U8s)</h3>
+              <p class="program-tile__summary">Ages 5-7. Saturday mornings with 3v3 games, on-court coaches, and skills stations each term.</p>
+              <span class="program-tile__cta">Mini Hoops (U8s) <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></span>
+            </div>
+          </a>
+
+          <a class="program-tile" href="join.html#u10s">
+            <img class="program-tile__image" src="images/u10s.jpg" alt="U10s players" />
+            <div class="program-tile__body">
+              <span class="program-tile__kicker">U10s</span>
+              <h3 class="program-tile__title">U10s Competition</h3>
+              <p class="program-tile__summary">Ages 8-9. Thursday afternoon 5v5 plus select Sunday skills sessions. Runs Term 4, Term 1, then winter.</p>
+              <span class="program-tile__cta">U10s Competition <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></span>
+            </div>
+          </a>
+
+          <a class="program-tile" href="join.html#winter-junior">
+            <img class="program-tile__image" src="images/U14-West-Raiders.jpg" alt="Winter junior competition players" />
+            <div class="program-tile__body">
+              <span class="program-tile__kicker">Winter</span>
+              <h3 class="program-tile__title">Winter Junior Competition</h3>
+              <p class="program-tile__summary">U12-U18 winter season (Terms 2-3). West coordinates teams, coaches, training, and placements by ability.</p>
+              <span class="program-tile__cta">Winter Junior Competition <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></span>
+            </div>
+          </a>
+
+          <a class="program-tile" href="join.html#summer-junior">
+            <img class="program-tile__image" src="images/U12-Knights.jpg" alt="Summer junior competition players" />
+            <div class="program-tile__body">
+              <span class="program-tile__kicker">Summer</span>
+              <h3 class="program-tile__title">Summer Junior Competition</h3>
+              <p class="program-tile__summary">U11-U17 summer competition run by Newcastle Basketball. Clubs do not form teams, ideal for extra games.</p>
+              <span class="program-tile__cta">Summer Junior Competition <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></span>
+            </div>
+          </a>
+
+          <a class="program-tile" href="join.html#development-programs">
+            <img class="program-tile__image" src="images/prez.jpg" alt="Development programs" />
+            <div class="program-tile__body">
+              <span class="program-tile__kicker">Programs</span>
+              <h3 class="program-tile__title">Development & holiday Camps</h3>
+              <p class="program-tile__summary">Mini Hoops (ages 3-5) to representative pathways. Holiday camps and skill programs run year round.</p>
+              <span class="program-tile__cta">Development and Holiday Camps <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></span>
+            </div>
+          </a>
+
+          <a class="program-tile" href="join.html#referee-pathways">
+            <img class="program-tile__image" src="images/awards.jpg" alt="Referee pathways" />
+            <div class="program-tile__body">
+              <span class="program-tile__kicker">Referees</span>
+              <h3 class="program-tile__title">Referee Pathways</h3>
+              <p class="program-tile__summary">Juniors 12+ can train as referees. Grow your game knowledge, get involved, and earn money.</p>
+              <span class="program-tile__cta">Referee Pathways <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg></span>
+            </div>
+          </a>
+        </div>
       </div>
     </section>
 
 
     
-    <section class="py-24 px-6 relative overflow-hidden">
+    <section class="py-24 px-6 relative overflow-hidden border-t border-white/5 bg-black/15">
       <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
       <div class="absolute bottom-0 left-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
       
@@ -303,52 +569,78 @@
             <span id="home-gallery-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Gallery</span>
             <div class="h-px flex-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
           </div>
-          <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">
+          <h2 class="text-4xl md:text-5xl font-bold text-center mb-8">
             <span id="home-gallery-title" class="gradient-text">On Court &amp; In the Stands</span>
           </h2>
-          <p id="home-gallery-subtitle" class="text-center text-white/60 max-w-2xl mx-auto mb-10">Look inside our courts and community.</p>
+          <p id="home-gallery-subtitle" class="text-center text-white/60 max-w-2xl mx-auto mb-10">Capturing the spirit, teamwork, and memorable moments.</p>
         </div>
         
-        <div id="home-featured-gallery" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 section-fade"></div>
-      </div>
-    </section>
-
-    <section class="py-24 px-6">
-      <div class="max-w-6xl mx-auto">
-        <div class="grid lg:grid-cols-2 gap-12 items-start">
-          <div class="space-y-8 section-fade">
-            <div>
-              <span id="home-news-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Latest</span>
-              <h2 class="text-4xl md:text-5xl font-bold mt-2">
-                <span id="home-news-title" class="gradient-text">Club News</span>
-              </h2>
-            </div>
-            <div id="news-grid" class="space-y-4"></div>
+        <div id="home-featured-gallery" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 section-fade">
+          <div class="image-card card-hover lg:col-span-2 lg:row-span-2">
+            <img src="images/prezq.jpg" alt="Featured photo" class="w-full h-full object-cover" style="min-height: 400px;" />
           </div>
-          
-          <div class="space-y-8 section-fade">
+          <div class="image-card card-hover">
+            <img src="images/prez.jpg" alt="Featured photo" class="w-full h-full object-cover" />
+          </div>
+          <div class="glass-dark card-hover rounded-3xl p-8 flex flex-col justify-between min-h-64">
             <div>
-              <span id="home-links-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Navigate</span>
-              <h2 class="text-4xl md:text-5xl font-bold mt-2">
-                <span id="home-links-title" class="gradient-text">Quick Links</span>
-              </h2>
-            </div>
-            <div id="quick-links" class="grid gap-3"></div>
-            
-            <div class="glass rounded-2xl p-6 space-y-3">
-              <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-primary pulse-glow"></div>
-                <span id="home-links-card-title" class="text-white font-semibold">Game Day Essentials</span>
+              <div class="flex items-center gap-2 text-primary mb-4">
+                <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/></svg>
               </div>
-              <p id="home-links-card-text" class="text-white/60">Uniform? Check. Drink bottle? Check. Be early, be loud, be respectful.</p>
+              <p class="text-white/90 text-lg italic leading-relaxed">"West feels like family. Coaches are supportive and my kid loves every session."</p>
             </div>
+            <p class="text-white/50 text-sm mt-4">- Local Parent</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="py-24 px-6 relative">
-      <div class="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent"></div>
+    <section id="news" class="py-24 px-6 border-t border-white/5">
+      <div class="max-w-5xl mx-auto">
+        <div class="space-y-8 section-fade">
+          <div>
+            <span id="home-news-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Latest</span>
+            <h2 class="text-4xl md:text-5xl font-bold mt-2">
+              <span id="home-news-title" class="gradient-text">Club News</span>
+            </h2>
+          </div>
+          <div id="news-grid" class="space-y-4">
+            <article class="glass card-hover rounded-2xl p-6 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-white/40">Feb 26</span>
+                <span class="inline-flex items-center gap-1.5 text-xs text-primary">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Latest
+                </span>
+              </div>
+              <h3 class="text-lg font-bold text-white">Winter season registrations now open</h3>
+              <p class="text-sm text-white/60 leading-relaxed">Secure your spot for U8-U18 competitions. Early bird closes March 15.</p>
+              <a class="inline-flex items-center gap-2 text-sm text-primary font-medium group" href="join.html">
+                Read more
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </a>
+            </article>
+            <article class="glass card-hover rounded-2xl p-6 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-white/40">Jan 30</span>
+                <span class="inline-flex items-center gap-1.5 text-xs text-primary">
+                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                  Latest
+                </span>
+              </div>
+              <h3 class="text-lg font-bold text-white">Holiday skills camp announced</h3>
+              <p class="text-sm text-white/60 leading-relaxed">Three-day camp with guest coaches focusing on shooting and decision making.</p>
+              <a class="inline-flex items-center gap-2 text-sm text-primary font-medium group" href="about.html">
+                Read more
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </a>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-24 px-6 relative border-t border-white/5 bg-black/20">
       <div class="max-w-6xl mx-auto relative">
         <div class="section-fade">
           <div class="flex items-center gap-4 mb-4">
@@ -362,7 +654,17 @@
           <p id="home-sponsors-desc" class="text-center text-white/60 max-w-2xl mx-auto mb-12">We're grateful for the partners who keep our programs running strong.</p>
         </div>
         
-        <div id="sponsor-logos" class="grid grid-cols-2 md:grid-cols-3 gap-6 section-fade"></div>
+        <div id="sponsor-logos" class="grid grid-cols-2 md:grid-cols-3 gap-6 section-fade">
+          <a href="https://iathletic.com.au" class="flex items-center justify-center p-4 min-h-24 transition-transform hover:scale-110" aria-label="iAthletic">
+            <img src="https://dummyimage.com/240x110/0f172a/22d3ee&text=iAthletic" alt="iAthletic" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" />
+          </a>
+          <a href="https://example.com" class="flex items-center justify-center p-4 min-h-24 transition-transform hover:scale-110" aria-label="West Group">
+            <img src="https://dummyimage.com/240x110/0f172a/34d399&text=West+Group" alt="West Group" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" />
+          </a>
+          <a href="https://example.com" class="flex items-center justify-center p-4 min-h-24 transition-transform hover:scale-110" aria-label="Major Uniform Sponsors (TBC)">
+            <img src="https://dummyimage.com/240x110/0f172a/f59e0b&text=Major+Sponsors+TBC" alt="Major Uniform Sponsors (TBC)" class="max-h-24 md:max-h-28 object-contain drop-shadow-xl brightness-110 hover:brightness-125 transition-all" />
+          </a>
+        </div>
         
         <div class="text-center mt-8">
           <a id="home-sponsors-cta" href="sponsors.html" class="inline-flex items-center gap-2 text-primary font-medium group">
@@ -373,7 +675,7 @@
       </div>
     </section>
 
-    <section class="py-24 px-6">
+    <section class="py-24 px-6 border-t border-white/5 bg-black/15">
       <div class="max-w-4xl mx-auto section-fade">
         <div class="glass glow rounded-3xl p-8 md:p-12 relative overflow-hidden">
           <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
@@ -388,11 +690,14 @@
             
             <div class="flex flex-wrap justify-center gap-4 pt-4">
               <a id="home-cta-primary" href="join.html" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold text-lg">
-                Register Now
+                JOIN A TEAM
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
               </a>
               <a id="home-cta-secondary" href="coaches.html" class="btn-secondary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-medium text-lg">
-                Volunteer With Us
+                COACH WITH US
+              </a>
+              <a id="home-cta-tertiary" href="about.html#contact" data-contact-trigger="true" class="btn-secondary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-medium text-lg contact-modal-trigger">
+                CONTACT US
               </a>
             </div>
           </div>
@@ -407,8 +712,10 @@
   <script src="common.js"></script>
   <script>
     function renderHomePage() {
+      if (!hasOverrides()) return;
       const data = window.siteContent || {};
       const home = data.pages?.home || {};
+      const joinPage = data.pages?.join || {};
       const setText = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.textContent = value ?? "";
@@ -417,6 +724,31 @@
         const el = document.getElementById(id);
         if (el) el.innerHTML = formatMultiline(value ?? "");
       };
+      const toPlainText = (value) => {
+        return (value ?? "")
+          .toString()
+          .replace(/<br\s*\/?>/gi, " ")
+          .replace(/<[^>]*>/g, " ")
+          .replace(/\s+/g, " ")
+          .trim();
+      };
+      const summarizeText = (value, limit = 170) => {
+        const plain = toPlainText(value);
+        if (!plain) return "";
+        if (plain.length <= limit) return plain;
+        const cut = plain.slice(0, limit);
+        const lastSpace = cut.lastIndexOf(" ");
+        return (lastSpace > 0 ? cut.slice(0, lastSpace) : cut) + "...";
+      };
+      const programImages = [
+        "images/mini-hoops.jpg",
+        "images/u10s.jpg",
+        "images/U14-West-Raiders.jpg",
+        "images/U12-Knights.jpg",
+        "images/prez.jpg",
+        "images/awards.jpg",
+        "images/prezq.jpg",
+      ];
       const arrowSm = '<svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>';
       const arrowLg = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>';
 
@@ -434,6 +766,11 @@
       setText("home-links-title", home.linksTitle);
       setText("home-links-card-title", home.linksCardTitle);
       setFormatted("home-links-card-text", home.linksCardText);
+      const linksCard = document.getElementById("home-links-card");
+      if (linksCard) {
+        const hasCardContent = (home.linksCardTitle || "").trim() || (home.linksCardText || "").trim();
+        linksCard.classList.toggle("hidden", !hasCardContent);
+      }
       setText("home-sponsors-tag", home.sponsorsTag);
       setText("home-sponsors-title", home.sponsorsTitle);
       setFormatted("home-sponsors-desc", home.sponsorsDescription);
@@ -467,27 +804,63 @@
 
       const programsContainer = document.getElementById("programs-list");
       if (programsContainer) {
-        const programs = (home.programs || []).slice(0, 2);
-        programsContainer.innerHTML = programs
-          .map(
-            (program, idx) => `
-            <article class="glass card-hover rounded-3xl p-8 space-y-4">
-              <div class="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center">
-                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              </div>
-              <div class="flex items-center justify-between gap-3">
-                <h3 class="text-2xl font-bold text-white">${program.title || "Program"}</h3>
-                ${program.badge ? `<span class="text-xs text-primary border border-primary/30 rounded-full px-3 py-1 bg-primary/10">${program.badge}</span>` : ""}
-              </div>
-              <p class="text-white/60 leading-relaxed">${formatMultiline(program.description || "")}</p>
-              <a href="${program.ctaHref || "#"}" class="inline-flex items-center gap-2 text-primary font-medium group">
-                ${program.ctaLabel || "Learn more"} 
-                ${arrowSm}
-              </a>
-            </article>
-          `
-          )
-          .join("\n");
+        const streams = joinPage.streams || [];
+        if (!streams.length) {
+          programsContainer.innerHTML = "";
+        } else {
+          const baseSignUpHref = (joinPage.signUpHref || "join.html").toString().trim() || "join.html";
+          const baseJoinHref = baseSignUpHref.split("#")[0] || "join.html";
+          const preferredOrder = ["juniors", "u8u10"];
+          const getStreamKey = (stream) => (stream.id || stream.title || "").toString().toLowerCase();
+
+          const orderedStreams = streams
+            .map((stream, index) => ({ stream, index }))
+            .sort((a, b) => {
+              const aKey = getStreamKey(a.stream);
+              const bKey = getStreamKey(b.stream);
+              const aRank = preferredOrder.indexOf(aKey);
+              const bRank = preferredOrder.indexOf(bKey);
+              const aScore = aRank === -1 ? preferredOrder.length : aRank;
+              const bScore = bRank === -1 ? preferredOrder.length : bRank;
+              if (aScore !== bScore) return aScore - bScore;
+              return a.index - b.index;
+            })
+            .map((entry) => entry.stream);
+
+          programsContainer.innerHTML = orderedStreams
+            .map((stream, index) => {
+              const steps = ((stream.steps && stream.steps.length)
+                ? stream.steps
+                : (stream.links || []).map((link) => link.label || link.href || "")).filter((s) => (s ?? "").toString().trim());
+              const summarySource = stream.description || steps.join(". ");
+              const summary = summarizeText(summarySource, 170);
+              const badge = stream.badge || stream.title || "Program";
+              const cardTitle = stream.title || badge || "Program";
+              const streamId = (stream.id || "").toString().trim();
+              const ctaLabel = cardTitle;
+              const ctaHref = streamId ? `${baseJoinHref}#${streamId}` : baseSignUpHref;
+              const image = programImages[index % programImages.length];
+
+              return `
+                <a class="program-tile" href="${escapeHtml(ctaHref)}">
+                  <img class="program-tile__image" src="${escapeHtml(image)}" alt="${escapeHtml(badge)}" />
+                  <div class="program-tile__body">
+                    <span class="program-tile__kicker">${escapeHtml(badge)}</span>
+                    <h3 class="program-tile__title">
+                      ${escapeHtml(cardTitle)}
+                    </h3>
+                    ${summary ? `
+                      <p class="program-tile__summary">
+                        ${escapeHtml(summary)}
+                      </p>
+                    ` : ""}
+                    <span class="program-tile__cta">${escapeHtml(ctaLabel)} ${arrowSm}</span>
+                  </div>
+                </a>
+              `;
+            })
+            .join("\n");
+        }
       }
 
       const featuredContainer = document.getElementById("home-featured-gallery");
@@ -496,13 +869,17 @@
         const cards = photos.map((photo, idx) => {
           const spanClasses = idx === 0 ? "lg:col-span-2 lg:row-span-2" : "";
           const minHeight = idx === 0 ? 'style="min-height: 400px;"' : "";
+          const hasCaption = (photo.title || photo.subtitle || "").toString().trim();
+          const captionBlock = hasCaption ? `
+              <div class="absolute bottom-0 left-0 right-0 p-${idx === 0 ? "6" : "4"} z-10">
+                ${photo.title ? `<p class="text-white font-medium text-${idx === 0 ? "lg" : "base"}">${escapeHtml(photo.title)}</p>` : ""}
+                ${photo.subtitle ? `<p class="text-white/60 text-sm mt-1">${escapeHtml(photo.subtitle)}</p>` : ""}
+              </div>
+            ` : "";
           return `
             <div class="image-card card-hover ${spanClasses}">
               <img src="${photo.src}" alt="${photo.title || "Featured photo"}" class="w-full h-full object-cover" ${minHeight} />
-              <div class="absolute bottom-0 left-0 right-0 p-${idx === 0 ? "6" : "4"} z-10">
-                <p class="text-white font-medium text-${idx === 0 ? "lg" : "base"}">${photo.title || ""}</p>
-                ${photo.subtitle ? `<p class="text-white/60 text-sm mt-1">${photo.subtitle}</p>` : ""}
-              </div>
+              ${captionBlock}
             </div>
           `;
         });
@@ -538,6 +915,13 @@
         secondaryCta.href = home.ctaSecondary?.href || "coaches.html";
         secondaryCta.textContent = home.ctaSecondary?.label || "Volunteer With Us";
       }
+      const tertiaryCta = document.getElementById("home-cta-tertiary");
+      if (tertiaryCta) {
+        tertiaryCta.href = home.ctaTertiary?.href || "about.html#contact";
+        tertiaryCta.textContent = home.ctaTertiary?.label || "Contact Us";
+        tertiaryCta.setAttribute("data-contact-trigger", "true");
+        tertiaryCta.classList.add("contact-modal-trigger");
+      }
     }
 
       document.addEventListener('DOMContentLoaded', () => {
@@ -546,21 +930,68 @@
         renderHero();
         renderHomePage();
         renderNews('news-grid');
-        renderQuickLinks('quick-links');
         renderSponsors('sponsor-logos');
+        initContactModal();
       
       // Load dynamic hero background image
       const parallaxImg = document.getElementById('parallax-img');
-      const heroBackground = window.siteContent?.images?.heroBackground;
-      if (heroBackground && parallaxImg) {
-        parallaxImg.src = heroBackground;
-      }
-      window.addEventListener('scroll', () => {
-        const scrolled = window.pageYOffset;
-        if (parallaxImg) {
-          parallaxImg.style.transform = `translateY(${scrolled * 0.5}px)`;
+      if (hasOverrides()) {
+        const heroBackground = window.siteContent?.images?.heroBackground;
+        if (heroBackground && parallaxImg) {
+          parallaxImg.src = heroBackground;
         }
-      });
+      }
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const hero = document.querySelector('.parallax-hero');
+      if (parallaxImg && hero && !prefersReduced) {
+        const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+        const parallaxFactor = 0.35;
+        const pauseEvent = new CustomEvent('parallax-bg:toggle', { detail: { paused: true } });
+        const resumeEvent = new CustomEvent('parallax-bg:toggle', { detail: { paused: false } });
+
+        let heroTop = 0;
+        let heroHeight = 1;
+        let rafId = 0;
+        let active = false;
+
+        const updateMetrics = () => {
+          const rect = hero.getBoundingClientRect();
+          heroTop = rect.top + window.pageYOffset;
+          heroHeight = Math.max(1, rect.height);
+        };
+
+        const render = () => {
+          if (!active) {
+            rafId = 0;
+            return;
+          }
+          const scrollY = window.pageYOffset || 0;
+          const progress = clamp((scrollY - heroTop) / heroHeight, 0, 1);
+          const translate = progress * heroHeight * parallaxFactor;
+          parallaxImg.style.transform = `translate3d(0, ${translate.toFixed(2)}px, 0)`;
+          rafId = requestAnimationFrame(render);
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              active = true;
+              window.dispatchEvent(pauseEvent);
+              if (!rafId) rafId = requestAnimationFrame(render);
+            } else {
+              active = false;
+              if (rafId) cancelAnimationFrame(rafId);
+              rafId = 0;
+              window.dispatchEvent(resumeEvent);
+            }
+          });
+        }, { rootMargin: '200px 0px 200px 0px' });
+
+        updateMetrics();
+        parallaxImg.style.transform = 'translate3d(0, 0, 0)';
+        observer.observe(hero);
+        window.addEventListener('resize', updateMetrics);
+      }
       
       const observerOptions = {
         threshold: 0.1,
@@ -584,9 +1015,10 @@
       renderHero();
       renderHomePage();
       renderNews('news-grid');
-      renderQuickLinks('quick-links');
       renderSponsors('sponsor-logos');
+      initContactModal();
     });
   </script>
+  <script src="parallax-bg.js"></script>
 </body>
 </html>

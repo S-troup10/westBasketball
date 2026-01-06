@@ -1,13 +1,19 @@
 // Common helpers for all pages - Modern Dark Theme
 const navLinks = [
   { label: "Home", href: "index.html", key: "home" },
-  { label: "About", href: "about.html", key: "about" },
-  { label: "Gallery", href: "gallery.html", key: "gallery" },
   { label: "Join", href: "join.html", key: "join" },
+  { label: "Training", href: "training.html", key: "training" },
+  { label: "Coaching", href: "coaches.html", key: "coaches" },
   { label: "Merchandise", href: "merchandise.html", key: "merch" },
-  { label: "Coaches", href: "coaches.html", key: "coaches" },
-  { label: "Sponsors", href: "sponsors.html", key: "sponsors" }
+  { label: "Gallery", href: "gallery.html", key: "gallery" },
+  { label: "Sponsors", href: "sponsors.html", key: "sponsors" },
+  { label: "About", href: "about.html", key: "about" },
+  { label: "Quick Links", href: "index.html#news", key: "quick-links" }
 ];
+
+function hasOverrides() {
+  return !!(window.siteContent && window.siteContent.__hasOverrides);
+}
 
 function escapeHtml(str = "") {
   return str
@@ -31,6 +37,10 @@ function ensureNavStyles() {
     .site-nav-toggle { display: inline-flex; }
     .site-mobile-menu { display: none; }
     .site-mobile-menu.is-open { display: block; }
+    .site-nav-item { position: relative; }
+    .site-nav-dropdown { display: none; }
+    .site-nav-item:hover .site-nav-dropdown,
+    .site-nav-item:focus-within .site-nav-dropdown { display: block; }
     @media (min-width: 1024px) {
       .site-nav-links { display: flex; }
       .site-nav-toggle { display: none; }
@@ -49,9 +59,83 @@ function renderNav(activeKey) {
   const club = siteContent.club || {};
   const images = siteContent.images || {};
   const navConfig = siteContent.navigation || {};
-  const links = navConfig?.links ?? navLinks;
+  const rawLinks = navConfig?.links ?? navLinks;
+  let links = [];
+  const seenKeys = new Set();
+  rawLinks.forEach((link) => {
+    const key = (link?.key || `${link?.label ?? ""}|${link?.href ?? ""}`).toLowerCase();
+    if (!key || seenKeys.has(key)) return;
+    seenKeys.add(key);
+    links.push(link);
+  });
+  if (!links.length) links = rawLinks;
   const adminLabel = navConfig?.adminLabel ?? "Admin";
-  const logoSrc = images?.logo || 'logo.png';
+  const logoSrc = images?.logo || 'images/logo.png';
+  const taglineText = club?.tagline ?? "";
+  const taglineDisplay = taglineText.length > 40 ? `${taglineText.substring(0, 40)}...` : taglineText;
+  const quickLinks = siteContent.quickLinks ?? [];
+  const baseLinkClass = "px-4 py-2 rounded-full text-sm font-medium transition-all";
+  const mobileLinkClass = "px-4 py-3 rounded-xl text-sm font-medium transition-all";
+  const inactiveClass = "text-white/70 hover:text-white hover:bg-white/5";
+  const activeClass = "bg-primary/20 text-primary";
+  const resolveNavItems = (link) => {
+    if (Array.isArray(link.items) && link.items.length) return link.items;
+    if (link.key === "quick-links") return quickLinks;
+    return [];
+  };
+  const hasItems = (link) => resolveNavItems(link).length > 0;
+  const renderDesktopLink = (link) => {
+    const active = link.key === activeKey;
+    if (hasItems(link)) {
+      const items = resolveNavItems(link);
+      return `
+        <div class="site-nav-item">
+          <button type="button" class="${baseLinkClass} ${inactiveClass} inline-flex items-center gap-2" aria-haspopup="true">
+            ${link.label}
+            <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="site-nav-dropdown absolute right-0 mt-2 w-64 rounded-2xl border border-white/10 bg-dark/95 backdrop-blur-xl p-2 shadow-xl">
+            ${items
+              .map(
+                (item) => `
+                  <a href="${item.href}" class="block px-4 py-2 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/5">
+                    ${item.label}
+                  </a>`
+              )
+              .join("")}
+          </div>
+        </div>`;
+    }
+    return `<a href="${link.href}" class="${baseLinkClass} ${active ? activeClass : inactiveClass}">${link.label}</a>`;
+  };
+  const renderMobileLink = (link) => {
+    const active = link.key === activeKey;
+    if (hasItems(link)) {
+      const items = resolveNavItems(link);
+      return `
+        <div class="space-y-2" data-mobile-dropdown>
+          <button type="button" class="w-full text-left flex items-center justify-between ${mobileLinkClass} ${inactiveClass}" data-mobile-dropdown-trigger aria-expanded="false">
+            <span>${link.label}</span>
+            <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
+          <div class="ml-4 space-y-1 hidden" data-mobile-dropdown-panel>
+            ${items
+              .map(
+                (item) => `
+                  <a href="${item.href}" class="block px-4 py-2 rounded-xl text-sm text-white/70 hover:text-white hover:bg-white/5">
+                    ${item.label}
+                  </a>`
+              )
+              .join("")}
+          </div>
+        </div>`;
+    }
+    return `<a href="${link.href}" class="block ${mobileLinkClass} ${active ? activeClass : inactiveClass}">${link.label}</a>`;
+  };
   container.innerHTML = `
     <div class="max-w-6xl mx-auto flex items-center justify-between py-4 px-6">
       <a href="index.html" class="flex items-center gap-3 group">
@@ -61,20 +145,11 @@ function renderNav(activeKey) {
         </div>
         <div class="hidden sm:block">
           <p class="text-base font-bold text-white group-hover:text-primary transition-colors">${club?.shortName ?? "West Basketball"}</p>
-          <p class="text-xs text-white/50">${club?.tagline?.substring(0, 40) ?? ""}...</p>
+          <p class="text-xs text-white/50">${taglineDisplay}</p>
         </div>
       </a>
       <nav class="site-nav-links items-center gap-1">
-        ${links
-          .map((link) => {
-            const active = link.key === activeKey;
-            return `<a href="${link.href}" class="px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              active
-                ? "bg-primary/20 text-primary"
-                : "text-white/70 hover:text-white hover:bg-white/5"
-            }">${link.label}</a>`;
-          })
-          .join("")}
+        ${links.map(renderDesktopLink).join("")}
       </nav>
       <div class="flex items-center gap-3">
         <button id="mobile-menu-btn" type="button" class="site-nav-toggle items-center gap-2 px-3 py-2 rounded-full bg-white/5 text-white/80 hover:text-white hover:bg-white/10 transition" aria-label="Toggle navigation" aria-controls="mobile-menu" aria-expanded="false">
@@ -85,16 +160,7 @@ function renderNav(activeKey) {
     </div>
     <div id="mobile-menu" class="site-mobile-menu border-t border-white/5 bg-dark/95 backdrop-blur-xl">
       <div class="px-6 py-4 space-y-2">
-        ${links
-          .map((link) => {
-            const active = link.key === activeKey;
-            return `<a href="${link.href}" class="block px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-              active
-                ? "bg-primary/20 text-primary"
-                : "text-white/70 hover:text-white hover:bg-white/5"
-            }">${link.label}</a>`;
-          })
-          .join("")}
+        ${links.map(renderMobileLink).join("")}
       </div>
     </div>
   `;
@@ -112,6 +178,15 @@ function renderNav(activeKey) {
         mobileBtn.setAttribute('aria-expanded', 'false');
       });
     });
+    mobileMenu.querySelectorAll('[data-mobile-dropdown]').forEach((dropdown) => {
+      const trigger = dropdown.querySelector('[data-mobile-dropdown-trigger]');
+      const panel = dropdown.querySelector('[data-mobile-dropdown-panel]');
+      if (!trigger || !panel) return;
+      trigger.addEventListener('click', () => {
+        const isHidden = panel.classList.toggle('hidden');
+        trigger.setAttribute('aria-expanded', (!isHidden).toString());
+      });
+    });
   }
 }
 
@@ -120,7 +195,7 @@ function renderFooter() {
   if (!el) return;
   const { club, images } = window.siteContent;
   const footerData = window.siteContent.footer ?? {};
-  const logoSrc = images?.logo || 'logo.png';
+  const logoSrc = images?.logo || 'images/logo.png';
   el.innerHTML = `
     <div class="max-w-6xl mx-auto py-12 px-6">
       <div class="grid md:grid-cols-4 gap-8 mb-8">
@@ -156,6 +231,7 @@ function renderFooter() {
 }
 
 function renderQuickLinks(targetId) {
+  if (!hasOverrides()) return;
   const el = document.getElementById(targetId);
   if (!el) return;
   const links = window.siteContent.quickLinks ?? [];
@@ -171,6 +247,7 @@ function renderQuickLinks(targetId) {
 }
 
 function renderNews(targetId) {
+  if (!hasOverrides()) return;
   const el = document.getElementById(targetId);
   if (!el) return;
   const news = window.siteContent.news ?? [];
@@ -198,6 +275,7 @@ function renderNews(targetId) {
 }
 
 function renderSponsors(targetId) {
+  if (!hasOverrides()) return;
   const el = document.getElementById(targetId);
   if (!el) return;
   const sponsors = window.siteContent.sponsors ?? [];
@@ -212,6 +290,7 @@ function renderSponsors(targetId) {
 }
 
 function renderAboutDetails() {
+  if (!hasOverrides()) return;
   const data = window.siteContent.about ?? {};
   const aboutPage = window.siteContent.pages?.about ?? {};
   const homePage = window.siteContent.pages?.home ?? {};
@@ -249,6 +328,11 @@ function renderAboutDetails() {
   const storyTitle = document.getElementById("home-story-title");
   const storySubtitle = document.getElementById("home-story-subtitle");
   const storyContainer = document.getElementById("home-story-blocks");
+  const faqSection = document.getElementById("about-faqs");
+  const faqTag = document.getElementById("about-faq-tag");
+  const faqTitle = document.getElementById("about-faq-title");
+  const faqSubtitle = document.getElementById("about-faq-subtitle");
+  const faqList = document.getElementById("about-faq-list");
   if (heroTag) heroTag.textContent = aboutPage.heroTag ?? "Our Story";
   if (heroTitle) heroTitle.textContent = aboutPage.heroTitle ?? "About";
   if (heroHighlight) heroHighlight.textContent = aboutPage.heroHighlight ?? "West Basketball";
@@ -303,7 +387,7 @@ function renderAboutDetails() {
   if (extraTag) extraTag.textContent = aboutPage.extraTag ?? "Club Story";
   if (extraTitle) extraTitle.textContent = aboutPage.extraTitle ?? "Why We Play";
   if (featureImage) {
-    const highlightPhoto = data.highlightPhoto || (Array.isArray(data.photos) && data.photos[0]) || "logo.png";
+    const highlightPhoto = data.highlightPhoto || (Array.isArray(data.photos) && data.photos[0]) || "images/logo.png";
     featureImage.innerHTML = `
       <img src="${highlightPhoto}" alt="Club highlight" class="w-full h-auto max-h-[420px] object-contain bg-black/40" loading="lazy" />
     `;
@@ -313,6 +397,23 @@ function renderAboutDetails() {
       .map((member) => `<li class="text-white/80">${member}</li>`)
       .join("\n");
   }
+  const faqs = (data.faqs ?? []).filter((item) => item.question || item.answer);
+  if (faqTag) faqTag.textContent = aboutPage.faqTag ?? "FAQs";
+  if (faqTitle) faqTitle.textContent = aboutPage.faqTitle ?? "Frequently Asked Questions";
+  if (faqSubtitle) faqSubtitle.innerHTML = formatMultiline(aboutPage.faqSubtitle ?? "");
+  if (faqList) {
+    faqList.innerHTML = faqs
+      .map(
+        (item) => `
+        <article class="glass rounded-3xl p-6 space-y-3">
+          <h3 class="text-xl font-semibold text-white">${escapeHtml(item.question ?? "")}</h3>
+          <p class="text-white/60 leading-relaxed">${formatMultiline(item.answer ?? "")}</p>
+        </article>
+      `
+      )
+      .join("\n");
+  }
+  if (faqSection) faqSection.classList.toggle("hidden", !faqs.length);
   if (photos) {
     photos.innerHTML = (data.photos ?? [])
       .map(
@@ -370,6 +471,7 @@ function renderAboutDetails() {
 }
 
 function renderMerchContent() {
+  if (!hasOverrides()) return;
   const merch = window.siteContent.merch;
   const merchPage = window.siteContent.pages?.merch ?? {};
   const setText = (id, value) => {
@@ -408,6 +510,7 @@ function renderMerchContent() {
 }
 
 function renderCoachesContent() {
+  if (!hasOverrides()) return;
   const coaches = window.siteContent.coaches;
   const coachesPage = window.siteContent.pages?.coaches ?? {};
   const blurb = document.getElementById("coaches-blurb");
@@ -452,15 +555,19 @@ function renderCoachesContent() {
 }
 
 function renderHero() {
+  if (!hasOverrides()) return;
   const hero = window.siteContent.hero ?? {};
   const home = window.siteContent.pages?.home ?? {};
   const heading = document.getElementById("hero-title");
   const highlight = document.getElementById("hero-highlight");
   const kicker = document.getElementById("home-hero-kicker");
+  const kickerWrap = document.getElementById("home-hero-kicker-wrap");
   const sub = document.getElementById("hero-sub");
   const primary = document.getElementById("hero-primary");
   const secondary = document.getElementById("hero-secondary");
-  if (kicker) kicker.textContent = home.heroKicker ?? "";
+  const kickerText = (home.heroKicker ?? "").trim();
+  if (kicker) kicker.textContent = kickerText;
+  if (kickerWrap) kickerWrap.classList.toggle("hidden", !kickerText);
   if (heading) heading.textContent = home.heroTitle ?? hero.headline ?? "";
   if (highlight) highlight.textContent = home.heroHighlight ?? "";
   if (sub) sub.innerHTML = formatMultiline(hero.subhead ?? "");
@@ -468,13 +575,24 @@ function renderHero() {
     primary.innerHTML = `${hero.primaryCta.label} <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>`;
     primary.href = hero.primaryCta.href;
   }
-  if (secondary && hero.secondaryCta) {
-    secondary.textContent = hero.secondaryCta.label;
-    secondary.href = hero.secondaryCta.href;
+  if (secondary) {
+    const secondaryLabel = hero.secondaryCta?.label?.trim();
+    const secondaryHref = hero.secondaryCta?.href?.trim();
+    if (secondaryLabel && secondaryHref) {
+      secondary.textContent = secondaryLabel;
+      secondary.href = secondaryHref;
+      secondary.classList.remove("hidden");
+      secondary.removeAttribute("aria-hidden");
+    } else {
+      secondary.classList.add("hidden");
+      secondary.setAttribute("aria-hidden", "true");
+      secondary.removeAttribute("href");
+    }
   }
 }
 
 function renderGallery(targetId) {
+  if (!hasOverrides()) return;
   const el = document.getElementById(targetId);
   if (!el) return;
   const gallery = window.siteContent.gallery ?? [];
@@ -490,18 +608,27 @@ function renderGallery(targetId) {
   window.galleryRenderOrder = renderOrder;
   el.innerHTML = renderOrder
     .map(
-      (photo, index) => `
-        <div class="gallery-item glass card-hover rounded-2xl overflow-hidden cursor-pointer" onclick="openLightbox(${index})">
-          <div class="relative aspect-[4/3] overflow-hidden">
-            <img src="${photo.src}" alt="${photo.caption}" class="w-full h-auto max-h-full object-contain bg-black/40 transition-transform duration-500 hover:scale-105" loading="lazy" />
+      (photo, index) => {
+        const caption = (photo.caption ?? "").trim();
+        const category = (photo.category ?? "").trim();
+        const hasOverlay = caption || category;
+        const overlay = hasOverlay
+          ? `
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300">
               <div class="absolute bottom-0 left-0 right-0 p-4">
-                <span class="inline-block px-3 py-1 text-xs rounded-full bg-primary/20 text-primary mb-2">${photo.category ?? 'Photo'}</span>
-                <p class="text-white font-medium">${photo.caption ?? ''}</p>
+                ${category ? `<span class="inline-block px-3 py-1 text-xs rounded-full bg-primary/20 text-primary mb-2">${escapeHtml(category)}</span>` : ""}
+                ${caption ? `<p class="text-white font-medium">${escapeHtml(caption)}</p>` : ""}
               </div>
+            </div>` : "";
+        const altText = caption || category || "Gallery photo";
+        return `
+          <div class="gallery-item glass card-hover rounded-2xl overflow-hidden cursor-pointer" onclick="openLightbox(${index})">
+            <div class="relative aspect-[4/3] overflow-hidden">
+              <img src="${photo.src}" alt="${escapeHtml(altText)}" class="w-full h-auto max-h-full object-contain bg-black/40 transition-transform duration-500 hover:scale-105" loading="lazy" />
+              ${overlay}
             </div>
-          </div>
-        </div>`
+          </div>`;
+      }
     )
     .join("\n");
 }
@@ -690,5 +817,3 @@ function initContactModal() {
 function refreshContent() {
   window.siteContent = loadSiteData();
 }
-
-

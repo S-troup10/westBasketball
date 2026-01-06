@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Join the Club | West Basketball</title>
+  <title>Join the Club | West Basketball Newcastle</title>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -19,69 +21,392 @@
             dark: '#0a0a0a',
             darker: '#050505',
             light: '#f8fafc'
+          },
+          boxShadow: {
+            soft: '0 18px 60px rgba(0,0,0,.55)',
+            glow: '0 0 60px rgba(16,185,129,.22)'
           }
         }
       }
     };
   </script>
+
+  <link rel="stylesheet" href="parallax-bg.css" />
   <style>
+    :root { color-scheme: dark; }
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
-    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-    .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .glow { box-shadow: 0 0 40px rgba(16, 185, 129, 0.3); }
-    .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4); }
-    .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease; }
-    .btn-secondary:hover { background: rgba(255,255,255,0.15); border-color: #10b981; }
-    .card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .card-hover:hover { transform: translateY(-8px) scale(1.02); }
-    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
-    .section-fade { opacity: 0; transform: translateY(40px); transition: all 0.8s ease-out; }
+
+    /* glass */
+    .glass {
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #06d6a0 55%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-blur {
+      background: rgba(10,10,10,.72);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    /* nicer focus */
+    :focus-visible {
+      outline: 3px solid rgba(16,185,129,.55);
+      outline-offset: 3px;
+      border-radius: 14px;
+    }
+
+    /* button styles (NO hover animations) */
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      box-shadow: 0 14px 40px rgba(16,185,129,.22);
+      transition: box-shadow .2s ease, filter .2s ease;
+    }
+    .btn-primary:hover { filter: brightness(1.03); box-shadow: 0 18px 55px rgba(16,185,129,.28); }
+    .btn-primary:active { filter: brightness(.98); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+      transition: border-color .2s ease, background .2s ease;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.10); border-color: rgba(16,185,129,.35); }
+    .btn-secondary:active { background: rgba(255,255,255,.07); }
+
+    /* reveal */
+    .section-fade { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
     .section-fade.visible { opacity: 1; transform: translateY(0); }
-    .float-slow { animation: float 14s ease-in-out infinite; }
-    .float-slower { animation: float 18s ease-in-out infinite; }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-18px); }
+
+    /* ambient blobs */
+    .blob { filter: blur(60px); opacity: .65; }
+    @media (prefers-reduced-motion: reduce) {
+      .section-fade { transition: none; transform: none; opacity: 1; }
     }
   </style>
 </head>
+
 <body class="text-light min-h-screen">
+  <!-- Parallax background -->
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+    <!-- Base gradient wash -->
+    <div class="absolute inset-0"
+      style="background:
+        radial-gradient(1200px 760px at 50% 12%, rgba(22,163,74,.12), transparent 58%),
+        radial-gradient(1000px 700px at 18% 82%, rgba(239,68,68,.10), transparent 58%),
+        radial-gradient(860px 640px at 86% 70%, rgba(22,163,74,.09), transparent 58%),
+        linear-gradient(to bottom, rgba(8,14,22,.55), rgba(5,7,10,1));">
+    </div>
+
+    <!-- Parallax scene -->
+    <div class="absolute inset-0" style="transform-style:preserve-3d; perspective: 900px;">
+      <!-- Far -->
+      <div class="parallax-layer absolute inset-0 wave-field" data-depth="0.04" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 fog-bands" data-depth="0.06" data-mode="float"></div>
+
+      <!-- Mid -->
+      <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
+      <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
+
+      <!-- Details -->
+      <div class="parallax-layer absolute inset-0 court-lines" data-depth="0.09" data-mode="locked"></div>
+      <div class="parallax-layer absolute inset-0 shafts" data-depth="0.20" data-mode="float"></div>
+      <div class="parallax-layer absolute inset-0 dust" data-depth="0.30" data-mode="grain"></div>
+
+      <!-- Bokeh smear layers -->
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
+      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
+
+      <!-- Foreground shards -->
+      <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
+           data-depth="0.46" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(255,255,255,.16), transparent 62%);
+                  border: 1px solid rgba(255,255,255,.10);">
+      </div>
+
+      <div class="parallax-layer absolute right-[14%] top-[32%] h-64 w-64 -rotate-12 rounded-[42px] opacity-[.085]"
+           data-depth="0.54" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(22,163,74,.18), transparent 70%);
+                  border: 1px solid rgba(255,255,255,.09);">
+      </div>
+
+      <div class="parallax-layer absolute right-[30%] top-[62%] h-40 w-40 rotate-6 rounded-[28px] opacity-[.065]"
+           data-depth="0.60" data-mode="tilt"
+           style="background: linear-gradient(135deg, rgba(239,68,68,.14), transparent 74%);
+                  border: 1px solid rgba(255,255,255,.08);">
+      </div>
+
+      <!-- Spotlight sweep -->
+      <div class="parallax-layer absolute -inset-x-28 top-[-48%] h-[190%] rotate-6 opacity-[.14]"
+           data-depth="0.24" data-mode="float"
+           style="background: radial-gradient(closest-side at 50% 45%, rgba(255,255,255,.10), transparent 62%);">
+      </div>
+    </div>
+
+    <!-- Premium overlays (static) -->
+    <div class="absolute inset-0 streaks"></div>
+    <div class="absolute inset-0 grid-overlay"></div>
+    <div class="absolute inset-0 subgrid"></div>
+    <div class="absolute inset-0 noise"></div>
+    <div class="absolute inset-0 vignette"></div>
+
+    <div class="absolute inset-x-0 bottom-0 h-[36vh] bg-gradient-to-t from-black/85 via-black/22 to-transparent"></div>
+  </div>
+
+  <!-- KEEPING ID SAME -->
   <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
 
   <main class="pt-24">
+    <!-- HERO -->
     <section class="py-16 px-6 relative overflow-hidden">
-      <div class="absolute top-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl float-slow"></div>
-      <div class="absolute bottom-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl float-slower"></div>
+      <div class="absolute -top-16 -left-16 w-[32rem] h-[32rem] bg-primary/14 rounded-full blob"></div>
+      <div class="absolute -bottom-24 -right-20 w-[26rem] h-[26rem] bg-accent/12 rounded-full blob"></div>
+
       <div class="max-w-5xl mx-auto relative">
         <div class="section-fade">
-          <span id="join-hero-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Join Us</span>
-          <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
-            <span id="join-hero-title">Join the</span> <span id="join-hero-highlight" class="gradient-text">Club</span>
+          <!-- KEEPING IDS SAME -->
+          <span id="join-hero-tag" class="inline-flex items-center gap-2 text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold">
+            Join Us
+          </span>
+
+          <h1 class="text-5xl md:text-6xl font-extrabold mt-4 mb-5 leading-[1.05]">
+            <span id="join-hero-title">Join the</span>
+            <span id="join-hero-highlight" class="gradient-text">Club</span>
           </h1>
-          <p id="join-hero-description" class="text-xl text-white/70 max-w-2xl">Choose the right stream for your player. We have programs for every age and skill level.</p>
+
+          <p id="join-hero-description" class="text-lg sm:text-xl text-white/70 max-w-2xl leading-relaxed">
+            There are plenty of opportunities for juniors in Newcastle to get involved in basketball.
+          </p>
+
+          <!-- subtle divider (better structure, no extra IDs) -->
+          <div class="mt-8 h-px w-full max-w-2xl bg-gradient-to-r from-white/5 via-white/15 to-white/5"></div>
         </div>
       </div>
     </section>
 
-    <section class="py-16 px-6">
-      <div class="max-w-5xl mx-auto space-y-8">
-        <div id="join-streams" class="section-fade"></div>
-        <div class="section-fade">
-          <div class="glass glow rounded-3xl p-8 text-center relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-48 h-48 bg-primary/20 rounded-full blur-3xl"></div>
-            <div class="relative">
-              <span id="join-help-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium block mb-4">Support</span>
-              <div class="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+    <!-- FEATURE -->
+    <section class="py-10 px-6">
+      <div class="max-w-5xl mx-auto grid lg:grid-cols-2 gap-8 items-center section-fade" id="join-feature">
+        <div id="join-feature-image" class="image-card card-hover rounded-3xl overflow-hidden bg-white/5 border border-white/10">
+          <img src="images/U12-Knights.jpg" alt="West Basketball family" class="w-full h-auto max-h-[360px] object-contain bg-black/40" loading="lazy" />
+        </div>
+        <div class="glass rounded-3xl p-7 sm:p-8 shadow-soft">
+          <span id="join-quote-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
+            Parent Story
+          </span>
+          <p id="join-quote-text" class="text-white/70 leading-relaxed text-lg italic">A big thank you for welcoming our family to West Basketball and well done on a great season! Moving from interstate was a big move for us, and we have felt so welcomed and are very glad we chose to join such an awesome club!</p>
+          <p id="join-quote-attribution" class="text-white/50 text-sm mt-4">Club family</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STREAMS + SUPPORT -->
+    <section class="py-14 px-6">
+      <div class="max-w-5xl mx-auto space-y-10">
+        <!-- KEEPING ID SAME -->
+        <div id="join-streams" class="section-fade">
+          <div class="space-y-3">
+            <span id="u8s" class="block -mt-24 pt-24"></span>
+            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
+                  U8s
+                </span>
+                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
               </div>
-              <h2 class="text-2xl font-bold text-white mb-4"><span id="join-help-title">Need Help?</span></h2>
-              <p id="join-help-text" class="text-white/60 mb-6 max-w-md mx-auto">If you need payment plans or have accessibility needs, reach out. We want everyone to play.</p>
-              <button id="join-help-cta" type="button" data-contact-trigger="true" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold contact-modal-trigger">
-                Talk to us
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">U8s</h2>
+
+              <p class="text-white/65 leading-relaxed">
+                This competition is for players turning 5, 6 or 7 during the calendar year. Run on a Saturday morning, players will participate in a 3v3 style of game, with help from on floor coaches and additional skills training throughout the season. The U8s competitions are run each term, and we can ensure friends are kept together on teams - or it is a great chance to make new friends! Keep an eye on our Facebook page and website for registration information towards the end of each term.<br>More information can be found under the Development tab on the Newcastle Basketball website.
+              </p>
+
+              <div class="pt-2">
+                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/">
+                  Development info
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <span id="u10s" class="block -mt-24 pt-24"></span>
+            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
+                  U10s
+                </span>
+                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">U10s</h2>
+
+              <p class="text-white/65 leading-relaxed">
+                For players turning 8 or 9 during the calendar year, the U10s competition is a great introduction to 5v5 basketball. Played on a Thursday afternoon, each team will have a designated coach and are invited to participate in two skills sessions (held on select Sundays) throughout the term. This competition is run in Term 4, then again in Term 1, followed by a longer winter season to align with the Junior Competition as an 18-week competition during Terms 2 and 3. Keep an eye on our Facebook page and website for registration information as it comes to hand, friend requests will be accommodated where possible.<br>More information can be found under the Development tab on the Newcastle Basketball website.
+              </p>
+
+              <div class="pt-2">
+                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/">
+                  Development info
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <span id="winter-junior" class="block -mt-24 pt-24"></span>
+            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
+                  Winter
+                </span>
+                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Winter Junior Competition</h2>
+
+              <p class="text-white/65 leading-relaxed">
+                Catering for U12 through to U18 players, the Winter Competition is the premier competition facilitated by Newcastle Basketball and runs through Terms 2 and 3 each year. West Basketball coordinates teams across all age groups and divisions, allocates coaches, coordinates training and skill development, and strives to ensure each player is placed in a team that suits their ability and preferences (e.g. friend requests, level of division, etc).<br>More information will be shared once registrations for 2026 open.
+              </p>
+
+              <div class="pt-2">
+                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="about.html#contact">
+                  Contact us
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <span id="summer-junior" class="block -mt-24 pt-24"></span>
+            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
+                  Summer
+                </span>
+                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Summer Junior Competition</h2>
+
+              <p class="text-white/65 leading-relaxed">
+                Catering for U11 through to U17 players, this competition is facilitated by Newcastle Basketball and the clubs are not involved in putting teams together for this competition.
+              </p>
+
+              <div class="pt-2">
+                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/summer-junior-competition/">
+                  Newcastle Basketball info
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <span id="development-programs" class="block -mt-24 pt-24"></span>
+            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
+                  Programs
+                </span>
+                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Development Programs and Holiday Camps</h2>
+
+              <p class="text-white/65 leading-relaxed">
+                Newcastle Basketball facilitate a range of development programs and holiday camps to cater for all levels of basketball. From Mini Hoops (ages 3-5) through to representative programs, visit their website to find out more.
+              </p>
+
+              <div class="pt-2">
+                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/">
+                  Newcastle Basketball programs
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+
+            <span id="referee-pathways" class="block -mt-24 pt-24"></span>
+            <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
+              <div class="flex flex-wrap items-center gap-3">
+                <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
+                  Referees
+                </span>
+                <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white">Referee Pathways</h2>
+
+              <p class="text-white/65 leading-relaxed">
+                Newcastle Basketball have a referee pathways program for juniors aged 12 years and over. A great way to increase your basketball knowledge, get involved in the sport and earn some money along the way.
+              </p>
+
+              <div class="pt-2">
+                <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="https://www.newcastlebasketball.com.au/referees/">
+                  Referee pathways
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="section-fade">
+          <div class="glass rounded-3xl p-7 sm:p-8 relative overflow-hidden shadow-soft">
+            <div class="absolute -top-16 -right-12 w-72 h-72 bg-primary/16 rounded-full blob"></div>
+
+            <div class="relative text-center">
+              <!-- KEEPING IDS SAME -->
+              <span id="join-help-tag" class="text-primary uppercase tracking-[0.3em] text-xs sm:text-sm font-semibold block mb-4">
+                Support
+              </span>
+
+              <div class="w-14 h-14 rounded-2xl bg-primary/15 border border-primary/25 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                  </path>
+                </svg>
+              </div>
+
+              <h2 class="text-2xl sm:text-3xl font-extrabold text-white mb-3">
+                <span id="join-help-title">Need Help?</span>
+              </h2>
+
+              <p id="join-help-text" class="text-white/65 leading-relaxed mb-6 max-w-lg mx-auto">
+                For any further queries, please don't hesitate to contact us.
+              </p>
+
+              <!-- KEEPING ID SAME -->
+              <button
+                id="join-help-cta"
+                type="button"
+                data-contact-trigger="true"
+                class="btn-primary inline-flex items-center justify-center gap-2 rounded-full px-8 py-4 text-white font-semibold contact-modal-trigger"
+              >
+                Contact us
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
               </button>
-              <p id="join-help-contact" class="text-white/50 text-sm mt-2"></p>
+
+              <!-- KEEPING ID SAME -->
+              <p id="join-help-contact" class="text-white/50 text-sm mt-3">Contact: about.html#contact</p>
             </div>
           </div>
         </div>
@@ -89,30 +414,58 @@
     </section>
   </main>
 
+  <!-- KEEPING ID SAME -->
   <footer class="border-t border-white/10 bg-darker mt-16" id="site-footer"></footer>
 
   <script src="data.js"></script>
   <script src="common.js"></script>
+
   <script>
     function renderJoinContent() {
+      if (!hasOverrides()) return;
       const joinPage = window.siteContent.pages?.join ?? {};
       const setText = (id, value) => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = formatMultiline(value ?? "");
       };
+
       setText("join-hero-tag", joinPage.heroTag);
       setText("join-hero-title", joinPage.heroTitle);
       setText("join-hero-highlight", joinPage.heroHighlight);
       setText("join-hero-description", joinPage.heroDescription);
+      setText("join-quote-tag", joinPage.quoteTag ?? "Parent Story");
+      setText("join-quote-text", joinPage.quoteText);
+      setText("join-quote-attribution", joinPage.quoteAttribution);
+
+      const featureSection = document.getElementById("join-feature");
+      const featureImage = document.getElementById("join-feature-image");
+      if (featureImage) {
+        const imageSrc = joinPage.featureImage || "";
+        const imageAlt = joinPage.featureAlt || "Join West Basketball";
+        featureImage.innerHTML = imageSrc
+          ? `<img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" class="w-full h-auto max-h-[360px] object-contain bg-black/40" loading="lazy" />`
+          : "";
+      }
+      if (featureSection) {
+        const hasImage = !!joinPage.featureImage;
+        const hasQuote = (joinPage.quoteText || "").trim();
+        featureSection.classList.toggle("hidden", !(hasImage || hasQuote));
+      }
+
       setText("join-help-tag", joinPage.helpTag);
       setText("join-help-title", joinPage.helpTitle);
       setText("join-help-text", joinPage.helpText);
+
       const helpCta = document.getElementById("join-help-cta");
       if (helpCta) {
-        helpCta.innerHTML = `${joinPage.helpCtaLabel ?? "Talk to us"} <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>`;
+        helpCta.innerHTML = `${escapeHtml(joinPage.helpCtaLabel ?? "Talk to us")}
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>`;
         helpCta.setAttribute("data-contact-trigger", "true");
         helpCta.classList.add("contact-modal-trigger");
       }
+
       const helpContact = document.getElementById("join-help-contact");
       if (helpContact) {
         const helpHref = joinPage.helpCtaHref ?? "";
@@ -127,10 +480,13 @@
           container.innerHTML = "";
           return;
         }
-        const baseSignUpLabel = joinPage.signUpLabel || "Sign up";
-        const baseSignUpHref = joinPage.signUpHref || joinPage.helpCtaHref || "#";
+
+        const baseSignUpLabel = joinPage.signUpLabel || "Register";
+        const baseSignUpHref = joinPage.signUpHref || "";
+
         const preferredOrder = ["juniors", "u8u10"];
         const getStreamKey = (stream) => (stream.id || stream.title || "").toString().toLowerCase();
+
         const orderedStreams = streams
           .map((stream, index) => ({ stream, index }))
           .sort((a, b) => {
@@ -146,49 +502,70 @@
           .map((entry) => entry.stream);
 
         container.innerHTML = `
-          <div class="space-y-2">
-            ${orderedStreams
-              .map((stream) => {
-                const steps = ((stream.steps && stream.steps.length)
-                  ? stream.steps
-                  : (stream.links || []).map((link) => link.label || link.href || "")).filter((s) => (s ?? "").toString().trim());
-                const ctaLabel = stream.ctaLabel || baseSignUpLabel;
-                const ctaHref = stream.ctaHref || baseSignUpHref;
-                return `
-                  ${stream.id ? `<span id="${escapeHtml(stream.id)}" class="block -mt-24 pt-24"></span>` : ""}
-                  <article class="glass rounded-3xl p-6 md:p-8 space-y-5">
-                    <div class="flex flex-wrap items-center gap-3">
-                      ${stream.badge ? `<span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">${escapeHtml(stream.badge)}</span>` : ""}
-                      <span class="text-xs uppercase tracking-[0.2em] text-white/50">Program details</span>
-                    </div>
-                    <h2 class="text-2xl md:text-3xl font-bold text-white">${escapeHtml(stream.title || "Program")}</h2>
-                    ${stream.description ? `<p class="text-white/60 leading-relaxed">${formatMultiline(stream.description)}</p>` : ""}
-                    <div class="glass rounded-2xl p-5 space-y-3">
-                      ${
-                        steps.length
-                          ? steps
-                              .map(
-                                (step, idx) => `
-                          <div class="flex items-start gap-3">
-                            <span class="w-8 h-8 rounded-full bg-primary/15 text-primary font-semibold flex items-center justify-center">${idx + 1}</span>
-                            <p class="text-white/80 leading-relaxed">${formatMultiline(step || "")}</p>
-                          </div>
-                        `
-                              )
-                              .join("")
-                          : '<p class="text-white/50 text-sm">Add steps in the admin panel.</p>'
-                      }
-                    </div>
+          <div class="space-y-3">
+            ${orderedStreams.map((stream) => {
+              const steps = ((stream.steps && stream.steps.length)
+                ? stream.steps
+                : (stream.links || []).map((link) => link.label || link.href || "")).filter((s) => (s ?? "").toString().trim());
+
+              const ctaLabel = stream.ctaLabel || baseSignUpLabel;
+              const ctaHref = (stream.ctaHref || baseSignUpHref || "").trim();
+              const hasCta = !!ctaHref;
+
+              return `
+                ${stream.id ? `<span id="${escapeHtml(stream.id)}" class="block -mt-24 pt-24"></span>` : ""}
+
+                <article class="glass rounded-3xl p-6 sm:p-8 space-y-5 shadow-soft">
+                  <div class="flex flex-wrap items-center gap-3">
+                    ${stream.badge ? `
+                      <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">
+                        ${escapeHtml(stream.badge)}
+                      </span>
+                    ` : ""}
+                    <span class="text-xs uppercase tracking-[0.2em] text-white/55">Program details</span>
+                  </div>
+
+                  <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                    ${escapeHtml(stream.title || "Program")}
+                  </h2>
+
+                  ${stream.description ? `
+                    <p class="text-white/65 leading-relaxed">
+                      ${formatMultiline(stream.description)}
+                    </p>
+                  ` : ""}
+
+                  ${
+                    steps.length
+                      ? `<div class="glass rounded-2xl p-5 space-y-3 border border-white/10">
+                          ${steps.map((step, idx) => `
+                            <div class="flex items-start gap-3">
+                              <span class="w-8 h-8 rounded-full bg-primary/15 text-primary font-semibold flex items-center justify-center shrink-0">
+                                ${idx + 1}
+                              </span>
+                              <p class="text-white/80 leading-relaxed">
+                                ${formatMultiline(step || "")}
+                              </p>
+                            </div>
+                          `).join("")}
+                        </div>`
+                      : ""
+                  }
+
+                  ${hasCta ? `
                     <div class="pt-2">
-                      <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold" href="${escapeHtml(ctaHref)}">
+                      <a class="btn-primary inline-flex items-center gap-2 rounded-full px-6 py-3 text-white font-semibold"
+                         href="${escapeHtml(ctaHref)}">
                         ${escapeHtml(ctaLabel)}
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
                       </a>
                     </div>
-                  </article>
-                `;
-              })
-              .join("")}
+                  ` : ""}
+                </article>
+              `;
+            }).join("")}
           </div>
         `;
       }
@@ -199,12 +576,12 @@
       renderFooter();
       renderJoinContent();
       initContactModal();
-      
+
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) entry.target.classList.add('visible');
         });
-      }, { threshold: 0.1 });
+      }, { threshold: 0.12 });
 
       document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
     });
@@ -216,5 +593,6 @@
       initContactModal();
     });
   </script>
+  <script src="parallax-bg.js"></script>
 </body>
 </html>

@@ -1,0 +1,289 @@
+:root{
+  --bg0:#05070a;
+  --grid: rgba(255,255,255,.075);
+  --grid2: rgba(255,255,255,.035);
+  --noise: rgba(255,255,255,.04);
+  --scroll-track: #0b0f14;
+  --scroll-thumb: #166534;
+  --scroll-thumb-2: #ef4444;
+}
+
+.parallax-layer{
+  will-change: transform, filter, opacity;
+  transform: translate3d(0,0,0);
+  pointer-events:none;
+}
+
+html{
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+
+::-webkit-scrollbar{
+  width: 12px;
+}
+
+::-webkit-scrollbar-track{
+  background: var(--scroll-track);
+}
+
+::-webkit-scrollbar-thumb{
+  background: linear-gradient(180deg, var(--scroll-thumb), var(--scroll-thumb-2));
+  border-radius: 999px;
+  border: 3px solid var(--scroll-track);
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background: linear-gradient(180deg, #22c55e, #f97316);
+}
+
+/* Soft procedural noise */
+.noise::before{
+  content:"";
+  position:absolute; inset:-35%;
+  background-image:
+    radial-gradient(circle at 20% 30%, var(--noise) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, var(--noise) 0 1px, transparent 1px),
+    radial-gradient(circle at 40% 80%, var(--noise) 0 1px, transparent 1px),
+    radial-gradient(circle at 85% 15%, var(--noise) 0 1px, transparent 1px);
+  background-size: 120px 120px, 170px 170px, 220px 220px, 280px 280px;
+  opacity:.22;
+  transform: rotate(8deg);
+  mix-blend-mode: overlay;
+  filter: blur(.25px);
+}
+
+/* Macro grid */
+.grid-overlay::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to right, var(--grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity:.22;
+  pointer-events:none;
+  mask-image: radial-gradient(circle at 50% 18%, black 0 58%, transparent 78%);
+  -webkit-mask-image: radial-gradient(circle at 50% 18%, black 0 58%, transparent 78%);
+}
+
+/* Micro grid */
+.subgrid::after{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(to right, var(--grid2) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid2) 1px, transparent 1px);
+  background-size: 18px 18px;
+  opacity:.18;
+  pointer-events:none;
+  mask-image: radial-gradient(circle at 50% 26%, black 0 52%, transparent 84%);
+  -webkit-mask-image: radial-gradient(circle at 50% 26%, black 0 52%, transparent 84%);
+}
+
+/* Streaks */
+.streaks::before{
+  content:"";
+  position:absolute; inset:-30%;
+  background:
+    linear-gradient(115deg,
+      transparent 0%,
+      rgba(22,163,74,.12) 18%,
+      transparent 26%,
+      rgba(239,68,68,.09) 48%,
+      transparent 56%,
+      rgba(22,163,74,.08) 78%,
+      transparent 86%
+    );
+  opacity:.44;
+  transform: rotate(-7deg);
+  mix-blend-mode: screen;
+  filter: blur(.55px);
+  pointer-events:none;
+}
+
+/* Court motif */
+.court-lines{
+  background:
+    radial-gradient(circle at 50% 62%, rgba(255,255,255,.050) 0 1px, transparent 1px),
+    radial-gradient(circle at 50% 62%, rgba(255,255,255,.040) 0 2px, transparent 2px),
+    radial-gradient(circle at 50% 62%, transparent 0 140px, rgba(255,255,255,.030) 140px 141px, transparent 141px),
+    linear-gradient(to right, transparent 0 49.72%, rgba(255,255,255,.038) 49.72% 50.28%, transparent 50.28% 100%),
+    radial-gradient(circle at 15% 72%, transparent 0 70px, rgba(255,255,255,.024) 70px 71px, transparent 71px),
+    radial-gradient(circle at 85% 72%, transparent 0 70px, rgba(255,255,255,.024) 70px 71px, transparent 71px);
+  background-repeat:no-repeat;
+  background-position:center;
+  opacity:.14;
+  filter: blur(.2px);
+  mask-image: linear-gradient(to bottom, black 0 55%, transparent 92%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0 55%, transparent 92%);
+}
+
+/* Seamless wave */
+.wave-field{
+  background:
+    radial-gradient(1200px 900px at 20% 15%, rgba(239,68,68,.08), transparent 62%),
+    radial-gradient(1300px 950px at 80% 25%, rgba(22,163,74,.08), transparent 64%),
+    radial-gradient(1400px 1000px at 50% 60%, rgba(255,255,255,.03), transparent 66%);
+  opacity:.70;
+  mix-blend-mode: soft-light;
+}
+
+/* Nebula (no obvious circles) */
+.nebula{
+  opacity:.40;
+  mix-blend-mode: screen;
+  filter: blur(28px);
+  mask-image:
+    radial-gradient(1200px 700px at 35% 35%, black 0 55%, transparent 75%),
+    radial-gradient(1100px 650px at 70% 55%, black 0 50%, transparent 76%),
+    linear-gradient(to bottom, black, black);
+  -webkit-mask-image:
+    radial-gradient(1200px 700px at 35% 35%, black 0 55%, transparent 75%),
+    radial-gradient(1100px 650px at 70% 55%, black 0 50%, transparent 76%),
+    linear-gradient(to bottom, black, black);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+.nebula-a{
+  background:
+    radial-gradient(900px 500px at 18% 30%, rgba(22,163,74,.20), transparent 65%),
+    radial-gradient(800px 520px at 45% 45%, rgba(255,255,255,.06), transparent 70%),
+    radial-gradient(900px 600px at 70% 35%, rgba(239,68,68,.13), transparent 68%),
+    radial-gradient(1200px 700px at 80% 70%, rgba(22,163,74,.09), transparent 72%),
+    radial-gradient(1200px 900px at 40% 85%, rgba(239,68,68,.06), transparent 76%);
+}
+.nebula-b{
+  opacity:.32;
+  mix-blend-mode: soft-light;
+  background:
+    radial-gradient(900px 650px at 75% 25%, rgba(239,68,68,.13), transparent 70%),
+    radial-gradient(1100px 700px at 25% 70%, rgba(22,163,74,.11), transparent 72%),
+    radial-gradient(1200px 800px at 50% 55%, rgba(255,255,255,.04), transparent 75%),
+    radial-gradient(1200px 900px at 15% 40%, rgba(255,255,255,.03), transparent 78%);
+}
+
+/* Fog bands */
+.fog-bands{
+  opacity:.20;
+  mix-blend-mode: soft-light;
+  filter: blur(14px);
+  background:
+    linear-gradient(to bottom,
+      transparent 0%,
+      rgba(255,255,255,.028) 14%,
+      transparent 30%,
+      rgba(255,255,255,.022) 46%,
+      transparent 62%,
+      rgba(255,255,255,.018) 78%,
+      transparent 100%
+    );
+  mask-image: radial-gradient(circle at 50% 40%, black 0 70%, transparent 92%);
+  -webkit-mask-image: radial-gradient(circle at 50% 40%, black 0 70%, transparent 92%);
+}
+
+/* Shafts */
+.shafts{
+  opacity:.15;
+  mix-blend-mode: screen;
+  filter: blur(2px);
+  background:
+    linear-gradient(100deg, transparent 0 18%, rgba(255,255,255,.08) 22%, transparent 30%),
+    linear-gradient(110deg, transparent 0 40%, rgba(22,163,74,.07) 46%, transparent 56%),
+    linear-gradient(120deg, transparent 0 62%, rgba(239,68,68,.06) 68%, transparent 78%);
+  mask-image: radial-gradient(circle at 50% 18%, black 0 52%, transparent 82%);
+  -webkit-mask-image: radial-gradient(circle at 50% 18%, black 0 52%, transparent 82%);
+}
+
+/* Dust specks */
+.dust::before{
+  content:"";
+  position:absolute; inset:-30%;
+  background-image:
+    radial-gradient(circle at 12% 22%, rgba(255,255,255,.10) 0 1px, transparent 2px),
+    radial-gradient(circle at 28% 68%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+    radial-gradient(circle at 44% 38%, rgba(255,255,255,.07) 0 1px, transparent 2px),
+    radial-gradient(circle at 61% 82%, rgba(255,255,255,.09) 0 1px, transparent 2px),
+    radial-gradient(circle at 76% 28%, rgba(255,255,255,.08) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 62%, rgba(255,255,255,.07) 0 1px, transparent 2px);
+  background-size: 240px 240px, 280px 280px, 320px 320px, 360px 360px, 420px 420px, 520px 520px;
+  opacity:.16;
+  mix-blend-mode: screen;
+  filter: blur(.2px);
+  transform: rotate(-6deg);
+}
+
+/* Chroma glow */
+.chroma{
+  opacity:.16;
+  mix-blend-mode: color-dodge;
+  filter: blur(18px);
+  background:
+    radial-gradient(900px 520px at 30% 35%, rgba(22,163,74,.10), transparent 70%),
+    radial-gradient(900px 520px at 68% 42%, rgba(239,68,68,.08), transparent 72%);
+  mask-image: radial-gradient(circle at 50% 35%, black 0 60%, transparent 88%);
+  -webkit-mask-image: radial-gradient(circle at 50% 35%, black 0 60%, transparent 88%);
+}
+
+/* Bokeh smear (not circles) */
+.bokeh-smear{
+  opacity:.075;
+  mix-blend-mode: screen;
+  filter: blur(18px);
+  background:
+    conic-gradient(from 210deg at 20% 45%,
+      transparent 0 10%,
+      rgba(255,255,255,.10) 12%,
+      transparent 18%,
+      rgba(22,163,74,.10) 28%,
+      transparent 36%,
+      rgba(239,68,68,.08) 52%,
+      transparent 62%,
+      rgba(255,255,255,.08) 74%,
+      transparent 100%
+    );
+  mask-image:
+    radial-gradient(900px 520px at 24% 42%, black 0 48%, transparent 78%),
+    radial-gradient(1000px 620px at 75% 55%, black 0 44%, transparent 78%),
+    linear-gradient(to bottom, black, black);
+  -webkit-mask-image:
+    radial-gradient(900px 520px at 24% 42%, black 0 48%, transparent 78%),
+    radial-gradient(1000px 620px at 75% 55%, black 0 44%, transparent 78%),
+    linear-gradient(to bottom, black, black);
+  mask-composite: intersect;
+  -webkit-mask-composite: source-in;
+}
+.bokeh-smear.bokeh-a{
+  transform: rotate(-10deg);
+}
+.bokeh-smear.bokeh-b{
+  opacity:.06;
+  filter: blur(22px);
+  background:
+    conic-gradient(from 120deg at 70% 40%,
+      transparent 0 14%,
+      rgba(22,163,74,.10) 18%,
+      transparent 26%,
+      rgba(255,255,255,.10) 38%,
+      transparent 48%,
+      rgba(239,68,68,.07) 62%,
+      transparent 72%,
+      rgba(255,255,255,.07) 86%,
+      transparent 100%
+    );
+  transform: rotate(8deg);
+}
+
+/* Vignette */
+.vignette{
+  background:
+    radial-gradient(1200px 800px at 50% 10%, rgba(255,255,255,.028), transparent 55%),
+    radial-gradient(900px 600px at 50% 115%, rgba(0,0,0,.86), transparent 55%),
+    radial-gradient(1400px 1000px at 50% 50%, transparent 0 60%, rgba(0,0,0,.62) 78%, rgba(0,0,0,.92) 100%);
+  opacity:.92;
+  pointer-events:none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .parallax-layer{ transform: none !important; filter:none !important; opacity: 1 !important; }
+}
