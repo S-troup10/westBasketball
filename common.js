@@ -472,11 +472,38 @@ function renderAboutDetails() {
 
 function renderMerchContent() {
   if (!hasOverrides()) return;
-  const merch = window.siteContent.merch;
+  const merch = window.siteContent.merch ?? {};
   const merchPage = window.siteContent.pages?.merch ?? {};
   const setText = (id, value) => {
     const el = document.getElementById(id);
-    if (el) el.innerHTML = formatMultiline(value ?? "");
+    if (el && value !== undefined) el.innerHTML = formatMultiline(value ?? "");
+  };
+  const setPlainText = (id, value) => {
+    if (value === undefined) return;
+    const el = document.getElementById(id);
+    if (el) el.textContent = value ?? "";
+  };
+  const parseMerchBlurb = (text = "") => {
+    const lines = text
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+    const importantIndex = lines.findIndex((line) => line.toLowerCase() === "important");
+    const intro = lines[0] ?? "";
+    const requirements = lines[1] ?? "";
+    const details = importantIndex >= 0 ? lines.slice(importantIndex + 1) : lines.slice(2);
+    const essentials = requirements
+      ? requirements
+          .split(". ")
+          .map((sentence) => sentence.trim())
+          .filter(Boolean)
+          .map((sentence) => (sentence.endsWith(".") ? sentence : `${sentence}.`))
+      : [];
+    return {
+      intro,
+      essentials,
+      importantText: details.join(" ")
+    };
   };
   setText("merch-hero-tag", merchPage.heroTag);
   setText("merch-hero-title", merchPage.heroTitle);
@@ -484,9 +511,17 @@ function renderMerchContent() {
   setText("merch-store-tag", merchPage.storeTag);
   setText("merch-store-title", merchPage.storeTitle);
   setText("merch-store-highlight", merchPage.storeHighlight);
-  const blurb = document.getElementById("merch-blurb");
   const store = document.getElementById("merch-store-link");
-  if (blurb) blurb.innerHTML = formatMultiline(merch?.blurb ?? "");
+  const blurbText = typeof merch.blurb === "string" ? merch.blurb.trim() : "";
+  const parsed = parseMerchBlurb(blurbText);
+  const useParsed = blurbText.length > 0;
+  const intro = useParsed ? parsed.intro : merch.intro ?? parsed.intro;
+  const essentials = useParsed
+    ? parsed.essentials
+    : Array.isArray(merch.essentials) && merch.essentials.length
+    ? merch.essentials
+    : parsed.essentials;
+  const importantText = useParsed ? parsed.importantText : merch.importantText ?? parsed.importantText;
   if (store && merch?.storeUrl) store.href = merch.storeUrl;
   setText("merch-store-description", merchPage.storeDescription);
   const pillars = document.getElementById("merch-pillars");
@@ -507,6 +542,55 @@ function renderMerchContent() {
   if (store) {
     store.innerHTML = `${merchPage.ctaLabel || "Go to merch store"} <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>`;
   }
+  const supplier = merch.supplier ?? {};
+  const supplierName = supplier.name ?? merchPage.supplierName;
+  setPlainText("merch-supplier-tag", merchPage.supplierTag);
+  setPlainText("merch-supplier-name", supplierName);
+  setPlainText("merch-supplier-note", merch.supplierNote ?? merchPage.supplierNote);
+  const supplierLogo = document.getElementById("merch-supplier-logo");
+  const supplierMark = document.getElementById("merch-supplier-mark");
+  const supplierLogoSrc = supplier.logo ?? merchPage.supplierLogo ?? "";
+  const hasSupplierLogoOverride =
+    Object.prototype.hasOwnProperty.call(supplier, "logo") ||
+    Object.prototype.hasOwnProperty.call(merchPage, "supplierLogo");
+  if (supplierLogo) {
+    if (supplierLogoSrc) {
+      supplierLogo.src = supplierLogoSrc;
+      supplierLogo.alt = supplierName ? `${supplierName} logo` : "Merchandise supplier logo";
+      supplierLogo.classList.remove("hidden");
+    } else if (hasSupplierLogoOverride) {
+      supplierLogo.classList.add("hidden");
+    }
+  }
+  if (supplierMark) {
+    if (!supplierLogoSrc && supplierName && hasSupplierLogoOverride) {
+      supplierMark.textContent = supplierName;
+      supplierMark.classList.remove("hidden");
+    } else if (supplierLogoSrc) {
+      supplierMark.classList.add("hidden");
+    }
+  }
+  const supplierLink = document.getElementById("merch-supplier-link");
+  if (supplierLink) {
+    const supplierUrl = supplier.url ?? merch.storeUrl;
+    if (supplierUrl) supplierLink.href = supplierUrl;
+    const supplierCta = merchPage.supplierCtaLabel;
+    if (supplierCta !== undefined) {
+      supplierLink.innerHTML = `${supplierCta} <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>`;
+    }
+  }
+  const introEl = document.getElementById("merch-intro");
+  if (introEl && intro) introEl.innerHTML = formatMultiline(intro);
+  setPlainText("merch-essentials-tag", merchPage.essentialsTag);
+  setPlainText("merch-essentials-title", merchPage.essentialsTitle);
+  const essentialsList = document.getElementById("merch-essentials-list");
+  if (essentialsList && essentials.length) {
+    essentialsList.innerHTML = essentials.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
+  }
+  setPlainText("merch-important-tag", merchPage.importantTag);
+  setPlainText("merch-important-title", merchPage.importantTitle ?? merch.importantTitle);
+  const importantTextEl = document.getElementById("merch-important-text");
+  if (importantTextEl && importantText) importantTextEl.innerHTML = formatMultiline(importantText);
 }
 
 function renderCoachesContent() {

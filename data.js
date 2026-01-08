@@ -212,8 +212,23 @@ const defaultSiteData = {
       "Junior squads (U12-U18) train weekly with structured plans for skills, decision making, and fitness. Grading and team lists are updated each season."
   },
   merch: {
+    supplier: {
+      name: "iAthletic",
+      logo: "images/merchandise.jpg",
+      url: "https://iathletic.com.au"
+    },
+    supplierNote: "Official merchandise supplier",
+    intro: "We are proud to be partnering with iAthletic to provide high-quality merchandise to our players.",
+    essentials: [
+      "Green and red playing shorts are compulsory.",
+      "Shorts from previous years are fine to continue wearing.",
+      "All other merchandise is optional."
+    ],
+    importantTitle: "Shipping & custom shorts",
+    importantText:
+      "Items will be shipped within a couple of days and usually arrive within a week. West playing shorts are custom made for our club, so we keep a small stock for direct sale and will open an ordering period before the 2026 season. Please reach out if you need shorts and we will advise the best option.",
     blurb:
-      "We are proud to be partnering with iAthletic to provide options of high-quality merchandise to our players.\nThe only compulsory item are green and red playing shorts (and if you have shorts from previous years, these are fine to continue wearing). All other merch is optional.\nIMPORTANT\nItems will be shipped to you within a couple of days of ordering, and should arrive within a week, EXCEPT for West Playing Shorts which are custom made for our club. We keep a small stock of shorts for direct sale and will have an ordering period prior to the 2026 season where you can order directly through the website. Please reach out directly to us if you are requiring shorts and we will advise the best option for purchasing.",
+      "We are proud to be partnering with iAthletic to provide high-quality merchandise to our players.\nGreen and red playing shorts are compulsory (shorts from previous years are fine to continue wearing). All other merchandise is optional.\nIMPORTANT\nItems will be shipped within a couple of days and usually arrive within a week. West playing shorts are custom made for our club, so we keep a small stock for direct sale and will open an ordering period before the 2026 season. Please reach out if you need shorts and we will advise the best option.",
     storeUrl: "https://iathletic.com.au/collections/west-basketball"
   },
   coaches: {
@@ -460,6 +475,13 @@ const defaultSiteData = {
       heroTag: "Merchandise",
       heroTitle: "Uniforms &",
       heroHighlight: "Gear",
+      supplierTag: "Supplier",
+      supplierNote: "Official merchandise supplier",
+      supplierCtaLabel: "Visit iAthletic",
+      essentialsTag: "Essentials",
+      essentialsTitle: "Uniform requirements",
+      importantTag: "Important",
+      importantTitle: "Shipping & custom shorts",
       storeTag: "Official Store",
       storeTitle: "Shop",
       storeHighlight: "Now",

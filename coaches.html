@@ -116,20 +116,25 @@
   <header class="fixed top-0 left-0 right-0 z-50 nav-blur border-b border-white/5" id="site-nav"></header>
 
   <main class="pt-24">
-    <section class="py-16 px-6 relative overflow-hidden">
+    <section class="pt-16 px-6 relative overflow-hidden">
       <div class="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl float-slow"></div>
       <div class="max-w-5xl mx-auto relative">
-        <div class="section-fade">
-          <span id="coaches-hero-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Coaching</span>
-          <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
-            <span id="coaches-hero-title">Coaching at</span> <span id="coaches-hero-highlight" class="gradient-text">West Basketball</span>
-          </h1>
-          <p id="coaches-blurb" class="text-xl text-white/70 max-w-2xl leading-relaxed">Our club prides itself on having passionate and committed coaches helping develop the next generation of basketballers. Supported by a strong committee and an experienced head coach, we support coach development and ensure coaches have access to courses and resources to assist with their development and coaching approach, from basic fundamentals through to higher level structured play.</p>
+        <div class="section-fade grid gap-10 lg:grid-cols-[1.1fr_.9fr] items-center">
+          <div>
+            <span id="coaches-hero-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Coaching</span>
+            <h1 class="text-5xl md:text-6xl font-bold mt-4 mb-6">
+              <span id="coaches-hero-title">Coaching at</span> <span id="coaches-hero-highlight" class="gradient-text">West Basketball</span>
+            </h1>
+            <p id="coaches-blurb" class="text-xl text-white/70 max-w-2xl leading-relaxed">Our club prides itself on having passionate and committed coaches helping develop the next generation of basketballers. Supported by a strong committee and an experienced head coach, we support coach development and ensure coaches have access to courses and resources to assist with their development and coaching approach, from basic fundamentals through to higher level structured play.</p>
+          </div>
+          <div class="glass rounded-3xl overflow-hidden border border-white/10">
+            <img src="images/U14-West-Raiders.jpg" alt="Coaches mentoring players" class="w-full h-[320px] sm:h-[360px] lg:h-[420px] object-cover" loading="lazy" decoding="async" />
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="py-16 px-6">
+    <section class="py-8 px-6">
       <div class="max-w-5xl mx-auto">
         <div id="coaches-resources" class="grid md:grid-cols-2 gap-6 section-fade">
           <div class="glass card-hover rounded-3xl p-8 relative overflow-hidden">
@@ -164,7 +169,7 @@
       </div>
     </section>
 
-    <section class="py-16 px-6">
+    <section class="pb-12 pt-2 px-6">
       <div class="max-w-4xl mx-auto section-fade">
         <div class="glass glow rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
           <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl float-slow"></div>
@@ -176,7 +181,7 @@
             <span id="coaches-cta-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Get Involved</span>
             <h2 class="text-4xl font-bold mt-4 mb-6"><span id="coaches-cta-title">Want to</span> <span id="coaches-cta-highlight" class="gradient-text">Coach?</span></h2>
             <p id="coaches-cta-desc" class="text-white/70 mb-8 max-w-lg mx-auto">If you are interested in being part of our positive and collaborative club through coaching for us in 2026, we'd love to hear from you. Please fill out a Contact Us form and we will be in touch soon!</p>
-            <a id="coaches-cta-button" href="about.html#contact" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold">
+            <a id="coaches-cta-button" href="about.html#contact" data-contact-trigger="true" data-contact-subject="Coaching enquiry" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold contact-modal-trigger">
               Contact us
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
             </a>
@@ -195,23 +200,28 @@
       renderNav('coaches');
       renderFooter();
       renderCoachesContent();
+      initContactModal();
       
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
-        });
-      }, { threshold: 0.1 });
+      const fadeSections = document.querySelectorAll('.section-fade');
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('visible');
+          });
+        }, { threshold: 0.1 });
 
-      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+        fadeSections.forEach(el => observer.observe(el));
+      } else {
+        fadeSections.forEach(el => el.classList.add('visible'));
+      }
     });
 
     window.addEventListener('sitecontent:updated', () => {
       renderNav('coaches');
       renderFooter();
       renderCoachesContent();
+      initContactModal();
     });
   </script>
 </body>
 </html>
-
-

@@ -394,13 +394,18 @@
       renderAboutDetails();
       initContactModal();
       
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) entry.target.classList.add('visible');
-        });
-      }, { threshold: 0.1 });
+      const fadeSections = document.querySelectorAll('.section-fade');
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('visible');
+          });
+        }, { threshold: 0.1 });
 
-      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+        fadeSections.forEach(el => observer.observe(el));
+      } else {
+        fadeSections.forEach(el => el.classList.add('visible'));
+      }
     });
 
     window.addEventListener('sitecontent:updated', () => {

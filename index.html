@@ -999,22 +999,27 @@
       renderNews('news-grid');
       renderSponsors('sponsor-logos');
       scheduleNonCritical(initContactModal);
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
+      const fadeSections = document.querySelectorAll('.section-fade');
+      if ('IntersectionObserver' in window) {
+        const observerOptions = {
+          threshold: 0.1,
+          rootMargin: '0px 0px -50px 0px'
+        };
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          } else {
-            entry.target.classList.remove('visible');
-          }
-        });
-      }, observerOptions);
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+            } else {
+              entry.target.classList.remove('visible');
+            }
+          });
+        }, observerOptions);
 
-      document.querySelectorAll('.section-fade').forEach(el => observer.observe(el));
+        fadeSections.forEach(el => observer.observe(el));
+      } else {
+        fadeSections.forEach(el => el.classList.add('visible'));
+      }
     });
 
     window.addEventListener('sitecontent:updated', () => {
