@@ -219,30 +219,110 @@
       color: rgba(16,185,129,0.85);
     }
 
-    .program-tile__cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
-      margin-top: auto;
-    }
+      .program-tile__cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.7);
+        margin-top: auto;
+      }
+
+      .program-block {
+        display: grid;
+        gap: 10px;
+      }
+
+      .program-tile__cta--toggle {
+        padding: 10px 18px;
+        border-radius: 999px;
+        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.04);
+        cursor: pointer;
+        transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+      }
+
+      .program-tile__cta--toggle:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(16,185,129,0.35);
+        color: #ffffff;
+      }
+
+      .program-tile__cta--toggle svg {
+        transition: transform 0.3s ease;
+      }
+
+      .program-tile__cta--toggle[aria-expanded="true"] svg {
+        transform: rotate(180deg);
+      }
+
+      .program-faq {
+        padding: 0;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.03);
+        overflow: hidden;
+        max-height: 0;
+        opacity: 0;
+        transform: translateY(-6px);
+        transition: max-height 0.45s ease, opacity 0.35s ease, transform 0.35s ease;
+      }
+
+      .program-faq.is-open {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .program-faq__list {
+        display: grid;
+        gap: 14px;
+      }
+
+      .program-faq__inner {
+        padding: 16px;
+      }
+
+      .program-faq__item {
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(0,0,0,0.25);
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .program-faq__question {
+        font-size: 15px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.92);
+      }
+
+      .program-faq__answer {
+        margin-top: 6px;
+        color: rgba(255,255,255,0.65);
+        line-height: 1.6;
+        font-size: 14px;
+      }
 
     .program-anchor {
       scroll-margin-top: 120px;
     }
 
-    @media (max-width: 900px) {
-      .program-tile {
-        grid-template-columns: 1fr;
+      @media (max-width: 900px) {
+        .program-tile {
+          grid-template-columns: 1fr;
+        }
+
+        .program-tile__media {
+          min-height: 240px;
+        }
       }
 
-      .program-tile__media {
-        min-height: 240px;
+      @media (min-width: 900px) {
+        .program-faq__list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
       }
-    }
 
     @media (max-width: 1100px) {
       .programs-showcase {
@@ -258,9 +338,11 @@
 
     /* ambient blobs */
     .blob { filter: blur(60px); opacity: .65; }
-    @media (prefers-reduced-motion: reduce) {
-      .section-fade { transition: none; transform: none; opacity: 1; }
-    }
+      @media (prefers-reduced-motion: reduce) {
+        .section-fade { transition: none; transform: none; opacity: 1; }
+        .program-faq { transition: none; }
+        .program-tile__cta--toggle svg { transition: none; }
+      }
   </style>
 </head>
 
@@ -425,25 +507,81 @@
               </div>
             </article>
 
-            <article id="winter-junior" class="program-tile program-anchor">
-              <div class="program-tile__media">
-                <img class="program-tile__image" src="images/U14-West-Raiders.jpg" alt="Winter junior competition players" loading="eager" decoding="async" />
-                <span class="program-tile__tag">Winter</span>
+            <div class="program-block">
+              <article id="winter-junior" class="program-tile program-anchor">
+                <div class="program-tile__media">
+                  <img class="program-tile__image" src="images/U14-West-Raiders.jpg" alt="Winter junior competition players" loading="eager" decoding="async" />
+                  <span class="program-tile__tag">Winter</span>
+                </div>
+                <div class="program-tile__body">
+                  <span class="program-tile__kicker">Program details</span>
+                  <h2 class="program-tile__title">Winter Junior Competition</h2>
+                  <p class="program-tile__summary">
+                    Catering for U12 through to U18 players, the Winter Competition is the premier competition facilitated by Newcastle Basketball and runs through Terms 2 and 3 each year. West Basketball coordinates teams across all age groups and divisions, allocates coaches, coordinates training and skill development, and strives to ensure each player is placed in a team that suits their ability and preferences (e.g. friend requests, level of division, etc).<br>More information will be shared once registrations for 2026 open.
+                  </p>
+                  <button class="program-tile__cta program-tile__cta--toggle" type="button" data-faq-toggle="winter-junior-faq" aria-expanded="false" aria-controls="winter-junior-faq">
+                    More info
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </button>
+                </div>
+              </article>
+              <div id="winter-junior-faq" class="program-faq" data-faq-panel="winter-junior-faq" aria-hidden="true">
+                <div class="program-faq__inner">
+                  <div class="program-faq__list">
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">When will the registrations open for the 2026 season?</h3>
+                      <p class="program-faq__answer">We expect registrations to open in February, to allow clubs enough time to put together teams, coaches, training schedules, and be ready to start the competition in Term 2. The best way to keep across registrations opening is to follow us (and Newcastle Basketball) on Facebook, or keep an eye on our website where we will share information as it comes to hand. This will include information such as fees, playing nights, dates, and more.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">I would like to play with my friends, how do I arrange that?</h3>
+                      <p class="program-faq__answer">During the registration process there will be a field where you can add up to three friends you would like to play with (this is the only option the system provides). Please include this information so that when we are forming our teams we can try and accommodate requests where possible. If you have further requests please email us at westbasketballclubnewcastle@gmail.com so we can note this down. Equally, if you don't know anyone else playing or are happy to meet new friends we will find a team for you.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">The registration form asks for &quot;Registration Division&quot;, how do I answer this?</h3>
+                      <p class="program-faq__answer">This gives us some information about your playing level and self rated ability. For example, if you are wanting to trial for a Division 1 team (top division), it is important to list Division 1 here so that we add you to our trial lists. If you are currently playing Division 4 in Summer Comp and competing well, then we suggest you put Division 4 or 5 as a preference (winter comp is normally stronger than summer comp with all rep players obligated to play winter). If you are new to the sport and would like to start in a team with other new players, list Division 8. These division preferences are a guide only and your final division may be different, but we will try to keep it as close as possible.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">What game nights will I play or train?</h3>
+                      <p class="program-faq__answer">Most of our West teams have their training on a Sunday afternoon at Broadmeadow Stadium, but there may be some teams training mid-week depending on coach preference and availability. Game nights will be confirmed by Newcastle Basketball closer to the season start.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">How much are registration fees?</h3>
+                      <p class="program-faq__answer">In 2025 the winter season fees were $330 for the 18 week season, plus Annual Registration if yours is due: 8-11yrs ($93.50), 12-17yrs ($124.50). Prices for 2026 will be confirmed by Newcastle Basketball when competition information is released (around February).</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">Do I need to buy a uniform?</h3>
+                      <p class="program-faq__answer">We provide you a West singlet to wear for the season, to be returned after your final game. West shorts (green and red) are required, and there will be an opportunity to purchase them through our merchandise store once competition registrations open.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">I am keen to coach a team, where do I express my interest?</h3>
+                      <p class="program-faq__answer">Great! Please send us a message via Contact Us. All levels of experience are welcomed. We have experienced club coaches who can help with resources, suggestions, and even a visit to help run a training session for those new to coaching.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">I am interested in helping with the team, but can't commit to coaching, how can I help?</h3>
+                      <p class="program-faq__answer">Each team requires a team manager, which is a great way to help out. The role helps with setting a team chat, communicating information from the coach around training times and games, handing out singlets at the start of the season, and sharing messages from us. Let us know if you are keen to help.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">When will I find out my team?</h3>
+                      <p class="program-faq__answer">We aim to have this information released before the April school holidays via direct email. Training will normally start on the final weekend of school holidays, and games start in Week 1 of Term 2. We will also send contact lists to coaches and managers so they can set up a team chat for communications.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">What do I need to do if I want to play for a different club from last year's comp?</h3>
+                      <p class="program-faq__answer">Unless you are a representative player, you are free to choose your club of choice. There is no need for any formal transfer or request. Just wait until registrations open up at all clubs for new players and register to the club of your choice (all links will be available on Newcastle Basketball's website and social media). We have no issues if players prefer to move to another club. Equally, we are always happy to welcome new players.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">I would love to get more involved in the club, can I help at all?</h3>
+                      <p class="program-faq__answer">Glad you asked! We would love to have you involved, and welcome all volunteers whether you have a lot of time to give or a little. Our club operations (including season start up and presentation day) run on the fuel of many and are a great way to get involved in a fun and enthusiastic committee. Drop us an email at westbasketballclubnewcastle@gmail.com.</p>
+                    </article>
+                    <article class="program-faq__item">
+                      <h3 class="program-faq__question">HELP - I'm having trouble with my Basketball Connect profile, and need some assistance. Can you help?</h3>
+                      <p class="program-faq__answer">It is best to contact Newcastle Basketball for help with any Basketball Connect profile issues, as they have full access to the backend to resolve issues. We are limited in what we can see beyond player registrations and team allocations. Best to call during business hours on 4961 3185.</p>
+                    </article>
+                  </div>
+                </div>
               </div>
-              <div class="program-tile__body">
-                <span class="program-tile__kicker">Program details</span>
-                <h2 class="program-tile__title">Winter Junior Competition</h2>
-                <p class="program-tile__summary">
-                  Catering for U12 through to U18 players, the Winter Competition is the premier competition facilitated by Newcastle Basketball and runs through Terms 2 and 3 each year. West Basketball coordinates teams across all age groups and divisions, allocates coaches, coordinates training and skill development, and strives to ensure each player is placed in a team that suits their ability and preferences (e.g. friend requests, level of division, etc).<br>More information will be shared once registrations for 2026 open.
-                </p>
-                <a class="program-tile__cta" href="about.html#contact">
-                  Contact us
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                  </svg>
-                </a>
-              </div>
-            </article>
+            </div>
 
             <article id="summer-junior" class="program-tile program-anchor">
               <div class="program-tile__media">
@@ -554,11 +692,11 @@
   <script src="common.js"></script>
 
   <script>
-    function renderJoinContent() {
-      if (!hasOverrides()) return;
-      const joinPage = window.siteContent.pages?.join ?? {};
-      const setText = (id, value) => {
-        const el = document.getElementById(id);
+      function renderJoinContent() {
+        if (!hasOverrides()) return;
+        const joinPage = window.siteContent.pages?.join ?? {};
+        const setText = (id, value) => {
+          const el = document.getElementById(id);
         if (el) el.innerHTML = formatMultiline(value ?? "");
       };
 
@@ -645,65 +783,136 @@
 
         container.innerHTML = `
           <div class="programs-showcase">
-            ${orderedStreams.map((stream, index) => {
-              const steps = ((stream.steps && stream.steps.length)
-                ? stream.steps
-                : (stream.links || []).map((link) => link.label || link.href || "")).filter((s) => (s ?? "").toString().trim());
+              ${orderedStreams.map((stream, index) => {
+                const steps = ((stream.steps && stream.steps.length)
+                  ? stream.steps
+                  : (stream.links || []).map((link) => link.label || link.href || "")).filter((s) => (s ?? "").toString().trim());
 
-              const ctaLabel = stream.ctaLabel || baseSignUpLabel;
-              const ctaHref = (stream.ctaHref || baseSignUpHref || "").trim();
-              const hasCta = !!ctaHref;
-              const imageSrc = (stream.image || stream.imageSrc || stream.photo || "").toString().trim() || programImages[index % programImages.length];
-              const imageAlt = (stream.imageAlt || stream.badge || stream.title || "Program").toString();
-              const badge = (stream.badge || stream.title || "Program").toString();
-              const kicker = (stream.kicker || "Program details").toString();
-              const title = (stream.title || badge || "Program").toString();
-              const description = stream.description ? formatMultiline(stream.description) : "";
-              const anchorId = (stream.id || "").toString().trim();
-              const anchorAttr = anchorId ? `id="${escapeHtml(anchorId)}"` : "";
+                const anchorId = (stream.id || "").toString().trim();
+                const anchorAttr = anchorId ? `id="${escapeHtml(anchorId)}"` : "";
+                const faqs = Array.isArray(stream.faqs)
+                  ? stream.faqs.filter((item) => item && (item.question || item.answer))
+                  : [];
+                const hasFaqs = faqs.length > 0;
+                const faqId = hasFaqs ? `${anchorId || `stream-${index}`}-faq` : "";
+                const moreInfoLabel = (stream.moreInfoLabel || "More info").toString();
+                const ctaLabel = stream.ctaLabel || baseSignUpLabel;
+                const ctaHref = (stream.ctaHref || baseSignUpHref || "").trim();
+                const hasCta = !!ctaHref && !hasFaqs;
+                const imageSrc = (stream.image || stream.imageSrc || stream.photo || "").toString().trim() || programImages[index % programImages.length];
+                const imageAlt = (stream.imageAlt || stream.badge || stream.title || "Program").toString();
+                const badge = (stream.badge || stream.title || "Program").toString();
+                const kicker = (stream.kicker || "Program details").toString();
+                const title = (stream.title || badge || "Program").toString();
+                const description = stream.description ? formatMultiline(stream.description) : "";
+                const faqMarkup = hasFaqs
+                  ? `
+                    <div id="${escapeHtml(faqId)}" class="program-faq" data-faq-panel="${escapeHtml(faqId)}" aria-hidden="true">
+                      <div class="program-faq__inner">
+                        <div class="program-faq__list">
+                          ${faqs
+                            .map(
+                              (item) => `
+                            <article class="program-faq__item">
+                              ${item.question ? `<h3 class="program-faq__question">${escapeHtml(item.question)}</h3>` : ""}
+                              ${item.answer ? `<p class="program-faq__answer">${formatMultiline(item.answer)}</p>` : ""}
+                            </article>
+                          `
+                            )
+                            .join("")}
+                        </div>
+                      </div>
+                    </div>
+                  `
+                  : "";
 
-              return `
-                <article ${anchorAttr} class="program-tile program-anchor">
-                  <div class="program-tile__media">
-                    <img class="program-tile__image" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" loading="eager" decoding="async" />
-                    <span class="program-tile__tag">${escapeHtml(badge)}</span>
+                return `
+                  <div class="program-block">
+                    <article ${anchorAttr} class="program-tile program-anchor">
+                      <div class="program-tile__media">
+                        <img class="program-tile__image" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" loading="eager" decoding="async" />
+                        <span class="program-tile__tag">${escapeHtml(badge)}</span>
+                      </div>
+                      <div class="program-tile__body">
+                        <span class="program-tile__kicker">${escapeHtml(kicker)}</span>
+                        <h2 class="program-tile__title">${escapeHtml(title)}</h2>
+                        ${description ? `<p class="program-tile__summary">${description}</p>` : ""}
+                        ${steps.length ? `
+                          <ul class="program-tile__steps">
+                            ${steps.map((step) => `<li>${formatMultiline(step || "")}</li>`).join("")}
+                          </ul>
+                        ` : ""}
+                        ${hasFaqs ? `
+                          <button class="program-tile__cta program-tile__cta--toggle" type="button" data-faq-toggle="${escapeHtml(faqId)}" aria-expanded="false" aria-controls="${escapeHtml(faqId)}">
+                            ${escapeHtml(moreInfoLabel)}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                          </button>
+                        ` : ""}
+                        ${hasCta ? `
+                          <a class="program-tile__cta" href="${escapeHtml(ctaHref)}">
+                            ${escapeHtml(ctaLabel)}
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                            </svg>
+                          </a>
+                        ` : ""}
+                      </div>
+                    </article>
+                    ${hasFaqs ? faqMarkup : ""}
                   </div>
-                  <div class="program-tile__body">
-                    <span class="program-tile__kicker">${escapeHtml(kicker)}</span>
-                    <h2 class="program-tile__title">${escapeHtml(title)}</h2>
-                    ${description ? `<p class="program-tile__summary">${description}</p>` : ""}
-                    ${steps.length ? `
-                      <ul class="program-tile__steps">
-                        ${steps.map((step) => `<li>${formatMultiline(step || "")}</li>`).join("")}
-                      </ul>
-                    ` : ""}
-                    ${hasCta ? `
-                      <a class="program-tile__cta" href="${escapeHtml(ctaHref)}">
-                        ${escapeHtml(ctaLabel)}
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                        </svg>
-                      </a>
-                    ` : ""}
-                  </div>
-                </article>
-              `;
-            }).join("")}
-          </div>
-        `;
+                `;
+              }).join("")}
+            </div>
+          `;
+        }
       }
-    }
 
-    document.addEventListener('DOMContentLoaded', () => {
-      renderNav('join');
-      renderFooter();
-      renderJoinContent();
-      initContactModal();
+      function bindJoinFaqToggles() {
+        const toggles = document.querySelectorAll("[data-faq-toggle]");
+        toggles.forEach((toggle) => {
+          if (toggle.dataset.faqBound === "true") return;
+          const targetId = toggle.getAttribute("data-faq-toggle");
+          const panel = targetId ? document.querySelector(`[data-faq-panel="${targetId}"]`) : null;
+          if (!panel) return;
+          toggle.dataset.faqBound = "true";
 
-      const fadeSections = document.querySelectorAll('.section-fade');
-      if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
+          const setOpen = (open) => {
+            toggle.setAttribute("aria-expanded", open ? "true" : "false");
+            panel.classList.toggle("is-open", open);
+            panel.setAttribute("aria-hidden", open ? "false" : "true");
+            panel.style.maxHeight = open ? `${panel.scrollHeight}px` : "0px";
+          };
+
+          setOpen(false);
+          toggle.addEventListener("click", () => {
+            const isOpen = toggle.getAttribute("aria-expanded") === "true";
+            setOpen(!isOpen);
+          });
+        });
+
+        if (!window.__joinFaqResizeBound) {
+          window.__joinFaqResizeBound = true;
+          window.addEventListener("resize", () => {
+            document.querySelectorAll(".program-faq.is-open").forEach((panel) => {
+              panel.style.maxHeight = `${panel.scrollHeight}px`;
+            });
+          });
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        renderNav('join');
+        renderFooter();
+        renderJoinContent();
+        initContactModal();
+        bindJoinFaqToggles();
+
+        const fadeSections = document.querySelectorAll('.section-fade');
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
             if (entry.isIntersecting) entry.target.classList.add('visible');
           });
         }, { threshold: 0.12 });
@@ -714,12 +923,13 @@
       }
     });
 
-    window.addEventListener('sitecontent:updated', () => {
-      renderNav('join');
-      renderFooter();
-      renderJoinContent();
-      initContactModal();
-    });
-  </script>
+      window.addEventListener('sitecontent:updated', () => {
+        renderNav('join');
+        renderFooter();
+        renderJoinContent();
+        initContactModal();
+        bindJoinFaqToggles();
+      });
+    </script>
 </body>
 </html>

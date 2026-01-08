@@ -137,74 +137,12 @@ const defaultSiteData = {
     ],
     initiativesTitle: "Representative pathways",
     initiativesSubtitle: "Opportunities that extend beyond club competitions.",
-    initiatives: [
-      { title: "State & national programs", tag: "Pathway", description: "Support for selections including NSW U12 Jamboree, U14 Club Nationals, and NSW Country squads." },
-      { title: "School representation", tag: "Schools", description: "Players represent across PSSA, CHS, CIS, and CCS competitions." },
-      { title: "Development programs", tag: "Programs", description: "Pathways through BNSW Talented Athlete Program, Southern Cross Challenge, and other events." }
-    ],
-    faqs: [
-      {
-        question: "When will the registrations open for the 2026 season?",
-        answer:
-          "We expect registrations to open in February, to allow clubs enough time to put together teams, coaches, training schedules, and be ready to start the competition in Term 2. The best way to keep across registrations opening is to follow us (and Newcastle Basketball) on Facebook, or keep an eye on our website where we will share information as it comes to hand. This will include information such as fees, playing nights, dates, and more."
-      },
-      {
-        question: "I would like to play with my friends, how do I arrange that?",
-        answer:
-          "During the registration process there will be a field where you can add up to three friends you would like to play with (this is the only option the system provides). Please include this information so that when we are forming our teams we can try and accommodate requests where possible. If you have further requests please email us at westbasketballclubnewcastle@gmail.com so we can note this down. Equally, if you don't know anyone else playing or are happy to meet new friends we will find a team for you."
-      },
-      {
-        question: "The registration form asks for \"Registration Division\", how do I answer this?",
-        answer:
-          "This gives us some information about your playing level and self rated ability. For example, if you are wanting to trial for a Division 1 team (top division), it is important to list Division 1 here so that we add you to our trial lists. If you are currently playing Division 4 in Summer Comp and competing well, then we suggest you put Division 4 or 5 as a preference (winter comp is normally stronger than summer comp with all rep players obligated to play winter). If you are new to the sport and would like to start in a team with other new players, list Division 8. These division preferences are a guide only and your final division may be different, but we will try to keep it as close as possible."
-      },
-      {
-        question: "What game nights will I play or train?",
-        answer:
-          "Most of our West teams have their training on a Sunday afternoon at Broadmeadow Stadium, but there may be some teams training mid-week depending on coach preference and availability. Game nights will be confirmed by Newcastle Basketball closer to the season start."
-      },
-      {
-        question: "How much are registration fees?",
-        answer:
-          "In 2025 the winter season fees were $330 for the 18 week season, plus Annual Registration if yours is due: 8-11yrs ($93.50), 12-17yrs ($124.50). Prices for 2026 will be confirmed by Newcastle Basketball when competition information is released (around February)."
-      },
-      {
-        question: "Do I need to buy a uniform?",
-        answer:
-          "We provide you a West singlet to wear for the season, to be returned after your final game. West shorts (green and red) are required, and there will be an opportunity to purchase them through our merchandise store once competition registrations open."
-      },
-      {
-        question: "I am keen to coach a team, where do I express my interest?",
-        answer:
-          "Great! Please send us a message via Contact Us. All levels of experience are welcomed. We have experienced club coaches who can help with resources, suggestions, and even a visit to help run a training session for those new to coaching."
-      },
-      {
-        question: "I am interested in helping with the team, but can't commit to coaching, how can I help?",
-        answer:
-          "Each team requires a team manager, which is a great way to help out. The role helps with setting a team chat, communicating information from the coach around training times and games, handing out singlets at the start of the season, and sharing messages from us. Let us know if you are keen to help."
-      },
-      {
-        question: "When will I find out my team?",
-        answer:
-          "We aim to have this information released before the April school holidays via direct email. Training will normally start on the final weekend of school holidays, and games start in Week 1 of Term 2. We will also send contact lists to coaches and managers so they can set up a team chat for communications."
-      },
-      {
-        question: "What do I need to do if I want to play for a different club from last year's comp?",
-        answer:
-          "Unless you are a representative player, you are free to choose your club of choice. There is no need for any formal transfer or request. Just wait until registrations open up at all clubs for new players and register to the club of your choice (all links will be available on Newcastle Basketball's website and social media). We have no issues if players prefer to move to another club. Equally, we are always happy to welcome new players."
-      },
-      {
-        question: "I would love to get more involved in the club, can I help at all?",
-        answer:
-          "Glad you asked! We would love to have you involved, and welcome all volunteers whether you have a lot of time to give or a little. Our club operations (including season start up and presentation day) run on the fuel of many and are a great way to get involved in a fun and enthusiastic committee. Drop us an email at westbasketballclubnewcastle@gmail.com."
-      },
-      {
-        question: "HELP - I'm having trouble with my Basketball Connect profile, and need some assistance. Can you help?",
-        answer:
-          "It is best to contact Newcastle Basketball for help with any Basketball Connect profile issues, as they have full access to the backend to resolve issues. We are limited in what we can see beyond player registrations and team allocations. Best to call during business hours on 4961 3185."
-      }
-    ]
-  },
+      initiatives: [
+        { title: "State & national programs", tag: "Pathway", description: "Support for selections including NSW U12 Jamboree, U14 Club Nationals, and NSW Country squads." },
+        { title: "School representation", tag: "Schools", description: "Players represent across PSSA, CHS, CIS, and CCS competitions." },
+        { title: "Development programs", tag: "Programs", description: "Pathways through BNSW Talented Athlete Program, Southern Cross Challenge, and other events." }
+      ]
+    },
   join: {
     u8u10:
       "Our U8 and U10 programs focus on fundamentals and fun. Short games, high ball touches, and coaches who prioritise encouragement.",
@@ -408,15 +346,76 @@ const defaultSiteData = {
           ctaLabel: "Development info",
           ctaHref: "https://www.newcastlebasketball.com.au/"
         },
-        {
-          id: "winter-junior",
-          title: "Winter Junior Competition",
-          badge: "Winter",
-          description:
-            "Catering for U12 through to U18 players, the Winter Competition is the premier competition facilitated by Newcastle Basketball and runs through Terms 2 and 3 each year. West Basketball coordinates teams across all age groups and divisions, allocates coaches, coordinates training and skill development, and strives to ensure each player is placed in a team that suits their ability and preferences (e.g. friend requests, level of division, etc).\nMore information will be shared once registrations for 2026 open.",
-          ctaLabel: "Contact us",
-          ctaHref: "about.html#contact"
-        },
+          {
+            id: "winter-junior",
+            title: "Winter Junior Competition",
+            badge: "Winter",
+            description:
+              "Catering for U12 through to U18 players, the Winter Competition is the premier competition facilitated by Newcastle Basketball and runs through Terms 2 and 3 each year. West Basketball coordinates teams across all age groups and divisions, allocates coaches, coordinates training and skill development, and strives to ensure each player is placed in a team that suits their ability and preferences (e.g. friend requests, level of division, etc).\nMore information will be shared once registrations for 2026 open.",
+            moreInfoLabel: "More info",
+            faqs: [
+              {
+                question: "When will the registrations open for the 2026 season?",
+                answer:
+                  "We expect registrations to open in February, to allow clubs enough time to put together teams, coaches, training schedules, and be ready to start the competition in Term 2. The best way to keep across registrations opening is to follow us (and Newcastle Basketball) on Facebook, or keep an eye on our website where we will share information as it comes to hand. This will include information such as fees, playing nights, dates, and more."
+              },
+              {
+                question: "I would like to play with my friends, how do I arrange that?",
+                answer:
+                  "During the registration process there will be a field where you can add up to three friends you would like to play with (this is the only option the system provides). Please include this information so that when we are forming our teams we can try and accommodate requests where possible. If you have further requests please email us at westbasketballclubnewcastle@gmail.com so we can note this down. Equally, if you don't know anyone else playing or are happy to meet new friends we will find a team for you."
+              },
+              {
+                question: "The registration form asks for \"Registration Division\", how do I answer this?",
+                answer:
+                  "This gives us some information about your playing level and self rated ability. For example, if you are wanting to trial for a Division 1 team (top division), it is important to list Division 1 here so that we add you to our trial lists. If you are currently playing Division 4 in Summer Comp and competing well, then we suggest you put Division 4 or 5 as a preference (winter comp is normally stronger than summer comp with all rep players obligated to play winter). If you are new to the sport and would like to start in a team with other new players, list Division 8. These division preferences are a guide only and your final division may be different, but we will try to keep it as close as possible."
+              },
+              {
+                question: "What game nights will I play or train?",
+                answer:
+                  "Most of our West teams have their training on a Sunday afternoon at Broadmeadow Stadium, but there may be some teams training mid-week depending on coach preference and availability. Game nights will be confirmed by Newcastle Basketball closer to the season start."
+              },
+              {
+                question: "How much are registration fees?",
+                answer:
+                  "In 2025 the winter season fees were $330 for the 18 week season, plus Annual Registration if yours is due: 8-11yrs ($93.50), 12-17yrs ($124.50). Prices for 2026 will be confirmed by Newcastle Basketball when competition information is released (around February)."
+              },
+              {
+                question: "Do I need to buy a uniform?",
+                answer:
+                  "We provide you a West singlet to wear for the season, to be returned after your final game. West shorts (green and red) are required, and there will be an opportunity to purchase them through our merchandise store once competition registrations open."
+              },
+              {
+                question: "I am keen to coach a team, where do I express my interest?",
+                answer:
+                  "Great! Please send us a message via Contact Us. All levels of experience are welcomed. We have experienced club coaches who can help with resources, suggestions, and even a visit to help run a training session for those new to coaching."
+              },
+              {
+                question: "I am interested in helping with the team, but can't commit to coaching, how can I help?",
+                answer:
+                  "Each team requires a team manager, which is a great way to help out. The role helps with setting a team chat, communicating information from the coach around training times and games, handing out singlets at the start of the season, and sharing messages from us. Let us know if you are keen to help."
+              },
+              {
+                question: "When will I find out my team?",
+                answer:
+                  "We aim to have this information released before the April school holidays via direct email. Training will normally start on the final weekend of school holidays, and games start in Week 1 of Term 2. We will also send contact lists to coaches and managers so they can set up a team chat for communications."
+              },
+              {
+                question: "What do I need to do if I want to play for a different club from last year's comp?",
+                answer:
+                  "Unless you are a representative player, you are free to choose your club of choice. There is no need for any formal transfer or request. Just wait until registrations open up at all clubs for new players and register to the club of your choice (all links will be available on Newcastle Basketball's website and social media). We have no issues if players prefer to move to another club. Equally, we are always happy to welcome new players."
+              },
+              {
+                question: "I would love to get more involved in the club, can I help at all?",
+                answer:
+                  "Glad you asked! We would love to have you involved, and welcome all volunteers whether you have a lot of time to give or a little. Our club operations (including season start up and presentation day) run on the fuel of many and are a great way to get involved in a fun and enthusiastic committee. Drop us an email at westbasketballclubnewcastle@gmail.com."
+              },
+              {
+                question: "HELP - I'm having trouble with my Basketball Connect profile, and need some assistance. Can you help?",
+                answer:
+                  "It is best to contact Newcastle Basketball for help with any Basketball Connect profile issues, as they have full access to the backend to resolve issues. We are limited in what we can see beyond player registrations and team allocations. Best to call during business hours on 4961 3185."
+              }
+            ]
+          },
         {
           id: "summer-junior",
           title: "Summer Junior Competition",
