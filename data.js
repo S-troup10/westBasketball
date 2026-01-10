@@ -64,15 +64,19 @@ const defaultSiteData = {
   news: [
     {
       title: "Winter season registrations now open",
-      date: "Feb 26",
+      date: "2026-02-26",
       summary: "Secure your spot for U8-U18 competitions. Early bird closes March 15.",
-      url: "join.html"
+      url: "join.html",
+      image: "images/U14-West-Raiders.jpg",
+      imageAlt: "West Basketball players preparing for winter season"
     },
     {
       title: "Holiday skills camp announced",
-      date: "Jan 30",
+      date: "2026-01-30",
       summary: "Three-day camp with guest coaches focusing on shooting and decision making.",
-      url: "about.html"
+      url: "about.html",
+      image: "images/mini-hoops.jpg",
+      imageAlt: "Junior players at skills camp"
     }
   ],
   quickLinks: [
@@ -103,23 +107,63 @@ const defaultSiteData = {
     intro:
       "West Basketball Newcastle is one of the largest and oldest basketball clubs in Newcastle, with a history spanning 60 years.\nWe provide opportunities for players aged U8 to U18 in healthy, safe, and fun basketball activities within a family-oriented environment. Our club is run by a group of passionate and committed individuals who have overseen the club doubling in size over the past five years. In 2025 we fielded 68 teams in the U12-U18 Winter Competition, and over 20 teams across the U8 and U10 competitions.",
     values: [
-      "Inclusive, safe, and enjoyable basketball for every family",
-      "Teamwork, fair play, and respect for all",
-      "Effort and improvement over results",
-      "Positive sideline voices and strong club culture",
-      "Player development at every age group",
-      "Community connections that last beyond the season"
+      "Inclusive, safe, and welcoming basketball for juniors and families.",
+      "Shared responsibility for fair play, positive conduct, and development.",
+      "Respect for Aboriginal and Torres Strait Islander peoples and our wider community."
     ],
     history:
       "We are proud to have many juniors represent across local and state-wide events and development programs including selections for the NSW U12 Jamboree, U14 Australian Club Nationals, U16 & U18 NSW Country teams, BNSW Talented Athlete Program, Southern Cross Challenge and additional BNSW Tournaments.\nMany of our juniors also represent in school regional and state teams across the PSSA, CHS, CIS and CCS programs, as well as the Newcastle Falcons representative program. To find out more about the pathways to higher level representation please reach out to us.",
+    historyTimeline: [
+      {
+        year: "1960s",
+        title: "Club foundations",
+        description: "Built on local volunteers and a deep love of the game, West established a proud basketball home in Newcastle.",
+        image: "images/prez.jpg"
+      },
+      {
+        year: "1980s",
+        title: "Community growth",
+        description: "The club grew alongside families and schools, shaping a culture of inclusion, respect, and fair play.",
+        image: "images/U12-Knights.jpg"
+      },
+      {
+        year: "2000s",
+        title: "Pathways emerge",
+        description: "Structured junior programs created clear pathways from fundamentals into competitive and representative teams.",
+        image: "images/mini-hoops.jpg"
+      },
+      {
+        year: "Today",
+        title: "Pride and momentum",
+        description: "West continues to expand its reach, celebrating effort, teamwork, and the strength of its club community.",
+        image: "images/prezq.jpg"
+      }
+    ],
     lifeMembers: [
-      "Al Herrington Volunteer of the Year: Peta Rafty",
-      "Junior Club Person of the Year: Poppy Harman",
-      "Karen Audet Club Person of the Year: Wendy Blackmore",
-      "Eric Harvey Junior Coach of the Year: Kiara Barr",
-      "Club Coach of the Year: Angelo Iosif"
+      { name: "Andrew Smith", bio: "Andrew has been a steady hand behind the scenes, supporting junior development and club growth year after year.", photo: "images/life-member.jpg" },
+      { name: "Karen Audet", bio: "Karen is known for her tireless volunteering and her commitment to a welcoming club culture for every family.", photo: "images/life-member.jpg" },
+      { name: "Eric Harvey", bio: "Eric has guided countless players and coaches, championing high standards and a love for the game.", photo: "images/life-member.jpg" },
+      { name: "Larry Davidson", bio: "Larry has played a key role in keeping the club strong, mentoring teams and supporting community initiatives.", photo: "images/life-member.jpg" }
     ],
     photos: ["images/U12-Knights.jpg", "images/U14-West-Raiders.jpg"],
+    highlightPhoto: "images/U12-Knights.jpg",
+    highlightVideo: "",
+    highlightPoster: "",
+    highlightAlt: "West Basketball spotlight",
+    spotlights: [
+      {
+        name: "Alex Carter",
+        role: "Player",
+        blurb: "A calm leader on court, Alex helps set the standard for effort and teamwork in every training session.",
+        photo: "images/U12-Knights.jpg"
+      },
+      {
+        name: "Taylor Nguyen",
+        role: "Coach",
+        blurb: "Taylor brings energy and structure to training, ensuring every athlete grows in confidence and skill.",
+        photo: "images/prez.jpg"
+      }
+    ],
     snapshotTitle: "Club at a glance",
     snapshotSubtitle: "A snapshot of West Basketball Newcastle today.",
     snapshotStats: [
@@ -180,10 +224,108 @@ const defaultSiteData = {
       heroKicker: "",
       heroTitle: "Building skills,",
       heroHighlight: "confidence, and community",
-      storyTag: "2025 Season",
-      storyTitle: "Awards & Results",
-      storySubtitle: "Celebrating our people and teams from the 2025 season.",
-      storyBlocks: [
+      programsTag: "Programs",
+      programsTitle: "Pathways for every player",
+        programs: [
+          {
+            title: "Mini Hoops (U8s)",
+            badge: "U8s",
+            description: "Ages 5-7. Saturday mornings with 3v3 games, on-court coaches, and skills stations each term.",
+            ctaLabel: "Mini Hoops (U8s)",
+            ctaHref: "join.html#u8s",
+            image: "images/mini-hoops.jpg",
+            imageAlt: "U8s mini hoops players"
+          },
+          {
+            title: "U10s Competition",
+            badge: "U10s",
+            description: "Ages 8-9. Thursday afternoon 5v5 plus select Sunday skills sessions. Runs Term 4, Term 1, then winter.",
+            ctaLabel: "U10s Competition",
+            ctaHref: "join.html#u10s",
+            image: "images/u10s.jpg",
+            imageAlt: "U10s players"
+          },
+          {
+            title: "Winter Junior Competition",
+            badge: "Winter",
+            description: "U12-U18 winter season (Terms 2-3). West coordinates teams, coaches, training, and placements by ability.",
+            ctaLabel: "Winter Junior Competition",
+            ctaHref: "join.html#winter-junior",
+            image: "images/U14-West-Raiders.jpg",
+            imageAlt: "Winter junior competition players"
+          },
+          {
+            title: "Summer Junior Competition",
+            badge: "Summer",
+            description: "U11-U17 summer competition run by Newcastle Basketball. Clubs do not form teams, ideal for extra games.",
+            ctaLabel: "Summer Junior Competition",
+            ctaHref: "join.html#summer-junior",
+            image: "images/U12-Knights.jpg",
+            imageAlt: "Summer junior competition players"
+          },
+          {
+            title: "Development & holiday Camps",
+            badge: "Programs",
+            description: "Mini Hoops (ages 3-5) to representative pathways. Holiday camps and skill programs run year round.",
+            ctaLabel: "Development and Holiday Camps",
+            ctaHref: "join.html#development-programs",
+            image: "images/prez.jpg",
+            imageAlt: "Development programs"
+          },
+          {
+            title: "Referee Pathways",
+            badge: "Referees",
+            description: "Juniors 12+ can train as referees. Grow your game knowledge, get involved, and earn money.",
+            ctaLabel: "Referee Pathways",
+            ctaHref: "join.html#referee-pathways",
+            image: "images/awards.jpg",
+            imageAlt: "Referee pathways"
+          }
+        ],
+      galleryTag: "Gallery",
+      galleryTitle: "On Court & In the Stands",
+      gallerySubtitle: "Capturing the spirit, teamwork, and memorable moments.",
+      featuredPhotos: [
+        { src: "images/prezq.jpg", title: "", subtitle: "" },
+        { src: "images/prez.jpg", title: "", subtitle: "" }
+      ],
+      quote: {
+        text: "\"West feels like family. Coaches are supportive and my kid loves every session.\"",
+        attribution: "- Local Parent"
+      },
+      newsTag: "Latest",
+      newsTitle: "Club News",
+      linksTag: "Navigate",
+      linksTitle: "Quick Links",
+      linksCardTitle: "",
+      linksCardText: "",
+      sponsorsTag: "Partners",
+      sponsorsTitle: "Our Sponsors",
+      sponsorsDescription: "We're grateful for the partners who keep our programs running strong.",
+      sponsorsCtaLabel: "Become a sponsor",
+      sponsorsCtaHref: "sponsors.html",
+      ctaTag: "Ready to play?",
+      ctaTitle: "Join West Basketball",
+      ctaHighlight: "Today",
+      ctaDescription: "Pick your age group, grab a uniform, and we'll see you on court. Coaches and volunteers always welcome.",
+      ctaPrimary: { label: "JOIN A TEAM", href: "join.html" },
+      ctaSecondary: { label: "COACH WITH US", href: "coaches.html" },
+      ctaTertiary: { label: "CONTACT US", href: "about.html#contact" }
+    },
+    about: {
+      heroTag: "Our Story",
+      heroTitle: "About",
+      heroHighlight: "West Basketball",
+      historyTitle: "Our History",
+      valuesTitle: "West Values",
+      lifeMembersTitle: "Life Members",
+      lifeDescription: "Honouring the people who have shaped West Basketball.",
+      valuesDocLabel: "Full document",
+      valuesDocUrl: "https://example.com/west-basketball-vision-values.pdf",
+      awardsTag: "2025 Season",
+      awardsTitle: "Awards & Results",
+      awardsSubtitle: "Celebrating our people and teams from the 2025 season.",
+      awardsBlocks: [
         {
           tag: "Awards",
           title: "Celebrating our People",
@@ -244,69 +386,13 @@ const defaultSiteData = {
           ]
         }
       ],
-      programsTag: "Programs",
-      programsTitle: "Pathways for every player",
-      programs: [
-        {
-          title: "U8-U10 Foundations",
-          badge: "Beginners",
-          description: "High-touch coaching, fun drills, and lots of ball touches to build confidence and love for the game.",
-          ctaLabel: "Learn more",
-          ctaHref: "join.html#u8u10"
-        },
-        {
-          title: "Juniors U12-U18",
-          badge: "Competition",
-          description: "Structured training blocks, game IQ development, and fitness to compete at the highest level.",
-          ctaLabel: "Learn more",
-          ctaHref: "join.html#juniors"
-        }
-      ],
-      galleryTag: "Gallery",
-      galleryTitle: "On Court & In the Stands",
-      gallerySubtitle: "Capturing the spirit, teamwork, and memorable moments.",
-      featuredPhotos: [
-        { src: "images/prezq.jpg", title: "", subtitle: "" },
-        { src: "images/prez.jpg", title: "", subtitle: "" }
-      ],
-      quote: {
-        text: "\"West feels like family. Coaches are supportive and my kid loves every session.\"",
-        attribution: "- Local Parent"
-      },
-      newsTag: "Latest",
-      newsTitle: "Club News",
-      linksTag: "Navigate",
-      linksTitle: "Quick Links",
-      linksCardTitle: "",
-      linksCardText: "",
-      sponsorsTag: "Partners",
-      sponsorsTitle: "Our Sponsors",
-      sponsorsDescription: "We're grateful for the partners who keep our programs running strong.",
-      sponsorsCtaLabel: "Become a sponsor",
-      sponsorsCtaHref: "sponsors.html",
-      ctaTag: "Ready to play?",
-      ctaTitle: "Join West Basketball",
-      ctaHighlight: "Today",
-      ctaDescription: "Pick your age group, grab a uniform, and we'll see you on court. Coaches and volunteers always welcome.",
-      ctaPrimary: { label: "JOIN A TEAM", href: "join.html" },
-      ctaSecondary: { label: "COACH WITH US", href: "coaches.html" },
-      ctaTertiary: { label: "CONTACT US", href: "about.html#contact" }
-    },
-    about: {
-      heroTag: "Our Story",
-      heroTitle: "About",
-      heroHighlight: "West Basketball",
-      historyTitle: "Our History",
-      valuesTitle: "West Values",
-      lifeMembersTitle: "Awards",
-      lifeDescription: "Celebrating our people.",
       faqTag: "FAQs",
       faqTitle: "Frequently Asked Questions",
       faqSubtitle: "",
-      extraTag: "Pathways",
-      extraTitle: "Higher level representation",
+      extraTag: "Spotlight",
+      extraTitle: "Spotlight: Player Name",
       extraText:
-        "We are proud of the pathways our players take into representative and school programs. If you would like to know more about development opportunities, please reach out to us.",
+        "A short highlight about a player, coach, or volunteer that captures their impact on the club and community.",
       contactTag: "Get in Touch",
       contactTitle: "Contact",
       contactHighlight: "Us",
@@ -546,28 +632,19 @@ const defaultSiteData = {
   }
 };
 
-// API base for the tiny server (change to your deployed server URL or leave blank for same-origin)
-const API_BASE = typeof window !== "undefined" && window.API_BASE ? window.API_BASE : "http://localhost:8000";
+const CONTENT_URL = "https://site-content-worker.simontroup27.workers.dev/content";
+if (typeof window !== "undefined") {
+  window.CONTENT_URL = CONTENT_URL;
+}
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
 function deepMerge(base, override) {
   if (!override) return JSON.parse(JSON.stringify(base));
+  if (Array.isArray(override)) {
+    return JSON.parse(JSON.stringify(override));
+  }
   if (Array.isArray(base)) {
-    const merged = [];
-    const overrideArr = Array.isArray(override) ? override : [];
-    const max = Math.max(base.length, overrideArr.length);
-    for (let i = 0; i < max; i++) {
-      const baseVal = base[i];
-      const overVal = overrideArr[i];
-      if (typeof baseVal === "object" && baseVal !== null && typeof overVal === "object" && overVal !== null && !Array.isArray(overVal)) {
-        merged.push(deepMerge(baseVal, overVal));
-      } else if (overVal !== undefined) {
-        merged.push(overVal);
-      } else if (baseVal !== undefined) {
-        merged.push(JSON.parse(JSON.stringify(baseVal)));
-      }
-    }
-    return merged;
+    return JSON.parse(JSON.stringify(base));
   }
 
   const result = { ...base };
@@ -587,17 +664,43 @@ function deepMerge(base, override) {
 
 let hasCachedOverrides = false;
 
+function migrateAwards(data) {
+  if (!data || !data.pages) return data;
+  if (!data.pages.about) data.pages.about = {};
+  if (!data.pages.home) data.pages.home = {};
+  const about = data.pages.about;
+  const home = data.pages.home;
+  const hasAboutAwards =
+    (about.awardsTag || "").trim() ||
+    (about.awardsTitle || "").trim() ||
+    (about.awardsSubtitle || "").trim() ||
+    (Array.isArray(about.awardsBlocks) && about.awardsBlocks.length);
+  const hasHomeStory =
+    (home.storyTag || "").trim() ||
+    (home.storyTitle || "").trim() ||
+    (home.storySubtitle || "").trim() ||
+    (Array.isArray(home.storyBlocks) && home.storyBlocks.length);
+
+  if (!hasAboutAwards && hasHomeStory) {
+    about.awardsTag = home.storyTag;
+    about.awardsTitle = home.storyTitle;
+    about.awardsSubtitle = home.storySubtitle;
+    about.awardsBlocks = home.storyBlocks;
+  }
+  return data;
+}
+
 function loadSiteData() {
   try {
     const cached = localStorage.getItem("clubSiteData");
     if (cached) {
       hasCachedOverrides = true;
-      return deepMerge(defaultSiteData, JSON.parse(cached));
+      return migrateAwards(deepMerge(defaultSiteData, JSON.parse(cached)));
     }
   } catch (err) {
     console.warn("Could not read saved site data", err);
   }
-  return JSON.parse(JSON.stringify(defaultSiteData));
+  return migrateAwards(JSON.parse(JSON.stringify(defaultSiteData)));
 }
 
 function isQuotaError(err) {
@@ -626,6 +729,15 @@ function stripDataUrls(data) {
 
   if (clone.about && Array.isArray(clone.about.photos)) {
     clone.about.photos = clone.about.photos.filter((src) => !isDataUrl(src));
+  }
+
+  if (Array.isArray(clone.news)) {
+    clone.news = clone.news.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const copy = { ...item };
+      if (isDataUrl(copy.image)) delete copy.image;
+      return copy;
+    });
   }
 
   if (clone.pages?.home?.featuredPhotos) {
@@ -679,7 +791,7 @@ async function fetchRemoteSiteData() {
       return; // Use cached data within TTL
     }
 
-    const res = await fetch(`${API_BASE}/api/content`, { cache: "no-store" });
+    const res = await fetch(CONTENT_URL);
     if (!res.ok) throw new Error(`Remote fetch failed: ${res.status}`);
     const remote = await res.json();
     const merged = deepMerge(defaultSiteData, remote);

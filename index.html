@@ -220,6 +220,46 @@
       gap: 24px;
     }
 
+    .news-card {
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .news-card:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255,255,255,0.16);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+    }
+    .news-card__meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.5);
+    }
+    .news-card__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #10b981;
+      box-shadow: 0 0 12px rgba(16,185,129,0.6);
+    }
+    .news-card__media img {
+      transition: transform 0.35s ease;
+    }
+    .news-card:hover .news-card__media img {
+      transform: scale(1.01);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .news-card,
+      .news-card__media img {
+        transition: none;
+      }
+      .news-card:hover {
+        transform: none;
+      }
+    }
+
     .program-tile {
       position: relative;
       border-radius: 24px;
@@ -620,36 +660,38 @@
               <span id="home-news-title" class="gradient-text">Club News</span>
             </h2>
           </div>
-          <div id="news-grid" class="space-y-4">
-            <article class="glass card-hover rounded-2xl p-6 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-white/40">Feb 26</span>
-                <span class="inline-flex items-center gap-1.5 text-xs text-primary">
-                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                  Latest
-                </span>
+          <div id="news-grid" class="space-y-6">
+            <article class="news-card glass rounded-2xl overflow-hidden group">
+              <div class="md:flex md:items-stretch">
+                <div class="flex-1 p-6 space-y-3">
+                  <div class="news-card__meta">
+                    <span class="news-card__dot"></span>
+                    <span>Feb 26</span>
+                  </div>
+                  <h3 class="text-lg font-bold text-white">Winter season registrations now open</h3>
+                  <p class="text-sm text-white/60 leading-relaxed">Secure your spot for U8-U18 competitions. Early bird closes March 15.</p>
+                  <a class="inline-flex items-center gap-2 text-sm text-primary font-medium group" href="join.html">
+                    Read more
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                  </a>
+                </div>
               </div>
-              <h3 class="text-lg font-bold text-white">Winter season registrations now open</h3>
-              <p class="text-sm text-white/60 leading-relaxed">Secure your spot for U8-U18 competitions. Early bird closes March 15.</p>
-              <a class="inline-flex items-center gap-2 text-sm text-primary font-medium group" href="join.html">
-                Read more
-                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-              </a>
             </article>
-            <article class="glass card-hover rounded-2xl p-6 space-y-3">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-white/40">Jan 30</span>
-                <span class="inline-flex items-center gap-1.5 text-xs text-primary">
-                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                  Latest
-                </span>
+            <article class="news-card glass rounded-2xl overflow-hidden group">
+              <div class="md:flex md:items-stretch">
+                <div class="flex-1 p-6 space-y-3">
+                  <div class="news-card__meta">
+                    <span class="news-card__dot"></span>
+                    <span>Jan 30</span>
+                  </div>
+                  <h3 class="text-lg font-bold text-white">Holiday skills camp announced</h3>
+                  <p class="text-sm text-white/60 leading-relaxed">Three-day camp with guest coaches focusing on shooting and decision making.</p>
+                  <a class="inline-flex items-center gap-2 text-sm text-primary font-medium group" href="about.html">
+                    Read more
+                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                  </a>
+                </div>
               </div>
-              <h3 class="text-lg font-bold text-white">Holiday skills camp announced</h3>
-              <p class="text-sm text-white/60 leading-relaxed">Three-day camp with guest coaches focusing on shooting and decision making.</p>
-              <a class="inline-flex items-center gap-2 text-sm text-primary font-medium group" href="about.html">
-                Read more
-                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-              </a>
             </article>
           </div>
         </div>
@@ -811,9 +853,6 @@
 
       setText("home-programs-tag", home.programsTag);
       setText("home-programs-title", home.programsTitle);
-      setText("home-story-tag", home.storyTag);
-      setText("home-story-title", home.storyTitle);
-      setFormatted("home-story-subtitle", home.storySubtitle);
       setText("home-gallery-tag", home.galleryTag);
       setText("home-gallery-title", home.galleryTitle);
       setFormatted("home-gallery-subtitle", home.gallerySubtitle);
@@ -836,56 +875,65 @@
       setText("home-cta-highlight", home.ctaHighlight);
       setFormatted("home-cta-body", home.ctaDescription);
 
-      const storyContainer = document.getElementById("home-story-blocks");
-      if (storyContainer) {
-        const storyBlocks = home.storyBlocks || [];
-        storyContainer.innerHTML = storyBlocks
-          .map(
-            (block) => `
-            <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
-              <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">${escapeHtml(block.tag || "Story")}</span>
-              <h3 class="text-2xl font-bold text-white">${escapeHtml(block.title || "")}</h3>
-              <p class="text-white/60 leading-relaxed">${formatMultiline(block.summary || "")}</p>
-              ${
-                block.bullets && block.bullets.length
-                  ? `<ul class="space-y-2 text-sm text-white/70 list-disc list-inside">` +
-                    block.bullets.map((line) => `<li>${escapeHtml(line)}</li>`).join("") +
-                    `</ul>`
-                  : ""
-              }
-            </article>
-          `
-          )
-          .join("\n");
-      }
-
       const programsContainer = document.getElementById("programs-list");
       if (programsContainer) {
+        const programsSection = programsContainer.closest(".programs-section") || programsContainer.closest("section");
         const streams = joinPage.streams || [];
-        if (!streams.length) {
+        const hasHomePrograms = Array.isArray(home.programs);
+        const homePrograms = hasHomePrograms
+          ? home.programs.filter((program) => program && (
+            program.title ||
+            program.description ||
+            program.ctaHref ||
+            program.ctaLabel ||
+            program.image ||
+            program.badge
+          ))
+          : [];
+        const baseSignUpHref = (joinPage.signUpHref || "join.html").toString().trim() || "join.html";
+        const baseJoinHref = baseSignUpHref.split("#")[0] || "join.html";
+        const combined = hasHomePrograms
+          ? homePrograms.map((program) => ({ type: "home", program }))
+          : streams.map((stream) => ({ type: "stream", stream }));
+
+        if (programsSection) {
+          programsSection.classList.toggle("hidden", !combined.length);
+        }
+        if (!combined.length) {
           programsContainer.innerHTML = "";
         } else {
-          const baseSignUpHref = (joinPage.signUpHref || "join.html").toString().trim() || "join.html";
-          const baseJoinHref = baseSignUpHref.split("#")[0] || "join.html";
-          const preferredOrder = ["juniors", "u8u10"];
-          const getStreamKey = (stream) => (stream.id || stream.title || "").toString().toLowerCase();
+          programsContainer.innerHTML = combined
+            .map((item, index) => {
+              if (item.type === "home") {
+                const program = item.program || {};
+                const badge = program.badge || program.title || "Program";
+                const cardTitle = program.title || badge || "Program";
+                const summary = summarizeText(program.description || "", 170);
+                const ctaLabel = program.ctaLabel || "Learn more";
+                const ctaHref = program.ctaHref || baseSignUpHref;
+                const image = (program.image || program.imageSrc || program.photo || programImages[index % programImages.length]).toString();
+                const imageAlt = (program.imageAlt || badge || cardTitle || "Program").toString();
 
-          const orderedStreams = streams
-            .map((stream, index) => ({ stream, index }))
-            .sort((a, b) => {
-              const aKey = getStreamKey(a.stream);
-              const bKey = getStreamKey(b.stream);
-              const aRank = preferredOrder.indexOf(aKey);
-              const bRank = preferredOrder.indexOf(bKey);
-              const aScore = aRank === -1 ? preferredOrder.length : aRank;
-              const bScore = bRank === -1 ? preferredOrder.length : bRank;
-              if (aScore !== bScore) return aScore - bScore;
-              return a.index - b.index;
-            })
-            .map((entry) => entry.stream);
+                return `
+                  <a class="program-tile" href="${escapeHtml(ctaHref)}">
+                    <img class="program-tile__image" src="${escapeHtml(image)}" alt="${escapeHtml(imageAlt)}" loading="lazy" decoding="async" />
+                    <div class="program-tile__body">
+                      <span class="program-tile__kicker">${escapeHtml(badge)}</span>
+                      <h3 class="program-tile__title">
+                        ${escapeHtml(cardTitle)}
+                      </h3>
+                      ${summary ? `
+                        <p class="program-tile__summary">
+                          ${escapeHtml(summary)}
+                        </p>
+                      ` : ""}
+                      <span class="program-tile__cta">${escapeHtml(ctaLabel)} ${arrowSm}</span>
+                    </div>
+                  </a>
+                `;
+              }
 
-          programsContainer.innerHTML = orderedStreams
-            .map((stream, index) => {
+              const stream = item.stream || {};
               const steps = ((stream.steps && stream.steps.length)
                 ? stream.steps
                 : (stream.links || []).map((link) => link.label || link.href || "")).filter((s) => (s ?? "").toString().trim());
@@ -896,11 +944,12 @@
               const streamId = (stream.id || "").toString().trim();
               const ctaLabel = cardTitle;
               const ctaHref = streamId ? `${baseJoinHref}#${streamId}` : baseSignUpHref;
-              const image = programImages[index % programImages.length];
+              const image = (stream.image || stream.imageSrc || stream.photo || programImages[index % programImages.length]).toString();
+              const imageAlt = (stream.imageAlt || badge || cardTitle || "Program").toString();
 
               return `
                 <a class="program-tile" href="${escapeHtml(ctaHref)}">
-                  <img class="program-tile__image" src="${escapeHtml(image)}" alt="${escapeHtml(badge)}" loading="lazy" decoding="async" />
+                  <img class="program-tile__image" src="${escapeHtml(image)}" alt="${escapeHtml(imageAlt)}" loading="lazy" decoding="async" />
                   <div class="program-tile__body">
                     <span class="program-tile__kicker">${escapeHtml(badge)}</span>
                     <h3 class="program-tile__title">

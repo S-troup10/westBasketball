@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Worker JSON Test</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0a0a0a;
+      color: #f8fafc;
+    }
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 3rem;
+    }
+    h1 {
+      margin-bottom: 1rem;
+      font-size: 1.75rem;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    button {
+      background: #10b981;
+      color: #0a0a0a;
+      border: none;
+      border-radius: 999px;
+      padding: 0.7rem 1.6rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(16,185,129,0.3);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+    .status {
+      font-size: 0.95rem;
+      color: rgba(248,250,252,0.7);
+    }
+    pre {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 1.25rem;
+      border-radius: 16px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Fetch Worker JSON</h1>
+    <div class="controls">
+      <button id="fetch-json">Fetch JSON</button>
+      <span id="status" class="status">Ready.</span>
+    </div>
+    <pre id="output">Click "Fetch JSON" to load content.</pre>
+  </main>
+
+  <script>
+    const CONTENT_URL = "https://site-content-worker.simontroup27.workers.dev/content";
+    const button = document.getElementById("fetch-json");
+    const status = document.getElementById("status");
+    const output = document.getElementById("output");
+
+    const setStatus = (text) => {
+      status.textContent = text;
+    };
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      setStatus("Fetching...");
+      output.textContent = "Loading...";
+      try {
+        const resp = await fetch(CONTENT_URL, { cache: "no-store" });
+        if (!resp.ok) {
+          throw new Error(`Request failed (${resp.status})`);
+        }
+        const data = await resp.json();
+        output.textContent = JSON.stringify(data, null, 2);
+        setStatus("Fetched successfully.");
+      } catch (err) {
+        output.textContent = `Error: ${err.message}`;
+        setStatus("Fetch failed.");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

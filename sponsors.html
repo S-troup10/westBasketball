@@ -155,7 +155,7 @@
               <span id="sponsors-cta-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Partner With Us</span>
               <h2 class="text-4xl font-bold mt-4 mb-6"><span id="sponsors-cta-title">Become a</span> <span id="sponsors-cta-highlight" class="gradient-text">Sponsor</span></h2>
               <p id="sponsors-cta-desc" class="text-white/70 mb-6">We'd love to talk to any interested businesses and are open to discuss uniform sponsorship options or any other mutually beneficial sponsorships arrangements. It's an exciting time for our club and we look forward to taking the court in 2026 in our updated uniforms while helping to promote businesses with similar community spirit and values. Please reach out to discuss further and we will be in touch.</p>
-              <a id="sponsors-cta-button" href="about.html#contact" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold">
+              <a id="sponsors-cta-button" href="about.html#contact" data-contact-trigger="true" class="btn-primary inline-flex items-center gap-2 rounded-full px-8 py-4 text-white font-semibold contact-modal-trigger">
                 Contact us
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
               </a>
@@ -211,6 +211,8 @@
       if (ctaBtn) {
         ctaBtn.innerHTML = `${page.ctaLabel || "Get in touch"} ${arrow}`;
         ctaBtn.href = page.ctaHref || "mailto:sponsorship@westbasketball.com.au";
+        ctaBtn.setAttribute("data-contact-trigger", "true");
+        ctaBtn.classList.add("contact-modal-trigger");
       }
       const features = document.getElementById("sponsors-features");
       if (features) {
@@ -232,6 +234,7 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderNav('sponsors');
       renderFooter();
+      initContactModal();
       renderSponsors('sponsor-page-logos');
       renderSponsorsCopy();
       
@@ -252,6 +255,7 @@
     window.addEventListener('sitecontent:updated', () => {
       renderNav('sponsors');
       renderFooter();
+      initContactModal();
       renderSponsors('sponsor-page-logos');
       renderSponsorsCopy();
     });

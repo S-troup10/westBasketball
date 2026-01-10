@@ -46,6 +46,52 @@
       box-shadow: 0 0 0 3px rgba(16,185,129, 0.1);
     }
     .input-field::placeholder { color: rgba(255,255,255,0.3); }
+    .input-field[type="date"] {
+      padding-right: 2.75rem;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f8fafc' stroke-opacity='0.6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2' ry='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 0.85rem center;
+      background-size: 1rem;
+    }
+    .field-label { display: block; margin-bottom: 0.35rem; }
+    .image-upload-area { width: 100%; max-width: 360px; }
+    .image-upload-area.is-wide { max-width: 100%; }
+    .image-upload-area .upload-preview,
+    .image-upload-area .upload-placeholder {
+      aspect-ratio: 4 / 3;
+    }
+    .image-upload-area .upload-preview { height: auto !important; max-height: 220px; }
+    .image-upload-area .upload-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      width: 100%;
+    }
+    .image-upload-area .upload-preview--logo,
+    .image-upload-area .upload-placeholder--logo {
+      aspect-ratio: 1 / 1;
+      max-height: 160px;
+    }
+    .admin-tab {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      color: rgba(248,250,252,0.85);
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+    .admin-tab:hover { border-color: rgba(16,185,129,0.5); color: #f8fafc; }
+    .admin-tab--active {
+      background: linear-gradient(135deg, rgba(16,185,129,0.35), rgba(6,214,160,0.18));
+      border-color: rgba(16,185,129,0.6);
+      color: #f8fafc;
+      box-shadow: 0 8px 24px rgba(16,185,129,0.18);
+    }
   </style>
 </head>
 <body class="text-light min-h-screen">
@@ -166,16 +212,12 @@
   const submitBtn = document.getElementById("password-submit");
   const errorMsg = document.getElementById("password-error");
   const ttlMs = 60 * 60 * 1000; // 1 hour
-  const apiBase = (window.API_BASE && window.API_BASE) || "http://localhost:8000";
+  const authUrl = "https://site-content-worker.simontroup27.workers.dev/auth";
 
   function sessionValid() {
     const accessExpires = parseInt(localStorage.getItem("adminAccessExpires") || "0", 10);
-    const tokenExpires = parseInt(localStorage.getItem("adminApiTokenExpires") || "0", 10);
-    const hasToken = !!localStorage.getItem("adminApiToken");
     return (
       accessExpires > Date.now() &&
-      tokenExpires > Date.now() &&
-      hasToken &&
       localStorage.getItem("adminAccess") === "granted"
     );
   }
@@ -193,27 +235,30 @@
     const value = input.value.trim();
 
     try {
-      const res = await fetch(`${apiBase}/api/login`, {
+      const res = await fetch(authUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Password": value
+        },
         body: JSON.stringify({ password: value })
       });
-      if (!res.ok) throw new Error("bad credentials");
-      const { token } = await res.json();
-      if (!token) throw new Error("no token");
+      const text = await res.text();
+      if (!res.ok) throw new Error(text || "bad credentials");
 
       const expires = Date.now() + ttlMs;
       localStorage.setItem("adminAccess", "granted");
       localStorage.setItem("adminAccessExpires", expires.toString());
-      localStorage.setItem("adminApiToken", token);
-      localStorage.setItem("adminApiTokenExpires", expires.toString());
-      localStorage.removeItem("adminPassword");
+      localStorage.setItem("adminPassword", value);
+      localStorage.removeItem("adminApiToken");
+      localStorage.removeItem("adminApiTokenExpires");
       modal.classList.add("opacity-0", "pointer-events-none");
       setTimeout(() => modal.remove(), 300);
       window.dispatchEvent(new Event("admin:unlocked"));
     } catch (err) {
+      errorMsg.textContent = err?.message ? `Login failed: ${err.message}` : "Incorrect password.";
       errorMsg.classList.remove("hidden");
-      setTimeout(() => { window.location.href = "index.html"; }, 1200);
+      setTimeout(() => { window.location.href = "index.html"; }, 1500);
     }
   }
 
@@ -250,8 +295,20 @@
       </div>
     </div>
     <p id="admin-toast" class="text-sm text-primary hidden glass rounded-xl px-4 py-2 inline-block">Saved</p>
+    <div id="admin-tabs" class="flex flex-wrap gap-2 glass rounded-2xl px-4 py-3">
+      <button type="button" class="admin-tab admin-tab--active" data-admin-tab="all">All</button>
+      <button type="button" class="admin-tab" data-admin-tab="home">Home</button>
+      <button type="button" class="admin-tab" data-admin-tab="about">About</button>
+      <button type="button" class="admin-tab" data-admin-tab="join">Join</button>
+      <button type="button" class="admin-tab" data-admin-tab="training">Training</button>
+      <button type="button" class="admin-tab" data-admin-tab="coaches">Coaching</button>
+      <button type="button" class="admin-tab" data-admin-tab="sponsors">Sponsors</button>
+      <button type="button" class="admin-tab" data-admin-tab="gallery">Gallery</button>
+      <button type="button" class="admin-tab" data-admin-tab="merch">Merchandise</button>
+      <button type="button" class="admin-tab" data-admin-tab="global">Global</button>
+    </div>
 
-        <section class="glass rounded-3xl p-6 space-y-4">
+        <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="home">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -265,7 +322,7 @@
     </section>
 
 
-        <section class="glass rounded-3xl p-6 space-y-4">
+        <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="gallery">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -287,8 +344,8 @@
     </section>
 
 
-    <section class="grid md:grid-cols-2 gap-6">
-      <div class="glass rounded-3xl p-6 space-y-4">
+    <section class="grid md:grid-cols-2 gap-6" data-admin-group>
+      <div class="glass rounded-3xl p-6 space-y-4" data-admin-page="home">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
             <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -300,7 +357,7 @@
         </div>
         <div id="quick-links-list"></div>
       </div>
-      <div class="glass rounded-3xl p-6 space-y-4">
+      <div class="glass rounded-3xl p-6 space-y-4" data-admin-page="home sponsors">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
             <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -315,8 +372,8 @@
     </section>
    
 
-    <section class="grid md:grid-cols-2 gap-6">
-      <div class="glass rounded-3xl p-6 space-y-4">
+    <section class="grid md:grid-cols-2 gap-6" data-admin-group>
+      <div class="glass rounded-3xl p-6 space-y-4" data-admin-page="home">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
@@ -332,7 +389,7 @@
           <input id="hero-secondary-href" class="input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Secondary button link" />
         </div>
       </div>
-      <div class="glass rounded-3xl p-6 space-y-4">
+      <div class="glass rounded-3xl p-6 space-y-4" data-admin-page="global">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
@@ -344,7 +401,6 @@
           <input id="club-short-name" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Short name" />
         </div>
         <input id="club-tagline" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Tagline" />
-        <textarea id="club-intro" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Landing page intro"></textarea>
       </div>
     </section>
 
@@ -353,8 +409,8 @@
 
 
 
-    <section class="grid md:grid-cols-2 gap-6">
-      <div class="glass rounded-3xl p-6 space-y-4">
+    <section class="grid md:grid-cols-2 gap-6" data-admin-group>
+      <div class="glass rounded-3xl p-6 space-y-4" data-admin-page="home">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-bold text-white flex items-center gap-2">
             <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -366,46 +422,35 @@
         </div>
         <div id="home-programs-list"></div>
       </div>
-      <div class="glass rounded-3xl p-6 space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold text-white flex items-center gap-2">
-            <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-              <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18"></path></svg>
-            </span>
-            Homepage Featured Photos
-          </h2>
-          <span class="text-xs text-white/40">Large gallery cards</span>
-        </div>
-        <div id="home-featured-photos"></div>
-      </div>
+      
     </section>
 
-    <section class="glass rounded-3xl p-6 space-y-4">
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="about">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6m-7 4h8m-9 4h10m-11 4h12"></path></svg>
           </span>
-          Homepage Story Blocks
+          About Page: Awards &amp; Results Cards
         </h2>
-        <span class="text-xs text-white/40">History, last season, awards</span>
+        <span class="text-xs text-white/40">Cards in the About Awards &amp; Results section</span>
       </div>
-      <p class="text-white/50 text-sm">Each block uses a heading, short blurb, and dot points.</p>
+      <p class="text-white/50 text-sm">Each card uses a heading, short blurb, and dot points.</p>
       <div class="grid md:grid-cols-3 gap-3">
-        <input id="home-story-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Section tag" />
-        <input id="home-story-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Section title" />
-        <textarea id="home-story-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none md:col-span-3" placeholder="Section subtitle"></textarea>
+        <input id="about-awards-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Section tag" />
+        <input id="about-awards-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Section title" />
+        <textarea id="about-awards-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none md:col-span-3" placeholder="Section subtitle"></textarea>
       </div>
-      <div id="home-story-list"></div>
+      <div id="about-awards-list"></div>
     </section>
 
-    <section class="glass rounded-3xl p-6 space-y-4">
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="home">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"></path></svg>
           </span>
-          Homepage Quote
+          Home Page: Gallery Quote
         </h2>
         <span class="text-xs text-white/40">Shown on landing gallery section</span>
       </div>
@@ -413,12 +458,24 @@
       <input id="home-quote-attrib-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Attribution" />
     </section>
 
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="home">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18v18H3V3zm3 4h12v8H6V7zm2 10h8v2H8v-2z"></path></svg>
+          </span>
+          Home Page: Featured Gallery Photos
+        </h2>
+        <span class="text-xs text-white/40">Gallery tiles under the homepage gallery</span>
+      </div>
+      <div id="home-featured-list"></div>
+    </section>
 
 
 
 
-    <section class="grid md:grid-cols-2 gap-6">
-      <div class="glass rounded-3xl p-6 space-y-4">
+
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="about">
         <h2 class="text-xl font-bold text-white">About Page</h2>
         <div class="grid md:grid-cols-2 gap-3">
           <input id="about-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
@@ -430,9 +487,65 @@
         </div>
         <textarea id="about-intro-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Intro"></textarea>
         <textarea id="about-history-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="History"></textarea>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">History Timeline</p>
+            <span class="text-xs text-white/40">4 nodes shown on the about timeline</span>
+          </div>
+          <div id="about-history-timeline-list"></div>
+        </div>
         <textarea id="about-values-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Values (one per line)"></textarea>
-        <textarea id="about-members-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Life members (one per line)"></textarea>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="about-values-link-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Values link label" />
+          <input id="about-values-link-url-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Values link URL" />
+        </div>
         <textarea id="about-life-desc-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Life members description"></textarea>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Life Members</p>
+            <span class="text-xs text-white/40">Name, bio, and photo</span>
+          </div>
+          <div id="about-life-members-list"></div>
+        </div>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Community Highlights</p>
+            <span class="text-xs text-white/40">Spotlight cards on about page</span>
+          </div>
+          <div id="about-spotlights-list"></div>
+        </div>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Spotlight Media (fallback)</p>
+            <span class="text-xs text-white/40">Used if no spotlights are added</span>
+          </div>
+          <div class="grid md:grid-cols-2 gap-3">
+            <div class="space-y-2 md:col-span-2">
+              <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Highlight image upload</label>
+              <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('about-highlight-photo-input').click()">
+                <img id="about-highlight-photo-preview" src="" alt="Highlight preview" class="hidden w-full object-cover rounded-lg mb-3 upload-preview" />
+                <div id="about-highlight-photo-placeholder" class="space-y-2 upload-placeholder">
+                  <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  <p class="text-sm text-white/50">Click to upload highlight image</p>
+                </div>
+                <input type="file" id="about-highlight-photo-input" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'aboutHighlightPhoto', 'about-highlight-photo-preview', 'about-highlight-photo-placeholder')" />
+              </div>
+            </div>
+            <input id="about-highlight-video-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Highlight video URL" />
+            <input id="about-highlight-alt-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Highlight image alt text" />
+            <div class="space-y-2 md:col-span-2">
+              <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Video poster upload</label>
+              <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('about-highlight-poster-input').click()">
+                <img id="about-highlight-poster-preview" src="" alt="Poster preview" class="hidden w-full object-cover rounded-lg mb-3 upload-preview" />
+                <div id="about-highlight-poster-placeholder" class="space-y-2 upload-placeholder">
+                  <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  <p class="text-sm text-white/50">Click to upload poster image</p>
+                </div>
+                <input type="file" id="about-highlight-poster-input" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'aboutHighlightPoster', 'about-highlight-poster-preview', 'about-highlight-poster-placeholder')" />
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="grid md:grid-cols-2 gap-3">
           <input id="about-contact-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Contact tag" />
           <input id="about-contact-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Contact title" />
@@ -458,35 +571,9 @@
           <textarea id="about-faq-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="FAQ subtitle"></textarea>
           <div id="about-faqs-list"></div>
         </div>
-        <div class="border-t border-white/10 pt-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <p class="text-sm font-semibold text-white">Club Snapshot</p>
-            <span class="text-xs text-white/40">Numbers on the about page</span>
-          </div>
-          <input id="about-snapshot-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Snapshot heading" />
-          <textarea id="about-snapshot-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Snapshot subtitle"></textarea>
-          <div id="about-snapshot-stats-list"></div>
-        </div>
-        <div class="border-t border-white/10 pt-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <p class="text-sm font-semibold text-white">Coaching Pillars</p>
-            <span class="text-xs text-white/40">Cards under "How we coach"</span>
-          </div>
-          <input id="about-pillars-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Pillars heading" />
-          <textarea id="about-pillars-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Pillars subtitle"></textarea>
-          <div id="about-pillars-list"></div>
-        </div>
-        <div class="border-t border-white/10 pt-4 space-y-3">
-          <div class="flex items-center justify-between">
-            <p class="text-sm font-semibold text-white">Programs &amp; Community</p>
-            <span class="text-xs text-white/40">Support cards on the about page</span>
-          </div>
-          <input id="about-initiatives-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Programs heading" />
-          <textarea id="about-initiatives-subtitle-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Programs subtitle"></textarea>
-          <div id="about-initiatives-list"></div>
-        </div>
-      </div>
-      <div class="glass rounded-3xl p-6 space-y-4">
+    </section>
+
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="join">
         <h2 class="text-xl font-bold text-white">Join Page</h2>
         <div class="grid md:grid-cols-2 gap-3">
           <input id="join-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
@@ -503,13 +590,12 @@
           <textarea id="join-quote-text-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Quote text"></textarea>
           <div class="grid md:grid-cols-2 gap-3">
             <input id="join-feature-alt-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Feature image alt text" />
-            <input id="join-feature-image-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Feature image URL (optional)" />
           </div>
           <div class="space-y-2">
             <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Feature image upload</label>
             <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('join-feature-image-input').click()">
-              <img id="join-feature-image-preview" src="" alt="Join feature preview" class="hidden w-full h-32 object-cover rounded-lg mb-3" />
-              <div id="join-feature-image-placeholder" class="space-y-2">
+              <img id="join-feature-image-preview" src="" alt="Join feature preview" class="hidden w-full object-cover rounded-lg mb-3 upload-preview" />
+              <div id="join-feature-image-placeholder" class="space-y-2 upload-placeholder">
                 <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 <p class="text-sm text-white/50">Click to upload feature image</p>
               </div>
@@ -528,10 +614,9 @@
           <input id="join-signup-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Sign up label" />
           <input id="join-signup-href-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Sign up link" />
         </div>
-      </div>
     </section>
 
-    <section class="glass rounded-3xl p-6 space-y-4">
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="join">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -545,7 +630,7 @@
       <div id="join-streams-list"></div>
     </section>
 
-    <section class="glass rounded-3xl p-6 space-y-4">
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="training">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -582,22 +667,7 @@
       <textarea id="training-locations-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Locations (one per line)"></textarea>
     </section>
 
-    <section class="glass rounded-3xl p-6 space-y-4">
-      <div class="flex items-center justify-between">
-        <h2 class="text-xl font-bold text-white flex items-center gap-2">
-          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m-7 6h7a2 2 0 002-2V7a2 2 0 00-2-2H9a2 2 0 00-2 2v7a2 2 0 002 2z"></path></svg>
-          </span>
-          About Page Photos
-        </h2>
-        <span class="text-xs text-white/40">Used on about page collage</span>
-      </div>
-      <div id="about-photos-list"></div>
-    </section>
-
-
-
-    <section class="glass rounded-3xl p-6 space-y-4">
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="gallery">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -636,7 +706,7 @@
 
 
 
-  <section class="glass rounded-3xl p-6 space-y-4">
+  <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="sponsors">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
@@ -665,7 +735,7 @@
 
 
 
-    <section class="glass rounded-3xl p-6 space-y-4">
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="global">
       <h2 class="text-xl font-bold text-white flex items-center gap-2">
         <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
           <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
@@ -677,8 +747,8 @@
         <div class="space-y-3">
           <label class="text-sm font-medium text-white/70">Hero Background Image</label>
           <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('hero-image-input').click()">
-            <img id="hero-image-preview" src="" alt="Hero preview" class="hidden w-full h-32 object-cover rounded-lg mb-3" />
-            <div id="hero-image-placeholder" class="space-y-2">
+            <img id="hero-image-preview" src="" alt="Hero preview" class="hidden w-full object-cover rounded-lg mb-3 upload-preview" />
+            <div id="hero-image-placeholder" class="space-y-2 upload-placeholder">
               <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               <p class="text-sm text-white/50">Click to upload hero image</p>
             </div>
@@ -688,8 +758,8 @@
         <div class="space-y-3">
           <label class="text-sm font-medium text-white/70">Club Logo</label>
           <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('logo-image-input').click()">
-            <img id="logo-image-preview" src="" alt="Logo preview" class="hidden w-24 h-24 object-contain mx-auto rounded-lg mb-3" />
-            <div id="logo-image-placeholder" class="space-y-2">
+            <img id="logo-image-preview" src="" alt="Logo preview" class="hidden w-24 object-contain mx-auto rounded-lg mb-3 upload-preview upload-preview--logo" />
+            <div id="logo-image-placeholder" class="space-y-2 upload-placeholder upload-placeholder--logo">
               <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               <p class="text-sm text-white/50">Click to upload logo</p>
             </div>
@@ -700,20 +770,61 @@
     </section>
 
     
-    <section class="glass rounded-3xl p-6 space-y-4">
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="global">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          </span>
+          Navigation &amp; Footer
+        </h2>
+        <span class="text-xs text-white/40">Menus and footer copy</span>
+      </div>
+      <div class="grid md:grid-cols-2 gap-3">
+        <input id="nav-admin-label-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Admin label" />
+        <input id="footer-tagline-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Footer tagline" />
+        <input id="footer-note-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Footer note" />
+        <input id="footer-quicklinks-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Footer quick links title" />
+        <input id="footer-connect-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Footer connect title" />
+      </div>
+      <div class="border-t border-white/10 pt-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-white">Navigation Links</p>
+          <span class="text-xs text-white/40">Main menu links</span>
+        </div>
+        <div id="nav-links-list"></div>
+      </div>
+      <div class="border-t border-white/10 pt-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-white">Footer Quick Links</p>
+          <span class="text-xs text-white/40">Shown in footer</span>
+        </div>
+        <div id="footer-quick-links-list"></div>
+      </div>
+      <div class="border-t border-white/10 pt-4 space-y-3">
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-white">Footer Connect Links</p>
+          <span class="text-xs text-white/40">Shown in footer</span>
+        </div>
+        <div id="footer-connect-links-list"></div>
+      </div>
+    </section>
+
+
+    <section class="glass rounded-3xl p-6 space-y-4" data-admin-page="home">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-bold text-white flex items-center gap-2">
           <span class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
             <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6l4 2"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v18l7-4 7 4V3H5z"></path></svg>
           </span>
-          Homepage Copy
+          Home Page: Hero &amp; Section Copy
         </h2>
-        <span class="text-xs text-white/40">Headings and CTA text</span>
+        <span class="text-xs text-white/40">Hero + section headings, labels, and CTA text</span>
       </div>
       <div class="grid md:grid-cols-2 gap-4">
         <div class="space-y-2">
           <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Hero kicker</label>
-          <input id="home-hero-kicker-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="e.g. Youth Basketball in Newcastle" />
+          <input id="home-hero-kicker-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="e.g. Youth Basketball in Newcastle" data-label="Hero kicker" />
         </div>
         <div class="space-y-2">
           <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Hero title</label>
@@ -831,8 +942,8 @@
     </section>
 
 
-    <section class="grid md:grid-cols-2 gap-6">
-      <div class="glass rounded-3xl p-6 space-y-4">
+    <section class="grid md:grid-cols-2 gap-6" data-admin-group>
+      <div class="glass rounded-3xl p-6 space-y-4" data-admin-page="merch">
         <h2 class="text-xl font-bold text-white">Merchandise Page</h2>
         <div class="grid md:grid-cols-2 gap-3">
           <input id="merch-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
@@ -845,10 +956,50 @@
         <textarea id="merch-blurb-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Merchandise description"></textarea>
         <textarea id="merch-store-description-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Store description"></textarea>
         <input id="merch-store-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="Store URL" />
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Supplier Details</p>
+            <span class="text-xs text-white/40">Supplier name, logo, and note</span>
+          </div>
+          <div class="grid md:grid-cols-2 gap-3">
+            <input id="merch-supplier-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Supplier tag" />
+            <input id="merch-supplier-name-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Supplier name" />
+            <input id="merch-supplier-url-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Supplier URL" />
+            <input id="merch-supplier-note-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Supplier note" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Supplier logo upload</label>
+            <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onclick="document.getElementById('merch-supplier-logo-input').click()">
+              <img id="merch-supplier-logo-preview" src="" alt="Supplier logo preview" class="hidden w-24 object-contain mx-auto rounded-lg mb-3 upload-preview upload-preview--logo" />
+              <div id="merch-supplier-logo-placeholder" class="space-y-2 upload-placeholder upload-placeholder--logo">
+                <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <p class="text-sm text-white/50">Click to upload supplier logo</p>
+              </div>
+              <input type="file" id="merch-supplier-logo-input" accept="image/*" class="hidden" onchange="handleImageUpload(this, 'merchSupplierLogo', 'merch-supplier-logo-preview', 'merch-supplier-logo-placeholder')" />
+            </div>
+          </div>
+        </div>
+        <div class="border-t border-white/10 pt-4 space-y-3">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white">Merchandise Details</p>
+            <span class="text-xs text-white/40">Intro, essentials, and important copy</span>
+          </div>
+          <textarea id="merch-intro-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Merchandise intro"></textarea>
+          <div class="grid md:grid-cols-2 gap-3">
+            <input id="merch-essentials-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Essentials tag" />
+            <input id="merch-essentials-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Essentials title" />
+          </div>
+          <textarea id="merch-essentials-field" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Essentials (one per line)"></textarea>
+          <div class="grid md:grid-cols-2 gap-3">
+            <input id="merch-important-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Important tag" />
+            <input id="merch-important-title-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Important section title" />
+          </div>
+          <textarea id="merch-important-text-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Important section text"></textarea>
+        </div>
         <textarea id="merch-pillars-field" rows="2" class="w-full input-field rounded-xl px-4 py-3 text-white resize-none" placeholder="Pillars (one per line)"></textarea>
         <input id="merch-cta-label-field" class="w-full input-field rounded-xl px-4 py-3 text-white" placeholder="CTA label" />
       </div>
-      <div class="glass rounded-3xl p-6 space-y-4">
+      <div class="glass rounded-3xl p-6 space-y-4" data-admin-page="coaches">
         <h2 class="text-xl font-bold text-white">Coaches Page</h2>
         <div class="grid md:grid-cols-2 gap-3">
           <input id="coaches-hero-tag-field" class="input-field rounded-xl px-4 py-3 text-white" placeholder="Hero tag" />
@@ -887,5 +1038,3 @@
   </script>
 </body>
 </html>
-
-

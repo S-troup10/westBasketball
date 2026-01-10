@@ -40,6 +40,89 @@
     .image-card { position: relative; overflow: hidden; border-radius: 24px; }
     .image-card img { width: 100%; height: auto; max-height: 100%; object-fit: contain; background: #0a0a0a; transition: transform 0.35s ease, filter 0.35s ease; }
     .image-card:hover img { transform: scale(1.03); filter: brightness(1.05); }
+    .spotlight-card { border-radius: 28px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: rgba(6,10,14,0.7); box-shadow: 0 24px 50px rgba(0,0,0,0.35); }
+    .spotlight-media { aspect-ratio: 4 / 3; overflow: hidden; background: #050505; }
+    .spotlight-media img,
+    .spotlight-media video { width: 100%; height: 100%; object-fit: cover; }
+    .spotlight-body { padding: 1.25rem 1.5rem 1.5rem; }
+    .spotlight-role { text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.7rem; color: rgba(255,255,255,0.55); }
+    .history-branch { position: relative; display: flex; flex-direction: column; gap: 3rem; }
+    .history-branch__rail {
+      position: absolute;
+      left: calc(50% - 1px);
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background-image:
+        linear-gradient(to bottom, rgba(255,255,255,0), rgba(16,185,129,0.5) 35%, rgba(255,255,255,0.25) 55%, rgba(16,185,129,0.35) 75%, rgba(255,255,255,0)),
+        repeating-linear-gradient(to bottom, rgba(255,255,255,0.25), rgba(255,255,255,0.25) 6px, transparent 6px, transparent 14px);
+      box-shadow: 0 0 18px rgba(16,185,129,0.35);
+      transform: translateY(0);
+      will-change: transform;
+    }
+    .history-branch__item {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr);
+      align-items: center;
+    }
+    .history-branch__dot {
+      grid-column: 2;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #10b981;
+      box-shadow: 0 0 24px rgba(16,185,129,0.6);
+      margin: 0 auto;
+    }
+    .history-branch__media-card,
+    .history-branch__text-card {
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(6,10,14,0.65);
+      box-shadow: 0 25px 55px rgba(0,0,0,0.35);
+      position: relative;
+      transition: transform 0.6s ease, opacity 0.6s ease;
+    }
+    .history-branch__media { aspect-ratio: 16 / 9; overflow: hidden; background: #050505; border-radius: 22px; }
+    .history-branch__media img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.02); }
+    .history-branch__body { padding: 1.25rem 1.5rem 1.5rem; }
+    .history-branch__year { text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.75rem; color: rgba(255,255,255,0.55); }
+    .history-branch__title { font-size: 1.35rem; font-weight: 600; color: #f8fafc; margin-top: 0.5rem; }
+    .history-branch__text { color: rgba(255,255,255,0.6); margin-top: 0.5rem; }
+    .history-branch__card--left { grid-column: 1; justify-self: end; }
+    .history-branch__card--right { grid-column: 3; justify-self: start; }
+    .history-branch__card--left::after,
+    .history-branch__card--right::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      width: 72px;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(16,185,129,0.4), rgba(255,255,255,0.2));
+      z-index: 2;
+    }
+    .history-branch__card--left::after { right: -72px; }
+    .history-branch__card--right::after { left: -72px; }
+    .history-branch__item { opacity: 1; transform: none; }
+    .history-branch__item.is-visible { opacity: 1; transform: none; }
+    .history-branch__media-card.size-wide { max-width: 460px; }
+    .history-branch__media-card.size-tall { max-width: 360px; }
+    .history-branch__media-card.size-square { max-width: 320px; }
+    .history-branch__media-card.size-tall .history-branch__media { aspect-ratio: 3 / 4; }
+    .history-branch__media-card.size-square .history-branch__media { aspect-ratio: 1 / 1; }
+    .history-branch__text-card.size-compact { max-width: 360px; }
+    .history-branch__text-card.size-roomy { max-width: 460px; }
+    .history-branch__text-card.size-roomy .history-branch__body { padding: 1.5rem 1.75rem 1.75rem; }
+    @media (max-width: 900px) {
+      .history-branch__rail { left: 18px; }
+      .history-branch__item { grid-template-columns: 36px minmax(0, 1fr); gap: 1.5rem; }
+      .history-branch__dot { grid-column: 1; }
+      .history-branch__card--left,
+      .history-branch__card--right { grid-column: 2; justify-self: stretch; }
+      .history-branch__card--left::after,
+      .history-branch__card--right::after { display: none; }
+    }
     .float-slow { animation: float 14s ease-in-out infinite; }
     .float-slower { animation: float 18s ease-in-out infinite; }
     @keyframes float {
@@ -135,46 +218,113 @@
       </div>
     </section>
 
-    <section class="py-16 px-6">
-      <div class="max-w-6xl mx-auto">
-        <div class="grid lg:grid-cols-2 gap-12 items-center">
-          <div class="section-fade">
-            <div id="about-photos" class="grid grid-cols-2 gap-4">
-              <div class="image-card card-hover">
-                <img src="images/U12-Knights.jpg" alt="Club moment" class="rounded-2xl object-contain w-full h-auto max-h-64 bg-black/40" loading="lazy" />
-              </div>
-              <div class="image-card card-hover">
-                <img src="images/U14-West-Raiders.jpg" alt="Club moment" class="rounded-2xl object-contain w-full h-auto max-h-64 bg-black/40" loading="lazy" />
-              </div>
-            </div>
+    <section class="py-20 px-6 relative overflow-hidden">
+      <div class="absolute -left-28 top-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl float-slow"></div>
+      <div class="absolute right-0 top-28 w-[28rem] h-[28rem] bg-white/5 rounded-full blur-3xl float-slower"></div>
+      <div class="absolute left-1/3 bottom-0 w-[24rem] h-[24rem] bg-accent/10 rounded-full blur-3xl"></div>
+      <div class="max-w-6xl mx-auto relative">
+        <div class="section-fade mb-10 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
           </div>
-          <div class="space-y-8 section-fade">
-            <div>
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <h2 id="about-history-title" class="text-2xl font-bold text-white">Our History</h2>
+          <h2 id="about-history-title" class="text-3xl md:text-4xl font-bold text-white">Our History</h2>
+        </div>
+        <div id="about-history" data-layout="branch-timeline" class="history-branch section-fade">
+          <div class="history-branch__rail" data-timeline-parallax="true" data-speed="0.08"></div>
+          <article class="history-branch__item history-branch__item--left">
+            <span class="history-branch__dot"></span>
+            <div class="history-branch__media-card history-branch__card--left size-wide">
+              <div class="history-branch__media">
+                <img src="images/prez.jpg" alt="Club milestone" loading="lazy" />
               </div>
-              <p id="about-history" class="text-white/60 leading-relaxed">
-                We are proud to have many juniors represent across local and state-wide events and development programs including selections for the NSW U12 Jamboree, U14 Australian Club Nationals, U16 &amp; U18 NSW Country teams, BNSW Talented Athlete Program, Southern Cross Challenge and additional BNSW Tournaments.<br>
-                Many of our juniors also represent in school regional and state teams across the PSSA, CHS, CIS and CCS programs, as well as the Newcastle Falcons representative program. To find out more about the pathways to higher level representation please reach out to us.
-              </p>
             </div>
-            <div id="values">
-              <div class="flex items-center gap-3 mb-4">
-                <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
-                </div>
-                <h2 id="about-values-title" class="text-2xl font-bold text-white">West Values</h2>
+            <div class="history-branch__text-card history-branch__card--right size-compact">
+              <div class="history-branch__body">
+                <p class="history-branch__year">1960s</p>
+                <h3 class="history-branch__title">Club foundations</h3>
+                <p class="history-branch__text">
+                  Built on local volunteers and a deep love of the game, West established a proud basketball home in Newcastle.
+                </p>
               </div>
-              <ul id="about-values" class="grid grid-cols-2 gap-3">
-                <li class="px-4 py-3 rounded-xl glass text-white">Inclusive, safe, and enjoyable basketball for every family</li>
-                <li class="px-4 py-3 rounded-xl glass text-white">Teamwork, fair play, and respect for all</li>
-                <li class="px-4 py-3 rounded-xl glass text-white">Effort and improvement over results</li>
-                <li class="px-4 py-3 rounded-xl glass text-white">Positive sideline voices and strong club culture</li>
-                <li class="px-4 py-3 rounded-xl glass text-white">Player development at every age group</li>
-                <li class="px-4 py-3 rounded-xl glass text-white">Community connections that last beyond the season</li>
+            </div>
+          </article>
+          <article class="history-branch__item history-branch__item--right">
+            <span class="history-branch__dot"></span>
+            <div class="history-branch__text-card history-branch__card--left size-roomy">
+              <div class="history-branch__body">
+                <p class="history-branch__year">1980s</p>
+                <h3 class="history-branch__title">Community growth</h3>
+                <p class="history-branch__text">
+                  The club grew alongside families and schools, shaping a culture of inclusion, respect, and fair play.
+                </p>
+              </div>
+            </div>
+            <div class="history-branch__media-card history-branch__card--right size-square">
+              <div class="history-branch__media">
+                <img src="images/U12-Knights.jpg" alt="Club milestone" loading="lazy" />
+              </div>
+            </div>
+          </article>
+          <article class="history-branch__item history-branch__item--left">
+            <span class="history-branch__dot"></span>
+            <div class="history-branch__media-card history-branch__card--left size-tall">
+              <div class="history-branch__media">
+                <img src="images/mini-hoops.jpg" alt="Club milestone" loading="lazy" />
+              </div>
+            </div>
+            <div class="history-branch__text-card history-branch__card--right size-compact">
+              <div class="history-branch__body">
+                <p class="history-branch__year">2000s</p>
+                <h3 class="history-branch__title">Pathways emerge</h3>
+                <p class="history-branch__text">
+                  Structured junior programs created clear pathways from fundamentals into competitive and representative teams.
+                </p>
+              </div>
+            </div>
+          </article>
+          <article class="history-branch__item history-branch__item--right">
+            <span class="history-branch__dot"></span>
+            <div class="history-branch__text-card history-branch__card--left size-roomy">
+              <div class="history-branch__body">
+                <p class="history-branch__year">Today</p>
+                <h3 class="history-branch__title">Pride and momentum</h3>
+                <p class="history-branch__text">
+                  West continues to expand its reach, celebrating effort, teamwork, and the strength of its club community.
+                </p>
+              </div>
+            </div>
+            <div class="history-branch__media-card history-branch__card--right size-wide">
+              <div class="history-branch__media">
+                <img src="images/prezq.jpg" alt="Club milestone" loading="lazy" />
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class=" px-6">
+      <div class="max-w-6xl mx-auto">
+        <div class="section-fade">
+          <div id="values" class="glass rounded-3xl p-6 md:p-8">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+              </div>
+              <h2 id="about-values-title" class="text-2xl font-bold text-white">West Values</h2>
+            </div>
+            <div class="space-y-4 text-white/70 leading-relaxed">
+              <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-white/50">
+                <span class="text-primary font-semibold tracking-[0.2em]">Vision and Values Summary</span>
+                <a id="about-values-link" href="https://example.com/west-basketball-vision-values.pdf" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-white/70 hover:text-white transition-colors">
+                  <span id="about-values-link-label">Full document</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7m0 0v7m0-7L10 14m-4 7h12a2 2 0 002-2V9a2 2 0 00-2-2h-3"></path></svg>
+                </a>
+              </div>
+              <ul id="about-values" class="grid md:grid-cols-3 gap-3">
+                <li class="px-4 py-3 rounded-xl glass text-white">Inclusive, safe, and welcoming basketball for juniors and families.</li>
+                <li class="px-4 py-3 rounded-xl glass text-white">Shared responsibility for fair play, positive conduct, and development.</li>
+                <li class="px-4 py-3 rounded-xl glass text-white">Respect for Aboriginal and Torres Strait Islander peoples and our wider community.</li>
               </ul>
             </div>
           </div>
@@ -183,77 +333,185 @@
     </section>
 
 
-        <section class="py-16 px-6 relative overflow-hidden">
+    <section id="about-faqs" class="py-16 px-6 relative overflow-hidden hidden">
+      <div class="absolute -right-24 top-12 w-80 h-80 bg-primary/10 rounded-full blur-3xl float-slow"></div>
+      <div class="absolute left-0 bottom-0 w-96 h-96 bg-white/5 rounded-full blur-3xl float-slower"></div>
+      <div class="max-w-6xl mx-auto relative">
+        <div class="section-fade mb-10 space-y-3">
+          <span id="about-faq-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">FAQs</span>
+          <h2 id="about-faq-title" class="text-3xl md:text-4xl font-bold text-white">Frequently Asked Questions</h2>
+          <p id="about-faq-subtitle" class="text-white/60 leading-relaxed max-w-2xl"></p>
+        </div>
+        <div id="about-faq-list" class="grid md:grid-cols-2 gap-6 section-fade"></div>
+      </div>
+    </section>
+
+
+    <section class="py-16 px-6 relative overflow-hidden">
       <div class="absolute -left-16 top-10 w-80 h-80 bg-primary/10 rounded-full blur-3xl float-slow"></div>
       <div class="absolute -right-20 bottom-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl float-slower"></div>
       <div class="max-w-6xl mx-auto relative">
         <div class="section-fade text-center space-y-3 mb-12">
-          <span id="home-story-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">2025 Season</span>
+          <span id="about-awards-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">2025 Season</span>
           <h2 class="text-4xl md:text-5xl font-bold text-white">
-            <span id="home-story-title" class="gradient-text">Awards &amp; Results</span>
+            <span id="about-awards-title" class="gradient-text">Awards &amp; Results</span>
           </h2>
-          <p id="home-story-subtitle" class="text-white/60 max-w-3xl mx-auto">Celebrating our people and teams from the 2025 season.</p>
+          <p id="about-awards-subtitle" class="text-white/60 max-w-3xl mx-auto">Celebrating our people and teams from the 2025 season.</p>
         </div>
-        <div id="home-story-blocks" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 section-fade">
-          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
-            <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Awards</span>
-            <h3 class="text-2xl font-bold text-white">Celebrating our People</h3>
-            <p class="text-white/60 leading-relaxed">Congratulations to the 2025 winners of our perpetual awards.</p>
-            <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
-              <li>Al Herrington Volunteer of the Year: Peta Rafty</li>
-              <li>Junior Club Person of the Year: Poppy Harman</li>
-              <li>Karen Audet Club Person of the Year: Wendy Blackmore</li>
-              <li>Eric Harvey Junior Coach of the Year: Kiara Barr</li>
-              <li>Club Coach of the Year: Angelo Iosif</li>
-            </ul>
-          </article>
-          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
-            <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">2025 Season</span>
-            <h3 class="text-2xl font-bold text-white">2025 Wrap-up</h3>
-            <p class="text-white/60 leading-relaxed">68 teams competed in the Winter Club Competition, with 23 teams reaching the Grand Final and 10 champions.</p>
-            <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
-              <li>68 teams across the Winter Competition</li>
-              <li>23 teams reached the Grand Final</li>
-              <li>10 teams crowned champions</li>
-            </ul>
-          </article>
-          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
-            <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Champions</span>
-            <h3 class="text-2xl font-bold text-white">2025 Winners</h3>
-            <p class="text-white/60 leading-relaxed">Winter Competition champions.</p>
-            <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
-              <li>U12 Div5 West Kings</li>
-              <li>U14 Div2 West Golden Eagles</li>
-              <li>U14 Div3 West Gems</li>
-              <li>U14 Div3 West Speedies</li>
-              <li>U14 Div4 West Blazers</li>
-              <li>U16 Div2 West Bulls</li>
-              <li>U16 Div3 West Rollers</li>
-              <li>U16 Div4 West Clippers</li>
-              <li>U16 Div6 West Jayhawks</li>
-              <li>U18 Div1 West Titans</li>
-            </ul>
-          </article>
-          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
-            <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Finalists</span>
-            <h3 class="text-2xl font-bold text-white">2025 Runners Up</h3>
-            <p class="text-white/60 leading-relaxed">Grand Finalists finishing runners up.</p>
-            <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
-              <li>U12 Div1 West Mystics</li>
-              <li>U12 Div3 West Pirates</li>
-              <li>U14 Div1 West Vikings</li>
-              <li>U14 Div5 West Wolverines</li>
-              <li>U16 Div1 West Flyers</li>
-              <li>U16 Div2 West Gladiators</li>
-              <li>U16 Div3 West Rockets</li>
-              <li>U16 Div4 West Lynx</li>
-              <li>U18 Div2 West Magic</li>
-              <li>U18 Div3 West Flames</li>
-              <li>U18 Div3 West Rebounders</li>
-              <li>U18 Div4 West Rangers</li>
-              <li>U18 Div5 West Chiefs</li>
-            </ul>
-          </article>
+        <div id="about-awards-blocks" data-layout="awards" class="section-fade space-y-6">
+          <div class="grid md:grid-cols-2 gap-6">
+            <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
+              <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Awards</span>
+              <h3 class="text-2xl font-bold text-white">Celebrating our People</h3>
+              <p class="text-white/60 leading-relaxed">Congratulations to the 2025 winners of our perpetual awards.</p>
+              <div class="space-y-3 text-sm">
+                <div class="flex items-center justify-between gap-4 rounded-2xl bg-white/5 border border-white/10 px-4 py-3">
+                  <span class="text-white/70">Al Herrington Volunteer of the Year</span>
+                  <span class="text-primary font-semibold">Peta Rafty</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 rounded-2xl bg-white/5 border border-white/10 px-4 py-3">
+                  <span class="text-white/70">Junior Club Person of the Year</span>
+                  <span class="text-primary font-semibold">Poppy Harman</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 rounded-2xl bg-white/5 border border-white/10 px-4 py-3">
+                  <span class="text-white/70">Karen Audet Club Person of the Year</span>
+                  <span class="text-primary font-semibold">Wendy Blackmore</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 rounded-2xl bg-white/5 border border-white/10 px-4 py-3">
+                  <span class="text-white/70">Eric Harvey Junior Coach of the Year</span>
+                  <span class="text-primary font-semibold">Kiara Barr</span>
+                </div>
+                <div class="flex items-center justify-between gap-4 rounded-2xl bg-white/5 border border-white/10 px-4 py-3">
+                  <span class="text-white/70">Club Coach of the Year</span>
+                  <span class="text-primary font-semibold">Angelo Iosif</span>
+                </div>
+              </div>
+            </article>
+            <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
+              <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">2025 Season</span>
+              <h3 class="text-2xl font-bold text-white">2025 Wrap-up</h3>
+              <p class="text-white/60 leading-relaxed">68 teams competed in the Winter Club Competition, with 23 teams reaching the Grand Final and 10 champions.</p>
+              <ul class="space-y-2 text-sm text-white/70 list-disc list-inside">
+                <li>68 teams across the Winter Competition</li>
+                <li>23 teams reached the Grand Final</li>
+                <li>10 teams crowned champions</li>
+              </ul>
+            </article>
+          </div>
+          <div class="glass rounded-3xl p-6 md:p-8">
+            <div class="grid lg:grid-cols-2 gap-8">
+              <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                  <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Champions</span>
+                  <h3 class="text-2xl font-bold text-white">2025 Winners</h3>
+                </div>
+                <p class="text-white/60 leading-relaxed">Winter Competition champions.</p>
+                <div class="grid sm:grid-cols-2 gap-2 text-sm">
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U12 Div5</span>
+                    <span class="text-white font-semibold">West Kings</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U14 Div2</span>
+                    <span class="text-white font-semibold">West Golden Eagles</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U14 Div3</span>
+                    <span class="text-white font-semibold">West Gems</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U14 Div3</span>
+                    <span class="text-white font-semibold">West Speedies</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U14 Div4</span>
+                    <span class="text-white font-semibold">West Blazers</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U16 Div2</span>
+                    <span class="text-white font-semibold">West Bulls</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U16 Div3</span>
+                    <span class="text-white font-semibold">West Rollers</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U16 Div4</span>
+                    <span class="text-white font-semibold">West Clippers</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U16 Div6</span>
+                    <span class="text-white font-semibold">West Jayhawks</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U18 Div1</span>
+                    <span class="text-white font-semibold">West Titans</span>
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-4 lg:border-l lg:border-white/10 lg:pl-8">
+                <div class="flex items-center gap-3">
+                  <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">Finalists</span>
+                  <h3 class="text-2xl font-bold text-white">2025 Runners Up</h3>
+                </div>
+                <p class="text-white/60 leading-relaxed">Grand Finalists finishing runners up.</p>
+                <div class="grid sm:grid-cols-2 gap-2 text-sm">
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U12 Div1</span>
+                    <span class="text-white font-semibold">West Mystics</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U12 Div3</span>
+                    <span class="text-white font-semibold">West Pirates</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U14 Div1</span>
+                    <span class="text-white font-semibold">West Vikings</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U14 Div5</span>
+                    <span class="text-white font-semibold">West Wolverines</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U16 Div1</span>
+                    <span class="text-white font-semibold">West Flyers</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U16 Div2</span>
+                    <span class="text-white font-semibold">West Gladiators</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U16 Div3</span>
+                    <span class="text-white font-semibold">West Rockets</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U16 Div4</span>
+                    <span class="text-white font-semibold">West Lynx</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U18 Div2</span>
+                    <span class="text-white font-semibold">West Magic</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U18 Div3</span>
+                    <span class="text-white font-semibold">West Flames</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U18 Div3</span>
+                    <span class="text-white font-semibold">West Rebounders</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U18 Div4</span>
+                    <span class="text-white font-semibold">West Rangers</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">U18 Div5</span>
+                    <span class="text-white font-semibold">West Chiefs</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -263,18 +521,53 @@
     <section class="py-16 px-6 relative overflow-hidden">
       <div class="absolute -left-10 top-10 w-72 h-72 bg-primary/10 rounded-full blur-3xl float-slow"></div>
       <div class="absolute -right-10 bottom-0 w-80 h-80 bg-accent/5 rounded-full blur-3xl float-slower"></div>
-      <div class="max-w-6xl mx-auto relative space-y-10">
-        <div class="section-fade space-y-3">
-          <span id="about-extra-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Pathways</span>
-          <h2 id="about-extra-title" class="text-3xl md:text-4xl font-bold text-white">Higher level representation</h2>
-          <p id="about-extra-text" class="text-white/70 max-w-4xl leading-relaxed">
-            We are proud of the pathways our players take into representative and school programs. If you would like to know more about development opportunities, please reach out to us.
+      <div class="max-w-6xl mx-auto relative space-y-8">
+        <div class="section-fade flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <span id="about-extra-tag" class="text-primary uppercase tracking-[0.3em] text-sm font-medium">Spotlight</span>
+            <h2 id="about-extra-title" class="text-3xl md:text-4xl font-bold text-white mt-3">Community Highlights</h2>
+          </div>
+          <p id="about-extra-text" class="text-white/70 leading-relaxed max-w-2xl">
+            Highlights from players, coaches, and volunteers who shape the West Basketball community.
           </p>
         </div>
-        <div class="section-fade">
-          <div id="about-feature-image" class="image-card card-hover rounded-3xl overflow-hidden bg-white/5 border border-white/10">
-            <img src="images/U12-Knights.jpg" alt="Club highlight" class="w-full h-auto max-h-[420px] object-contain" loading="lazy" />
-          </div>
+        <div id="about-spotlight-list" class="grid md:grid-cols-2 gap-6 section-fade">
+          <article class="spotlight-card">
+            <div class="spotlight-media">
+              <img src="images/U12-Knights.jpg" alt="Spotlight highlight" loading="lazy" />
+            </div>
+            <div class="spotlight-body">
+              <span class="spotlight-role">Player</span>
+              <h3 class="text-xl font-semibold text-white mt-2">Alex Carter</h3>
+              <p class="text-white/60 mt-3">
+                A calm leader on court, Alex helps set the standard for effort and teamwork in every training session.
+              </p>
+            </div>
+          </article>
+          <article class="spotlight-card">
+            <div class="spotlight-media">
+              <img src="images/prez.jpg" alt="Spotlight highlight" loading="lazy" />
+            </div>
+            <div class="spotlight-body">
+              <span class="spotlight-role">Coach</span>
+              <h3 class="text-xl font-semibold text-white mt-2">Taylor Nguyen</h3>
+              <p class="text-white/60 mt-3">
+                Taylor brings energy and structure to training, ensuring every athlete grows in confidence and skill.
+              </p>
+            </div>
+          </article>
+          <article class="spotlight-card">
+            <div class="spotlight-media">
+              <img src="images/prezq.jpg" alt="Spotlight highlight" loading="lazy" />
+            </div>
+            <div class="spotlight-body">
+              <span class="spotlight-role">Volunteer</span>
+              <h3 class="text-xl font-semibold text-white mt-2">Jordan Lee</h3>
+              <p class="text-white/60 mt-3">
+                Jordan keeps game day running smoothly and is the friendly face that families rely on each weekend.
+              </p>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -288,16 +581,47 @@
               <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
                 <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
               </div>
-              <h2 id="about-life-title" class="text-2xl font-bold text-white">Awards</h2>
+              <h2 id="about-life-title" class="text-2xl font-bold text-white">Life Members</h2>
             </div>
-            <p id="about-life-description" class="text-white/60 mb-6">Celebrating our people.</p>
-            <ul id="about-life-members" class="grid md:grid-cols-3 gap-4">
-              <li class="text-white/80">Al Herrington Volunteer of the Year: Peta Rafty</li>
-              <li class="text-white/80">Junior Club Person of the Year: Poppy Harman</li>
-              <li class="text-white/80">Karen Audet Club Person of the Year: Wendy Blackmore</li>
-              <li class="text-white/80">Eric Harvey Junior Coach of the Year: Kiara Barr</li>
-              <li class="text-white/80">Club Coach of the Year: Angelo Iosif</li>
-            </ul>
+            <p id="about-life-description" class="text-white/60 mb-6">Honouring the people who have shaped West Basketball.</p>
+            <div id="about-life-members" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <article class="group glass rounded-2xl overflow-hidden border border-white/10">
+                <div class="aspect-[4/5] overflow-hidden bg-black/40">
+                  <img src="images/life-member.jpg" alt="Andrew Smith" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                </div>
+                <div class="p-4">
+                  <h3 class="text-lg font-semibold text-white">Andrew Smith</h3>
+                  <p class="text-sm text-white/60 mt-2">Andrew has been a steady hand behind the scenes, supporting junior development and club growth year after year.</p>
+                </div>
+              </article>
+              <article class="group glass rounded-2xl overflow-hidden border border-white/10">
+                <div class="aspect-[4/5] overflow-hidden bg-black/40">
+                  <img src="images/life-member.jpg" alt="Karen Audet" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                </div>
+                <div class="p-4">
+                  <h3 class="text-lg font-semibold text-white">Karen Audet</h3>
+                  <p class="text-sm text-white/60 mt-2">Karen is known for her tireless volunteering and her commitment to a welcoming club culture for every family.</p>
+                </div>
+              </article>
+              <article class="group glass rounded-2xl overflow-hidden border border-white/10">
+                <div class="aspect-[4/5] overflow-hidden bg-black/40">
+                  <img src="images/life-member.jpg" alt="Eric Harvey" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                </div>
+                <div class="p-4">
+                  <h3 class="text-lg font-semibold text-white">Eric Harvey</h3>
+                  <p class="text-sm text-white/60 mt-2">Eric has guided countless players and coaches, championing high standards and a love for the game.</p>
+                </div>
+              </article>
+              <article class="group glass rounded-2xl overflow-hidden border border-white/10">
+                <div class="aspect-[4/5] overflow-hidden bg-black/40">
+                  <img src="images/life-member.jpg" alt="Larry Davidson" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                </div>
+                <div class="p-4">
+                  <h3 class="text-lg font-semibold text-white">Larry Davidson</h3>
+                  <p class="text-sm text-white/60 mt-2">Larry has played a key role in keeping the club strong, mentoring teams and supporting community initiatives.</p>
+                </div>
+              </article>
+            </div>
           </div>
         </div>
       </div>
@@ -330,6 +654,7 @@
       renderNav('about');
       renderFooter();
       renderAboutDetails();
+      initHistoryMotion();
       initContactModal();
       
       const fadeSections = document.querySelectorAll('.section-fade');
@@ -350,8 +675,52 @@
       renderNav('about');
       renderFooter();
       renderAboutDetails();
+      initHistoryMotion();
       initContactModal();
     });
+
+    function initHistoryMotion() {
+      const container = document.getElementById('about-history');
+      if (!container || container.dataset.layout !== 'branch-timeline') return;
+      const items = Array.from(container.querySelectorAll('.history-branch__item'));
+      const parallaxElements = Array.from(container.querySelectorAll('[data-timeline-parallax="true"]'));
+      if (!items.length) return;
+
+      if (window.historyBranchObserver) {
+        window.historyBranchObserver.disconnect();
+      }
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced || !parallaxElements.length) return;
+
+      if (window.historyBranchParallaxHandlers) {
+        window.removeEventListener('scroll', window.historyBranchParallaxHandlers.onScroll);
+        window.removeEventListener('resize', window.historyBranchParallaxHandlers.onResize);
+      }
+
+      let rafId = null;
+      const updateParallax = () => {
+        rafId = null;
+        const viewportMid = window.innerHeight * 0.5;
+        parallaxElements.forEach((el) => {
+          const speed = Number(el.dataset.speed || 0.08);
+          const rect = el.getBoundingClientRect();
+          const offset = (viewportMid - (rect.top + rect.height / 2)) * speed;
+          const clamped = Math.max(-24, Math.min(24, offset));
+          el.style.transform = `translateY(${clamped}px)`;
+        });
+      };
+      const onScroll = () => {
+        if (rafId) return;
+        rafId = requestAnimationFrame(updateParallax);
+      };
+      const onResize = () => {
+        onScroll();
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onResize);
+      window.historyBranchParallaxHandlers = { onScroll, onResize };
+      updateParallax();
+    }
   </script>
 </body>
 </html>

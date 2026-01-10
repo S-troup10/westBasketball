@@ -1,1275 +1,1361 @@
-// Admin panel logic for editing club site data in-place
 
-async function sha256Hex(input) {
-  const data = new TextEncoder().encode(input);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const byteArray = Array.from(new Uint8Array(hashBuffer));
-  return byteArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
+(() => {
+  const state = {
+    data: loadSiteData(),
+    dirty: false
+  };
+  const contentUrl =
+    (typeof window !== "undefined" && window.CONTENT_URL) ||
+    "https://site-content-worker.simontroup27.workers.dev/content";
 
-const ADMIN_SESSION_TTL_MS = 60 * 60 * 1000; // 1 hour
+  const toast = document.getElementById("admin-toast");
+  const confirmModal = document.getElementById("save-confirm-modal");
+  const confirmClose = document.getElementById("save-confirm-close");
+  let toastTimer = null;
 
-function isAdminSessionValid() {
-  const expires = parseInt(localStorage.getItem("adminAccessExpires") || "0", 10);
-  return (
-    expires > Date.now() &&
-    localStorage.getItem("adminAccess") === "granted" &&
-    isTokenValid()
-  );
-}
+  const escapeHtml = (value = "") =>
+    value
+      .toString()
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
 
-function isTokenValid() {
-  const expires = parseInt(localStorage.getItem("adminApiTokenExpires") || "0", 10);
-  return expires > Date.now() && !!localStorage.getItem("adminApiToken");
-}
+  const escapeAttr = (value = "") => escapeHtml(value);
 
-function grantAdminSession(password) {
-  const expires = Date.now() + ADMIN_SESSION_TTL_MS;
-  localStorage.setItem("adminAccess", "granted");
-  localStorage.setItem("adminAccessExpires", expires.toString());
-}
+  const parseLines = (value = "") =>
+    value
+      .split(/\r?\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean);
 
-async function checkAdminPassword() {
-  // Skip if already validated and not expired
-  if (localStorage.getItem("adminAccess") === "granted" && isAdminSessionValid()) return;
-  // If modal lock is present, let it handle gating
-  if (document.getElementById("password-modal")) return;
-  // If no modal and no valid session, send away
-  window.location.href = "../index.html";
-}
+  const todayIso = () => new Date().toISOString().slice(0, 10);
 
-function getApiBase() {
-  return typeof API_BASE !== "undefined" ? API_BASE : "";
-}
+  const joinLines = (list) => (Array.isArray(list) ? list.join("\n") : "");
 
-async function ensureApiToken() {
-  const cached = localStorage.getItem("adminApiToken");
-  if (cached && isTokenValid()) return cached;
-  throw new Error("Login required");
-}
+  const clone = (value) => JSON.parse(JSON.stringify(value));
 
-// Image upload handling - converts to base64 for localStorage storage
-function handleImageUpload(input, imageKey, previewId, placeholderId) {
-  const file = input.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const base64 = e.target.result;
+  const getValue = (path, fallback) => {
+    let current = state.data;
+    for (const key of path) {
+      if (!current || typeof current !== "object" || !(key in current)) {
+        return fallback;
+      }
+      current = current[key];
+    }
+    return current ?? fallback;
+  };
+
+  const setValue = (path, value) => {
+    let current = state.data;
+    for (let i = 0; i < path.length - 1; i += 1) {
+      const key = path[i];
+      if (!current[key] || typeof current[key] !== "object") {
+        current[key] = typeof path[i + 1] === "number" ? [] : {};
+      }
+      current = current[key];
+    }
+    current[path[path.length - 1]] = value;
+  };
+
+  const showToast = (message, isError = false) => {
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.remove("hidden");
+    toast.classList.toggle("text-red-400", isError);
+    toast.classList.toggle("text-primary", !isError);
+    if (toastTimer) window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(() => toast.classList.add("hidden"), 2400);
+  };
+
+  const markDirty = () => {
+    state.dirty = true;
+  };
+
+  const bindTextField = (id, path, options = {}) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const rawValue = getValue(path, options.defaultValue);
+    const displayValue = options.list ? joinLines(rawValue) : rawValue ?? "";
+    if (el.value !== displayValue) {
+      el.value = displayValue;
+    }
+    if (el.dataset.bound) return;
+    el.dataset.bound = "true";
+    const handler = () => {
+      let value = el.value;
+      if (options.list) value = parseLines(value);
+      if (options.trim !== false && typeof value === "string") value = value.trim();
+      setValue(path, value);
+      markDirty();
+    };
+    el.addEventListener("input", handler);
+  };
+
+  const updateImagePreview = (previewId, placeholderId, src) => {
     const preview = document.getElementById(previewId);
     const placeholder = document.getElementById(placeholderId);
-    
-    if (preview) {
-      preview.src = base64;
-      preview.classList.remove('hidden');
-    }
-    if (placeholder) {
-      placeholder.classList.add('hidden');
-    }
-    
-    // Store in pending images to be saved
-    if (!window.pendingImages) window.pendingImages = {};
-    window.pendingImages[imageKey] = base64;
-  };
-  reader.readAsDataURL(file);
-}
-
-// Gallery photo upload handling
-function handleGalleryImageUpload(input, previewId, srcInputId) {
-  const file = input.files[0];
-  if (!file) return;
-  
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const base64 = e.target.result;
-    const preview = document.getElementById(previewId);
-    const srcInput = document.getElementById(srcInputId);
-    
-    if (preview) {
-      preview.src = base64;
-      preview.classList.remove('hidden');
-      preview.parentElement.querySelector('.upload-placeholder')?.classList.add('hidden');
-    }
-    if (srcInput) {
-      srcInput.value = base64;
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-function initCustomDropdowns(root = document) {
-  const dropdowns = root.querySelectorAll("[data-dropdown]");
-  dropdowns.forEach((dropdown) => {
-    const trigger = dropdown.querySelector("[data-dropdown-trigger]");
-    const menu = dropdown.querySelector("[data-dropdown-menu]");
-    const input = dropdown.querySelector("[data-dropdown-input]");
-    const label = dropdown.querySelector("[data-dropdown-label]");
-    const options = menu ? Array.from(menu.querySelectorAll("[data-dropdown-option]")) : [];
-    if (!trigger || !menu || !input || !label || !options.length) return;
-
-    const syncLabel = () => {
-      const current = input.value || options[0]?.dataset.value || "";
-      const active = options.find((opt) => opt.dataset.value === current);
-      label.textContent = (active ? active.textContent : current || options[0]?.textContent || "").trim();
-      options.forEach((opt) => {
-        opt.classList.toggle("bg-white/10", opt.dataset.value === current);
-        opt.classList.toggle("text-white", opt.dataset.value === current);
-      });
-    };
-
-    syncLabel();
-    if (dropdown.dataset.dropdownReady === "true") return;
-
-    trigger.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-      menu.classList.toggle("hidden");
-    });
-
-    options.forEach((option) => {
-      option.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        input.value = option.dataset.value || option.textContent.trim();
-        syncLabel();
-        menu.classList.add("hidden");
-      });
-    });
-
-    dropdown.dataset.dropdownReady = "true";
-  });
-
-  if (!window.customDropdownBound) {
-    window.customDropdownBound = true;
-    document.addEventListener("click", (event) => {
-      document.querySelectorAll("[data-dropdown-menu]").forEach((menu) => {
-        if (!menu.closest("[data-dropdown]")?.contains(event.target)) {
-          menu.classList.add("hidden");
-        }
-      });
-    });
-  }
-}
-
-function getNextGalleryIndex(container) {
-  const indices = Array.from(container.querySelectorAll("[data-index]"))
-    .map((card) => parseInt(card.dataset.index, 10))
-    .filter(Number.isFinite);
-  return indices.length ? Math.max(...indices) + 1 : 0;
-}
-
-function createGalleryCard(item, idx) {
-  const card = document.createElement("div");
-  card.className = "mb-4 rounded-2xl border border-white/10 bg-white/5 p-5";
-  card.dataset.index = idx;
-  
-  const previewId = `gallery-preview-${idx}`;
-  const srcInputId = `gallery-src-${idx}`;
-  const fileInputId = `gallery-file-${idx}`;
-  
-  card.innerHTML = `
-    <div class="grid md:grid-cols-3 gap-4">
-      <div class="space-y-2">
-        <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Photo</label>
-        <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-3 text-center hover:border-primary/50 transition-colors cursor-pointer h-32 flex items-center justify-center" onclick="document.getElementById('${fileInputId}').click()">
-          <img id="${previewId}" src="${item.src || ''}" alt="Preview" class="${item.src ? '' : 'hidden'} w-full h-full object-cover rounded-lg" />
-          <div class="upload-placeholder ${item.src ? 'hidden' : ''} space-y-1">
-            <svg class="w-6 h-6 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <p class="text-xs text-white/40">Upload</p>
-          </div>
-          <input type="file" id="${fileInputId}" accept="image/*" class="hidden" onchange="handleGalleryImageUpload(this, '${previewId}', '${srcInputId}')" />
-          <input type="hidden" id="${srcInputId}" name="gallery-src-${idx}" value="${item.src || ''}" />
-        </div>
-      </div>
-      <div class="md:col-span-2 space-y-3">
-        <div class="space-y-1.5">
-          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Caption</label>
-          <input name="gallery-caption-${idx}" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" value="${item.caption || ''}" placeholder="Photo caption" />
-        </div>
-        <div class="space-y-1.5">
-          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Category</label>
-          <div class="relative" data-dropdown>
-            <button type="button" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white flex items-center justify-between focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" data-dropdown-trigger>
-              <span data-dropdown-label></span>
-              <svg class="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-            </button>
-            <div class="hidden absolute z-20 mt-2 w-full rounded-xl border border-white/10 bg-dark/95 shadow-xl overflow-hidden" data-dropdown-menu>
-              <button type="button" class="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/10" data-dropdown-option data-value="Teams">Teams</button>
-              <button type="button" class="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/10" data-dropdown-option data-value="Events">Events</button>
-              <button type="button" class="w-full text-left px-4 py-2 text-sm text-white/80 hover:bg-white/10" data-dropdown-option data-value="Training">Training</button>
-            </div>
-            <input type="hidden" name="gallery-category-${idx}" value="${item.category || 'Teams'}" data-dropdown-input />
-          </div>
-        </div>
-      </div>
-    </div>
-    <button type="button" class="mt-3 text-xs text-red-400 hover:text-red-300 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-1.5 transition-all" onclick="this.closest('[data-index]').remove()">
-      <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Remove</span>
-    </button>
-  `;
-
-  return card;
-}
-
-function buildGalleryEditor(containerId, items) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = "";
-
-  items.forEach((item, idx) => {
-    const card = createGalleryCard(item, idx);
-    container.appendChild(card);
-    initCustomDropdowns(card);
-  });
-
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className =
-    "mt-3 inline-flex items-center gap-2 rounded-xl border border-dashed border-primary/30 px-4 py-2.5 text-sm text-primary hover:border-primary hover:bg-primary/10 transition-all";
-  addBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add Photo`;
-  addBtn.dataset.galleryAdd = "true";
-  addBtn.onclick = () => {
-    const card = createGalleryCard({}, getNextGalleryIndex(container));
-    container.insertBefore(card, addBtn);
-    initCustomDropdowns(card);
-  };
-  container.appendChild(addBtn);
-}
-
-function collectGalleryList() {
-  const container = document.getElementById('gallery-list');
-  if (!container) return [];
-  const cards = Array.from(container.querySelectorAll("[data-index]"));
-  return cards.map((card, idx) => {
-    const srcInput = card.querySelector(`[name="gallery-src-${card.dataset.index}"]`) || card.querySelector(`[id^="gallery-src-"]`);
-    const captionInput = card.querySelector(`[name^="gallery-caption-"]`);
-    const categorySelect = card.querySelector(`[name^="gallery-category-"]`);
-    return {
-      src: srcInput ? srcInput.value.trim() : '',
-      caption: captionInput ? captionInput.value.trim() : '',
-      category: categorySelect ? categorySelect.value : 'Teams'
-    };
-  }).filter(item => item.src);
-}
-
-function handleGalleryBulkUpload(fileList) {
-  const files = Array.from(fileList || []);
-  if (!files.length) return;
-  const container = document.getElementById("gallery-list");
-  if (!container) return;
-  const addBtn = container.querySelector("[data-gallery-add]");
-  let nextIndex = getNextGalleryIndex(container);
-
-  files.forEach((file) => {
-    const baseName = (file.name || "").replace(/\.[^/.]+$/, "");
-    const card = createGalleryCard({ caption: baseName, category: "Teams" }, nextIndex++);
-    if (addBtn) {
-      container.insertBefore(card, addBtn);
+    if (!preview || !placeholder) return;
+    if (src) {
+      preview.src = src;
+      preview.classList.remove("hidden");
+      placeholder.classList.add("hidden");
     } else {
-      container.appendChild(card);
+      preview.classList.add("hidden");
+      placeholder.classList.remove("hidden");
     }
-    initCustomDropdowns(card);
+  };
 
-    const preview = card.querySelector("img[id^='gallery-preview-']");
-    const srcInput = card.querySelector("input[id^='gallery-src-']");
-    const placeholder = card.querySelector(".upload-placeholder");
+  const updateInlinePreview = (preview, placeholder, src) => {
+    if (!preview || !placeholder) return;
+    if (src) {
+      preview.src = src;
+      preview.classList.remove("hidden");
+      placeholder.classList.add("hidden");
+    } else {
+      preview.classList.add("hidden");
+      placeholder.classList.remove("hidden");
+    }
+  };
+
+  const imageFieldMap = {
+    heroBackground: { path: ["images", "heroBackground"] },
+    logo: { path: ["images", "logo"] },
+    joinFeatureImage: { path: ["pages", "join", "featureImage"] },
+    aboutHighlightPhoto: { path: ["about", "highlightPhoto"] },
+    aboutHighlightPoster: { path: ["about", "highlightPoster"] },
+    merchSupplierLogo: { path: ["merch", "supplier", "logo"] }
+  };
+
+  window.handleImageUpload = (input, key, previewId, placeholderId) => {
+    const files = input.files;
+    if (!files || !files.length) return;
+    const file = files[0];
     const reader = new FileReader();
-    reader.onload = function(e) {
-      const base64 = e.target.result;
-      if (preview) {
-        preview.src = base64;
-        preview.classList.remove("hidden");
+    reader.onload = (event) => {
+      const src = event.target?.result?.toString() || "";
+      const config = imageFieldMap[key];
+      if (config) {
+        setValue(config.path, src);
+        markDirty();
       }
-      if (placeholder) {
-        placeholder.classList.add("hidden");
-      }
-      if (srcInput) {
-        srcInput.value = base64;
-      }
+      updateImagePreview(previewId, placeholderId, src);
     };
     reader.readAsDataURL(file);
-  });
-}
-
-function buildSimplePhotoEditor(containerId, photos) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = "";
-
-  (photos || []).forEach((src, idx) => {
-    container.appendChild(createCard(src, idx));
-  });
-
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className =
-    "mt-3 inline-flex items-center gap-2 rounded-xl border border-dashed border-primary/30 px-4 py-2.5 text-sm text-primary hover:border-primary hover:bg-primary/10 transition-all";
-  addBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add photo`;
-  addBtn.onclick = () => {
-    const card = createCard("", container.querySelectorAll("[data-index]").length);
-    container.insertBefore(card, addBtn);
   };
-  container.appendChild(addBtn);
 
-  function createCard(src, idx) {
-    const card = document.createElement("div");
-    card.className = "mb-3 rounded-2xl border border-white/10 bg-white/5 p-4 flex items-center gap-4";
-    card.dataset.index = idx;
-    const previewId = `${containerId}-preview-${idx}`;
-    const fileId = `${containerId}-file-${idx}`;
-    const srcInputId = `${containerId}-src-${idx}`;
-    card.innerHTML = `
-      <div class="flex items-center gap-3 w-full">
-        <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-3 text-center hover:border-primary/50 transition-colors cursor-pointer w-32 h-24 flex items-center justify-center" onclick="document.getElementById('${fileId}').click()">
-          <img id="${previewId}" src="${src || ''}" alt="Preview" class="${src ? '' : 'hidden'} w-full h-full object-cover rounded-lg" />
-          <div class="upload-placeholder ${src ? 'hidden' : ''} space-y-1">
-            <svg class="w-6 h-6 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <p class="text-xs text-white/40">Upload</p>
+  const initImageFields = () => {
+    updateImagePreview(
+      "hero-image-preview",
+      "hero-image-placeholder",
+      getValue(["images", "heroBackground"], "")
+    );
+    updateImagePreview(
+      "logo-image-preview",
+      "logo-image-placeholder",
+      getValue(["images", "logo"], "")
+    );
+    updateImagePreview(
+      "join-feature-image-preview",
+      "join-feature-image-placeholder",
+      getValue(["pages", "join", "featureImage"], "")
+    );
+    updateImagePreview(
+      "about-highlight-photo-preview",
+      "about-highlight-photo-placeholder",
+      getValue(["about", "highlightPhoto"], "")
+    );
+    updateImagePreview(
+      "about-highlight-poster-preview",
+      "about-highlight-poster-placeholder",
+      getValue(["about", "highlightPoster"], "")
+    );
+    updateImagePreview(
+      "merch-supplier-logo-preview",
+      "merch-supplier-logo-placeholder",
+      getValue(["merch", "supplier", "logo"], "")
+    );
+  };
+
+  const initDropdown = (inputId, path) => {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    const dropdown = input.closest("[data-dropdown]");
+    const label = dropdown?.querySelector("[data-dropdown-label]");
+    const setLabel = () => {
+      if (!label) return;
+      const option = dropdown?.querySelector(`[data-dropdown-option][data-value="${input.value}"]`);
+      label.textContent = option?.textContent?.trim() || "Select";
+    };
+    const savedValue = getValue(path, input.value || "");
+    if (savedValue !== undefined) input.value = savedValue;
+    setLabel();
+    if (dropdown?.dataset.bound) return;
+    dropdown.dataset.bound = "true";
+    dropdown.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-dropdown-trigger]");
+      const option = event.target.closest("[data-dropdown-option]");
+      const menu = dropdown.querySelector("[data-dropdown-menu]");
+      if (trigger && menu) {
+        menu.classList.toggle("hidden");
+      }
+      if (option) {
+        const value = option.getAttribute("data-value") || "";
+        input.value = value;
+        setValue(path, value);
+        markDirty();
+        setLabel();
+        if (menu) menu.classList.add("hidden");
+      }
+    });
+    document.addEventListener("click", (event) => {
+      if (!dropdown.contains(event.target)) {
+        const menu = dropdown.querySelector("[data-dropdown-menu]");
+        if (menu) menu.classList.add("hidden");
+      }
+    });
+  };
+
+  const initListEditor = (config) => {
+    const container = document.getElementById(config.containerId);
+    if (!container) return;
+
+    const getItems = () => {
+      const items = getValue(config.path, []);
+      return Array.isArray(items) ? items : [];
+    };
+    const setItems = (items) => {
+      setValue(config.path, items);
+      markDirty();
+    };
+    const normalizeItem = (item) => {
+      if (config.itemType === "string") return { value: item ?? "" };
+      return item && typeof item === "object" ? { ...item } : {};
+    };
+    const denormalizeItem = (item) => {
+      if (config.itemType === "string") return (item.value ?? "").toString();
+      return item;
+    };
+
+    const renderItem = (item, index) => {
+      const data = normalizeItem(item);
+      const hasImageField = config.fields.some((field) => field.type === "image");
+      const previewKey = config.previewKey;
+      const previewValue = previewKey ? (data[previewKey] ?? "") : "";
+      const previewMarkup = previewKey && !hasImageField
+        ? `
+          <div class="rounded-2xl overflow-hidden border border-white/10 bg-black/40">
+            <img data-preview-key="${escapeAttr(previewKey)}" src="${escapeAttr(previewValue)}" alt="Preview" class="w-full h-32 object-cover ${previewValue ? "" : "hidden"}" loading="lazy" />
+            <div data-preview-placeholder="${escapeAttr(previewKey)}" class="h-32 flex items-center justify-center text-xs text-white/40 ${previewValue ? "hidden" : ""}">No image</div>
           </div>
-          <input type="file" id="${fileId}" accept="image/*" class="hidden" onchange="handleGalleryImageUpload(this, '${previewId}', '${srcInputId}')" />
-          <input type="hidden" id="${srcInputId}" value="${src || ''}" />
-        </div>
-        <button type="button" class="text-xs text-red-400 hover:text-red-300 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-1.5 transition-all h-fit" onclick="this.closest('[data-index]').remove()">
-          Remove
-        </button>
-      </div>
-    `;
-    return card;
-  }
-}
-
-function collectSimplePhotoList(containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) return [];
-  const cards = Array.from(container.querySelectorAll("[data-index]"));
-  return cards
-    .map((card) => {
-      const srcInput = card.querySelector("input[type='hidden']");
-      return srcInput ? srcInput.value.trim() : "";
-    })
-    .filter(Boolean);
-}
-
-function buildFeaturedPhotosEditor(containerId, items) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = "";
-
-  (items || []).forEach((item, idx) => {
-    container.appendChild(createCard(item, idx));
-  });
-
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className =
-    "mt-3 inline-flex items-center gap-2 rounded-xl border border-dashed border-primary/30 px-4 py-2.5 text-sm text-primary hover:border-primary hover:bg-primary/10 transition-all";
-  addBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add featured photo`;
-  addBtn.onclick = () => {
-    const card = createCard({}, container.querySelectorAll("[data-index]").length);
-    container.insertBefore(card, addBtn);
-  };
-  container.appendChild(addBtn);
-
-  function createCard(item, idx) {
-    const card = document.createElement("div");
-    card.className = "mb-3 rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3";
-    card.dataset.index = idx;
-    const previewId = `${containerId}-preview-${idx}`;
-    const srcInputId = `${containerId}-src-${idx}`;
-    const fileId = `${containerId}-file-${idx}`;
-    card.innerHTML = `
-      <div class="grid md:grid-cols-3 gap-3 items-start">
-        <div>
-          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Photo</label>
-          <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-3 text-center hover:border-primary/50 transition-colors cursor-pointer h-28 flex items-center justify-center" onclick="document.getElementById('${fileId}').click()">
-            <img id="${previewId}" src="${item.src || ""}" alt="Preview" class="${item.src ? "" : "hidden"} w-full h-full object-cover rounded-lg" />
-            <div class="upload-placeholder ${item.src ? "hidden" : ""} space-y-1">
-              <svg class="w-6 h-6 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              <p class="text-xs text-white/40">Upload</p>
+        `
+        : "";
+      const fieldMarkup = config.fields
+        .map((field) => {
+          const value = data[field.key] ?? field.defaultValue ?? "";
+          const displayValue = field.list ? joinLines(value) : value;
+          const fieldLabel = field.label
+            ? `<label class="text-xs text-white/50 uppercase tracking-wider field-label">${escapeHtml(field.label)}</label>`
+            : "";
+          const baseClass = "w-full input-field rounded-xl px-4 py-3 text-white text-sm";
+          const textareaClass = `${baseClass} resize-none`;
+          const inputType = field.inputType || "text";
+          const wrapperClass = field.fullWidth ? "md:col-span-2 space-y-1.5" : "space-y-1.5";
+          if (field.type === "image") {
+            const inputId = `${config.containerId}-${index}-${field.key}`;
+            const previewId = `${inputId}-preview`;
+            const placeholderId = `${inputId}-placeholder`;
+            const hasValue = Boolean(displayValue);
+            const uploadCopy = field.placeholder || "Click to upload image";
+            return `
+              <div class="${wrapperClass}">
+                ${fieldLabel}
+                <label class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer block" for="${escapeAttr(inputId)}">
+                  <img id="${escapeAttr(previewId)}" data-image-preview="${escapeAttr(field.key)}" src="${escapeAttr(displayValue)}" alt="Preview" class="${hasValue ? "" : "hidden"} w-full object-cover rounded-lg mb-3 upload-preview" />
+                  <div id="${escapeAttr(placeholderId)}" data-image-placeholder="${escapeAttr(field.key)}" class="${hasValue ? "hidden" : ""} space-y-2 upload-placeholder">
+                    <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <p class="text-sm text-white/50">${escapeHtml(uploadCopy)}</p>
+                  </div>
+                </label>
+                <input type="file" id="${escapeAttr(inputId)}" data-field="${escapeAttr(field.key)}" data-image-input="true" accept="image/*" class="hidden" />
+                <button type="button" class="text-xs text-white/50 hover:text-white" data-action="clear-image" data-field="${escapeAttr(field.key)}">Clear image</button>
+              </div>
+            `;
+          }
+          if (field.type === "textarea") {
+            return `
+              <div class="${wrapperClass}">
+                ${fieldLabel}
+                <textarea data-field="${field.key}" data-field-type="${field.list ? "list" : "text"}" rows="${field.rows || 2}" class="${textareaClass}" placeholder="${escapeAttr(field.placeholder || "")}">${escapeHtml(displayValue)}</textarea>
+              </div>
+            `;
+          }
+          return `
+            <div class="${wrapperClass}">
+              ${fieldLabel}
+              <input data-field="${field.key}" data-field-type="${field.list ? "list" : "text"}" type="${inputType}" class="${baseClass}" placeholder="${escapeAttr(field.placeholder || "")}" value="${escapeAttr(displayValue)}" />
             </div>
-            <input type="file" id="${fileId}" accept="image/*" class="hidden" onchange="handleGalleryImageUpload(this, '${previewId}', '${srcInputId}')" />
-            <input type="hidden" id="${srcInputId}" value="${item.src || ''}" />
+          `;
+        })
+        .join("");
+
+      const isGridLayout = typeof config.layout === "string" && config.layout.startsWith("grid-");
+      const itemClass = isGridLayout
+        ? "glass rounded-2xl p-4 space-y-4 h-full flex flex-col"
+        : "glass rounded-2xl p-4 space-y-4";
+      const fieldsClass =
+        config.layout === "grid-3" ? "grid gap-3" : "grid md:grid-cols-2 gap-3";
+      return `
+        <div class="${itemClass}" data-item-index="${index}">
+          <div class="flex items-center justify-between">
+            <p class="text-sm font-semibold text-white/70">${escapeHtml(config.itemLabel || "Item")} ${index + 1}</p>
+            <div class="flex items-center gap-2">
+              <button type="button" class="px-3 py-1 rounded-full border border-white/10 text-xs text-white/60 hover:text-white" data-action="move-up">Up</button>
+              <button type="button" class="px-3 py-1 rounded-full border border-white/10 text-xs text-white/60 hover:text-white" data-action="move-down">Down</button>
+              <button type="button" class="px-3 py-1 rounded-full border border-white/10 text-xs text-red-300 hover:text-red-200" data-action="remove">Remove</button>
+            </div>
+          </div>
+          ${previewMarkup}
+          <div class="${fieldsClass}">
+            ${fieldMarkup}
           </div>
         </div>
-        <div class="md:col-span-2 space-y-2">
-          <div class="space-y-1.5">
-            <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Title</label>
-            <input name="featured-title-${idx}" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" value="${item.title || ''}" placeholder="Caption" />
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Subtitle</label>
-            <input name="featured-subtitle-${idx}" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" value="${item.subtitle || ''}" placeholder="Sub caption" />
-          </div>
+      `;
+    };
+
+    const render = () => {
+      const items = getItems();
+      let listClass = "space-y-4";
+      if (config.layout === "grid-3") {
+        listClass = "grid gap-4 md:grid-cols-3";
+      } else if (config.layout === "grid-2") {
+        listClass = "grid gap-4 md:grid-cols-2";
+      }
+      container.innerHTML = `
+        <div class="${listClass}">
+          ${items.map(renderItem).join("")}
         </div>
-      </div>
-      <button type="button" class="text-xs text-red-400 hover:text-red-300 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-1.5 transition-all" onclick="this.closest('[data-index]').remove()">
-        Remove
-      </button>
-    `;
-    return card;
-  }
-}
+        <button type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:border-primary/50 hover:text-primary transition-all" data-action="add">
+          Add ${escapeHtml(config.itemLabel || "item")}
+        </button>
+      `;
+    };
 
-function collectFeaturedPhotos(containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) return [];
-  const cards = Array.from(container.querySelectorAll("[data-index]"));
-  return cards
-    .map((card) => {
-      const srcInput = card.querySelector("input[type='hidden']");
-      const titleInput = card.querySelector("[name^='featured-title']");
-      const subtitleInput = card.querySelector("[name^='featured-subtitle']");
-      return {
-        src: srcInput ? srcInput.value.trim() : "",
-        title: titleInput ? titleInput.value.trim() : "",
-        subtitle: subtitleInput ? subtitleInput.value.trim() : ""
-      };
-    })
-    .filter((item) => item.src);
-}
+    if (!container.dataset.bound) {
+      container.dataset.bound = "true";
+      container.addEventListener("input", (event) => {
+        if (event.target.type === "file") return;
+        const field = event.target.dataset.field;
+        if (!field) return;
+        const itemEl = event.target.closest("[data-item-index]");
+        if (!itemEl) return;
+        const index = Number(itemEl.dataset.itemIndex);
+        const items = getItems();
+        const item = normalizeItem(items[index]);
+        let value = event.target.value;
+        if (event.target.dataset.fieldType === "list") {
+          value = parseLines(value);
+        }
+        item[field] = value;
+        items[index] = denormalizeItem(item);
+        setItems(items);
+      });
+      container.addEventListener("change", (event) => {
+        const input = event.target;
+        if (!input.matches('input[type="file"][data-field]')) return;
+        const itemEl = input.closest("[data-item-index]");
+        if (!itemEl) return;
+        const field = input.dataset.field;
+        const index = Number(itemEl.dataset.itemIndex);
+        const files = input.files;
+        if (!files || !files.length) return;
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const src = e.target?.result?.toString() || "";
+          const items = getItems();
+          const item = normalizeItem(items[index]);
+          item[field] = src;
+          items[index] = denormalizeItem(item);
+          setItems(items);
+          updateInlinePreview(
+            itemEl.querySelector(`[data-image-preview="${field}"]`),
+            itemEl.querySelector(`[data-image-placeholder="${field}"]`),
+            src
+          );
+          updateInlinePreview(
+            itemEl.querySelector(`[data-preview-key="${field}"]`),
+            itemEl.querySelector(`[data-preview-placeholder="${field}"]`),
+            src
+          );
+          input.value = "";
+        };
+        reader.readAsDataURL(file);
+      });
+      container.addEventListener("click", (event) => {
+        const action = event.target.dataset.action;
+        if (!action) return;
+        const items = getItems();
+        if (action === "add") {
+          const baseItem = config.defaultItem ?? (config.itemType === "string" ? "" : {});
+          let nextItem = clone(baseItem);
+          if (
+            config.autoDateField &&
+            nextItem &&
+            typeof nextItem === "object" &&
+            !Array.isArray(nextItem) &&
+            !nextItem[config.autoDateField]
+          ) {
+            nextItem[config.autoDateField] = todayIso();
+          }
+          items.push(nextItem);
+          setItems(items);
+          render();
+          return;
+        }
+        const itemEl = event.target.closest("[data-item-index]");
+        if (!itemEl) return;
+        const index = Number(itemEl.dataset.itemIndex);
+        if (action === "clear-image") {
+          const field = event.target.dataset.field;
+          const item = normalizeItem(items[index]);
+          item[field] = "";
+          items[index] = denormalizeItem(item);
+          setItems(items);
+          updateInlinePreview(
+            itemEl.querySelector(`[data-image-preview="${field}"]`),
+            itemEl.querySelector(`[data-image-placeholder="${field}"]`),
+            ""
+          );
+          updateInlinePreview(
+            itemEl.querySelector(`[data-preview-key="${field}"]`),
+            itemEl.querySelector(`[data-preview-placeholder="${field}"]`),
+            ""
+          );
+          const fileInput = itemEl.querySelector(`input[type="file"][data-field="${field}"]`);
+          if (fileInput) fileInput.value = "";
+          return;
+        }
+        if (action === "remove") {
+          items.splice(index, 1);
+          setItems(items);
+          render();
+        }
+        if (action === "move-up" && index > 0) {
+          [items[index - 1], items[index]] = [items[index], items[index - 1]];
+          setItems(items);
+          render();
+        }
+        if (action === "move-down" && index < items.length - 1) {
+          [items[index + 1], items[index]] = [items[index], items[index + 1]];
+          setItems(items);
+          render();
+        }
+      });
+    }
 
-function formatLinksText(links) {
-  return (links || [])
-    .map((link) => {
-      if (!link || (!link.label && !link.href)) return "";
-      return `${link.label || ""} | ${link.href || ""}`.trim();
-    })
-    .filter(Boolean)
-    .join("\n");
-}
-
-function parseLinksText(text) {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const [label, href] = line.split("|").map((part) => part.trim());
-      return { label: label || href || "", href: href || "" };
-    })
-    .filter((link) => link.label || link.href);
-}
-
-function parseLines(text) {
-  return text
-    .split("\n")
-    .map((item) => item.trim())
-    .filter(Boolean);
-}
-
-function buildListEditor(containerId, items, fields) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = "";
-
-  items.forEach((item, idx) => {
-    container.appendChild(createCard(item, idx));
-  });
-
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className =
-    "mt-3 inline-flex items-center gap-2 rounded-xl border border-dashed border-primary/30 px-4 py-2.5 text-sm text-primary hover:border-primary hover:bg-primary/10 transition-all";
-  addBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add another`;
-  addBtn.onclick = () => {
-    const card = createCard({}, container.children.length);
-    container.insertBefore(card, addBtn);
+    render();
   };
-  container.appendChild(addBtn);
 
-  function createCard(item, idx) {
-    const card = document.createElement("div");
-    card.className = "mb-3 rounded-2xl border border-white/10 bg-white/5 p-5 space-y-4";
-    card.dataset.index = idx;
+  const initJoinStreamsEditor = () => {
+    const container = document.getElementById("join-streams-list");
+    if (!container) return;
 
+    const getStreams = () => {
+      const streams = getValue(["pages", "join", "streams"], []);
+      return Array.isArray(streams) ? streams : [];
+    };
+
+    const setStreams = (streams) => {
+      setValue(["pages", "join", "streams"], streams);
+      markDirty();
+    };
+
+    const renderFaqs = (faqs) =>
+      faqs
+        .map(
+          (faq, faqIndex) => `
+          <div class="border border-white/10 rounded-xl p-3 space-y-2" data-faq-index="${faqIndex}">
+            <input data-faq-field="question" class="w-full input-field rounded-xl px-3 py-2 text-white text-sm" placeholder="Question" value="${escapeAttr(faq.question || "")}" />
+            <textarea data-faq-field="answer" rows="2" class="w-full input-field rounded-xl px-3 py-2 text-white text-sm resize-none" placeholder="Answer">${escapeHtml(faq.answer || "")}</textarea>
+            <button type="button" class="text-xs text-red-300 hover:text-red-200" data-faq-action="remove">Remove FAQ</button>
+          </div>
+        `
+        )
+        .join("");
+
+    const render = () => {
+      const streams = getStreams();
+      container.innerHTML = `
+        <div class="space-y-4">
+          ${streams
+            .map((stream, index) => {
+              const stepsText = joinLines(stream.steps || []);
+              const faqs = Array.isArray(stream.faqs) ? stream.faqs : [];
+              return `
+                <div class="glass rounded-2xl p-4 space-y-4" data-stream-index="${index}">
+                  <div class="flex items-center justify-between">
+                    <p class="text-sm font-semibold text-white/70">Stream ${index + 1}</p>
+                    <div class="flex items-center gap-2">
+                      <button type="button" class="px-3 py-1 rounded-full border border-white/10 text-xs text-white/60 hover:text-white" data-action="move-up">Up</button>
+                      <button type="button" class="px-3 py-1 rounded-full border border-white/10 text-xs text-white/60 hover:text-white" data-action="move-down">Down</button>
+                      <button type="button" class="px-3 py-1 rounded-full border border-white/10 text-xs text-red-300 hover:text-red-200" data-action="remove">Remove</button>
+                    </div>
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-3">
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">ID</label>
+                      <input data-field="id" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="u8s" value="${escapeAttr(stream.id || "")}" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">Title</label>
+                      <input data-field="title" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Program title" value="${escapeAttr(stream.title || "")}" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">Badge</label>
+                      <input data-field="badge" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Badge" value="${escapeAttr(stream.badge || "")}" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">Kicker</label>
+                      <input data-field="kicker" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Kicker text" value="${escapeAttr(stream.kicker || "")}" />
+                    </div>
+                    <div class="space-y-1.5 md:col-span-2">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">Description</label>
+                      <textarea data-field="description" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm resize-none" placeholder="Description">${escapeHtml(stream.description || "")}</textarea>
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">CTA Label</label>
+                      <input data-field="ctaLabel" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Learn more" value="${escapeAttr(stream.ctaLabel || "")}" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">CTA Link</label>
+                      <input data-field="ctaHref" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="https://..." value="${escapeAttr(stream.ctaHref || "")}" />
+                    </div>
+                    <div class="space-y-1.5 md:col-span-2">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">Image upload</label>
+                      <label class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer block" for="join-stream-image-${index}">
+                        <img data-stream-image-preview src="${escapeAttr(stream.image || "")}" alt="Preview" class="${stream.image ? "" : "hidden"} w-full object-cover rounded-lg mb-3 upload-preview" />
+                        <div data-stream-image-placeholder class="${stream.image ? "hidden" : ""} space-y-2 upload-placeholder">
+                          <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                          <p class="text-sm text-white/50">Click to upload stream image</p>
+                        </div>
+                      </label>
+                      <input type="file" id="join-stream-image-${index}" data-stream-field="image" accept="image/*" class="hidden" />
+                      <button type="button" class="text-xs text-white/50 hover:text-white" data-stream-action="clear-image">Clear image</button>
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">Image Alt</label>
+                      <input data-field="imageAlt" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="Alt text" value="${escapeAttr(stream.imageAlt || "")}" />
+                    </div>
+                    <div class="space-y-1.5 md:col-span-2">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">Steps (one per line)</label>
+                      <textarea data-field="steps" data-field-type="list" rows="3" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm resize-none" placeholder="Step 1">${escapeHtml(stepsText)}</textarea>
+                    </div>
+                    <div class="space-y-1.5 md:col-span-2">
+                      <label class="text-xs text-white/50 uppercase tracking-wider field-label">More Info Label</label>
+                      <input data-field="moreInfoLabel" class="w-full input-field rounded-xl px-4 py-3 text-white text-sm" placeholder="More info" value="${escapeAttr(stream.moreInfoLabel || "")}" />
+                    </div>
+                  </div>
+                  <div class="border-t border-white/10 pt-4 space-y-3" data-faq-list>
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-semibold text-white">FAQs</p>
+                      <button type="button" class="text-xs text-primary hover:text-white" data-faq-action="add">Add FAQ</button>
+                    </div>
+                    <div class="space-y-3">
+                      ${renderFaqs(faqs)}
+                    </div>
+                  </div>
+                </div>
+              `;
+            })
+            .join("")}
+        </div>
+        <button type="button" class="mt-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white hover:border-primary/50 hover:text-primary transition-all" data-action="add">
+          Add stream
+        </button>
+      `;
+    };
+
+    if (!container.dataset.bound) {
+      container.dataset.bound = "true";
+      container.addEventListener("input", (event) => {
+        if (event.target.type === "file") return;
+        const streamEl = event.target.closest("[data-stream-index]");
+        if (!streamEl) return;
+        const index = Number(streamEl.dataset.streamIndex);
+        const streams = getStreams();
+        const stream = { ...(streams[index] || {}) };
+        if (event.target.dataset.faqField) {
+          const faqEl = event.target.closest("[data-faq-index]");
+          if (!faqEl) return;
+          const faqIndex = Number(faqEl.dataset.faqIndex);
+          const faqs = Array.isArray(stream.faqs) ? [...stream.faqs] : [];
+          const faq = { ...(faqs[faqIndex] || {}) };
+          faq[event.target.dataset.faqField] = event.target.value;
+          faqs[faqIndex] = faq;
+          stream.faqs = faqs;
+          streams[index] = stream;
+          setStreams(streams);
+          return;
+        }
+        const field = event.target.dataset.field;
+        if (!field) return;
+        let value = event.target.value;
+        if (event.target.dataset.fieldType === "list") {
+          value = parseLines(value);
+        }
+        stream[field] = value;
+        streams[index] = stream;
+        setStreams(streams);
+      });
+      container.addEventListener("change", (event) => {
+        const input = event.target;
+        if (!input.matches('input[type="file"][data-stream-field]')) return;
+        const streamEl = input.closest("[data-stream-index]");
+        if (!streamEl) return;
+        const index = Number(streamEl.dataset.streamIndex);
+        const field = input.dataset.streamField;
+        const files = input.files;
+        if (!files || !files.length) return;
+        const file = files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const src = e.target?.result?.toString() || "";
+          const streams = getStreams();
+          const stream = { ...(streams[index] || {}) };
+          stream[field] = src;
+          streams[index] = stream;
+          setStreams(streams);
+          updateInlinePreview(
+            streamEl.querySelector("[data-stream-image-preview]"),
+            streamEl.querySelector("[data-stream-image-placeholder]"),
+            src
+          );
+          input.value = "";
+        };
+        reader.readAsDataURL(file);
+      });
+      container.addEventListener("click", (event) => {
+        const action = event.target.dataset.action;
+        const faqAction = event.target.dataset.faqAction;
+        const streamAction = event.target.dataset.streamAction;
+        const streamEl = event.target.closest("[data-stream-index]");
+        const streams = getStreams();
+        if (action === "add") {
+          streams.push({
+            id: "",
+            title: "",
+            badge: "",
+            kicker: "",
+            description: "",
+            ctaLabel: "",
+            ctaHref: "",
+            image: "",
+            imageAlt: "",
+            steps: [],
+            moreInfoLabel: "",
+            faqs: []
+          });
+          setStreams(streams);
+          render();
+          return;
+        }
+        if (!streamEl) return;
+        const index = Number(streamEl.dataset.streamIndex);
+        if (streamAction === "clear-image") {
+          const stream = { ...(streams[index] || {}) };
+          stream.image = "";
+          streams[index] = stream;
+          setStreams(streams);
+          updateInlinePreview(
+            streamEl.querySelector("[data-stream-image-preview]"),
+            streamEl.querySelector("[data-stream-image-placeholder]"),
+            ""
+          );
+          const fileInput = streamEl.querySelector('input[type="file"][data-stream-field="image"]');
+          if (fileInput) fileInput.value = "";
+          return;
+        }
+        if (action === "remove") {
+          streams.splice(index, 1);
+          setStreams(streams);
+          render();
+          return;
+        }
+        if (action === "move-up" && index > 0) {
+          [streams[index - 1], streams[index]] = [streams[index], streams[index - 1]];
+          setStreams(streams);
+          render();
+          return;
+        }
+        if (action === "move-down" && index < streams.length - 1) {
+          [streams[index + 1], streams[index]] = [streams[index], streams[index + 1]];
+          setStreams(streams);
+          render();
+          return;
+        }
+        if (faqAction) {
+          const stream = { ...(streams[index] || {}) };
+          const faqs = Array.isArray(stream.faqs) ? [...stream.faqs] : [];
+          if (faqAction === "add") {
+            faqs.push({ question: "", answer: "" });
+            stream.faqs = faqs;
+            streams[index] = stream;
+            setStreams(streams);
+            render();
+            return;
+          }
+          if (faqAction === "remove") {
+            const faqEl = event.target.closest("[data-faq-index]");
+            if (!faqEl) return;
+            const faqIndex = Number(faqEl.dataset.faqIndex);
+            faqs.splice(faqIndex, 1);
+            stream.faqs = faqs;
+            streams[index] = stream;
+            setStreams(streams);
+            render();
+          }
+        }
+      });
+    }
+
+    render();
+  };
+
+  const initBulkGalleryUpload = () => {
+    const bulkBtn = document.getElementById("gallery-bulk-upload");
+    const bulkInput = document.getElementById("gallery-bulk-input");
+    if (!bulkBtn || !bulkInput || bulkInput.dataset.bound) return;
+    bulkInput.dataset.bound = "true";
+    bulkBtn.addEventListener("click", () => bulkInput.click());
+    bulkInput.addEventListener("change", async () => {
+      const files = Array.from(bulkInput.files || []);
+      if (!files.length) return;
+      const readFile = (file) =>
+        new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result?.toString() || "");
+          reader.onerror = () => reject(new Error("read failed"));
+          reader.readAsDataURL(file);
+        });
+      try {
+        const sources = await Promise.all(files.map(readFile));
+        const gallery = getValue(["gallery"], []);
+        const nextGallery = Array.isArray(gallery) ? [...gallery] : [];
+        sources.forEach((src) => {
+          if (src) nextGallery.push({ src, caption: "", category: "" });
+        });
+        setValue(["gallery"], nextGallery);
+        markDirty();
+        initListEditor(listConfigs.gallery);
+      } catch (err) {
+        showToast("Unable to read one of the images.", true);
+      } finally {
+        bulkInput.value = "";
+      }
+    });
+  };
+
+  const ensureFieldLabels = () => {
+    const fields = document.querySelectorAll(".input-field");
     fields.forEach((field) => {
+      if (field.dataset.autoLabeled) return;
+      if (field.closest("label")) return;
+      if (field.id) {
+        const labelSelector = `label[for="${field.id}"]`;
+        if (document.querySelector(labelSelector)) return;
+      }
+      const parent = field.parentElement;
+      if (parent) {
+        const hasDirectLabel = Array.from(parent.children).some(
+          (child) => child.tagName === "LABEL"
+        );
+        if (hasDirectLabel) return;
+      }
+      const placeholder = field.getAttribute("placeholder") || "";
+      const isSample = /https?:|mailto:|images\/|\.html|\.pdf|\.zip|\.png|\.jpg|\.jpeg/i.test(placeholder);
+      const fallbackRaw = field.id ? field.id.replace(/[-_]+/g, " ") : "Field";
+      const fallback = fallbackRaw
+        .replace(/\bcta\b/gi, "CTA")
+        .replace(/\bhref\b/gi, "link")
+        .replace(/\burl\b/gi, "URL")
+        .replace(/\bfield\b/gi, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+      const labelHint =
+        /tag|title|label|link|url|subtitle|description|caption|quote|attribution|headline|subhead|kicker|intro|note|name|summary|category|badge|role|bio|question|answer|value|detail|highlight|cta|hero|program|gallery|news|sponsor|contact|help|feature|story|stat|pillar|initiative|resource|stream|season|schedule|location|coach|guide/i.test(
+          placeholder
+        );
+      let labelText = (field.dataset.label || (!isSample && labelHint ? placeholder : "") || fallback)
+        .replace(/^e\.g\.\s*/i, "")
+        .trim();
+      if (!labelText) return;
+      labelText = labelText.charAt(0).toUpperCase() + labelText.slice(1);
       const wrapper = document.createElement("div");
       wrapper.className = "space-y-1.5";
+      const spanClasses = Array.from(field.classList).filter((cls) =>
+        cls.includes("col-span")
+      );
+      spanClasses.forEach((cls) => {
+        wrapper.classList.add(cls);
+        field.classList.remove(cls);
+      });
       const label = document.createElement("label");
-      label.className = "text-xs font-medium text-white/50 uppercase tracking-wider";
-      label.textContent = field.label;
-      const input = field.multiline
-        ? document.createElement("textarea")
-        : document.createElement("input");
-      input.name = `${containerId}-${field.name}-${idx}`;
-      input.className =
-        "w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all";
-      if (field.multiline) input.rows = 3;
-      input.value = item[field.name] ?? "";
-      wrapper.append(label, input);
-      card.appendChild(wrapper);
+      label.className = "text-xs font-medium text-white/50 uppercase tracking-wider field-label";
+      label.textContent = labelText;
+      if (field.id) label.htmlFor = field.id;
+      field.parentNode.insertBefore(wrapper, field);
+      wrapper.appendChild(label);
+      wrapper.appendChild(field);
+      field.dataset.autoLabeled = "true";
     });
-
-    const removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className =
-      "text-xs text-red-400 hover:text-red-300 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-1.5 transition-all";
-    removeBtn.innerHTML = `<span class="flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg> Remove</span>`;
-    removeBtn.onclick = () => card.remove();
-    card.appendChild(removeBtn);
-
-    return card;
-  }
-}
-
-function collectList(containerId, fields) {
-  const container = document.getElementById(containerId);
-  if (!container) return [];
-  const cards = Array.from(container.querySelectorAll("[data-index]"));
-  return cards.map((card) => {
-    const item = {};
-    fields.forEach((field) => {
-      const input = card.querySelector(`[name^="${containerId}-${field.name}"]`);
-      item[field.name] = input ? input.value.trim() : "";
-    });
-    return item;
-  });
-}
-
-function buildSponsorsEditor(containerId, sponsors) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  container.innerHTML = "";
-
-  (sponsors || []).forEach((sponsor, idx) => {
-    container.appendChild(createCard(sponsor, idx));
-  });
-
-  const addBtn = document.createElement("button");
-  addBtn.type = "button";
-  addBtn.className =
-    "mt-3 inline-flex items-center gap-2 rounded-xl border border-dashed border-primary/30 px-4 py-2.5 text-sm text-primary hover:border-primary hover:bg-primary/10 transition-all";
-  addBtn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg> Add sponsor`;
-  addBtn.onclick = () => {
-    const card = createCard({}, container.querySelectorAll("[data-index]").length);
-    container.insertBefore(card, addBtn);
   };
-  container.appendChild(addBtn);
 
-  function createCard(sponsor, idx) {
-    const card = document.createElement("div");
-    card.className = "mb-3 rounded-2xl border border-white/10 bg-white/5 p-5 space-y-3";
-    card.dataset.index = idx;
-    const previewId = `${containerId}-logo-preview-${idx}`;
-    const fileId = `${containerId}-logo-file-${idx}`;
-    const srcInputId = `${containerId}-logo-src-${idx}`;
-    const nameId = `${containerId}-name-${idx}`;
-    const urlId = `${containerId}-url-${idx}`;
-
-    card.innerHTML = `
-      <div class="grid md:grid-cols-3 gap-4 items-start">
-        <div>
-          <label class="text-xs font-medium text-white/50 uppercase tracking-wider">Logo</label>
-          <div class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-3 text-center hover:border-primary/50 transition-colors cursor-pointer h-28 flex items-center justify-center" onclick="document.getElementById('${fileId}').click()">
-            <img id="${previewId}" src="${sponsor.logo || ""}" alt="Logo preview" class="${sponsor.logo ? "" : "hidden"} w-full h-full object-contain rounded-lg bg-white/5" />
-            <div class="upload-placeholder ${sponsor.logo ? "hidden" : ""} space-y-1">
-              <svg class="w-6 h-6 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-              <p class="text-xs text-white/40">Upload logo</p>
-            </div>
-            <input type="file" id="${fileId}" accept="image/*" class="hidden" onchange="handleGalleryImageUpload(this, '${previewId}', '${srcInputId}')" />
-            <input type="hidden" id="${srcInputId}" value="${sponsor.logo || ""}" />
-          </div>
-        </div>
-        <div class="md:col-span-2 space-y-3">
-          <div class="space-y-1.5">
-            <label class="text-xs font-medium text-white/50 uppercase tracking-wider" for="${nameId}">Name</label>
-            <input id="${nameId}" name="${containerId}-name-${idx}" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" value="${sponsor.name || ""}" placeholder="Sponsor name" />
-          </div>
-          <div class="space-y-1.5">
-            <label class="text-xs font-medium text-white/50 uppercase tracking-wider" for="${urlId}">Website (optional)</label>
-            <input id="${urlId}" name="${containerId}-url-${idx}" class="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" value="${sponsor.url || ""}" placeholder="https://sponsor-site.com" />
-          </div>
-        </div>
-      </div>
-      <button type="button" class="text-xs text-red-400 hover:text-red-300 border border-red-400/30 hover:border-red-400/50 rounded-lg px-3 py-1.5 transition-all" onclick="this.closest('[data-index]').remove()">
-        Remove
-      </button>
-    `;
-
-    return card;
-  }
-}
-
-function collectSponsors(containerId) {
-  const container = document.getElementById(containerId);
-  if (!container) return [];
-  const cards = Array.from(container.querySelectorAll("[data-index]"));
-  return cards
-    .map((card) => {
-      const name = card.querySelector(`[name^="${containerId}-name"]`)?.value.trim() || "";
-      const url = card.querySelector(`[name^="${containerId}-url"]`)?.value.trim() || "";
-      const logo = card.querySelector(`input[id*="${containerId}-logo-src"]`)?.value.trim() || "";
-      return { name, url, logo };
-    })
-    .filter((item) => item.name || item.logo || item.url);
-}
-
-function hydrateAdminForms() {
-  const data = window.siteContent;
-  data.about = data.about || {};
-  const pages = data.pages || {};
-  const home = pages.home || {};
-  const aboutPage = pages.about || {};
-  const joinPage = pages.join || {};
-  const merchPage = pages.merch || {};
-  const coachesPage = pages.coaches || {};
-  const sponsorsPage = pages.sponsors || {};
-  const galleryPage = pages.gallery || {};
-
-  // Hero
-  setValue("hero-headline", data.hero.headline);
-  setValue("hero-subhead", data.hero.subhead);
-  setValue("hero-primary-label", data.hero.primaryCta.label);
-  setValue("hero-primary-href", data.hero.primaryCta.href);
-  setValue("hero-secondary-label", data.hero.secondaryCta.label);
-  setValue("hero-secondary-href", data.hero.secondaryCta.href);
-
-  setValue("club-tagline", data.club.tagline);
-  setValue("club-intro", data.club.homeIntro);
-
-  buildListEditor("nav-links-list", data.navigation?.links || [], [
-    { name: "label", label: "Label" },
-    { name: "href", label: "URL" },
-    { name: "key", label: "Key" }
-  ]);
-  setValue("nav-admin-label-field", data.navigation?.adminLabel);
-
-  buildListEditor("footer-links-list", data.footer?.quickLinks || [], [
-    { name: "label", label: "Label" },
-    { name: "href", label: "URL" }
-  ]);
-  buildListEditor("footer-connect-list", data.footer?.connectLinks || [], [
-    { name: "label", label: "Label" },
-    { name: "href", label: "URL" }
-  ]);
-  setValue("footer-tagline-field", data.footer?.tagline);
-  setValue("footer-note-field", data.footer?.note);
-  setValue("footer-quick-title-field", data.footer?.quickLinksTitle);
-  setValue("footer-connect-title-field", data.footer?.connectTitle);
-
-  // Homepage copy
-  setValue("home-hero-kicker-field", home.heroKicker);
-  setValue("home-hero-title-field", home.heroTitle || data.hero.headline);
-  setValue("home-hero-highlight-field", home.heroHighlight);
-  setValue("home-programs-tag-field", home.programsTag);
-  setValue("home-programs-title-field", home.programsTitle);
-  setValue("home-story-tag-field", home.storyTag);
-  setValue("home-story-title-field", home.storyTitle);
-  setValue("home-story-subtitle-field", home.storySubtitle);
-  setValue("home-gallery-tag-field", home.galleryTag);
-  setValue("home-gallery-title-field", home.galleryTitle);
-  setValue("home-gallery-subtitle-field", home.gallerySubtitle);
-  setValue("home-news-tag-field", home.newsTag);
-  setValue("home-news-title-field", home.newsTitle);
-  setValue("home-links-tag-field", home.linksTag);
-  setValue("home-links-title-field", home.linksTitle);
-  setValue("home-links-card-title-field", home.linksCardTitle);
-  setValue("home-links-card-text-field", home.linksCardText);
-  setValue("home-sponsors-tag-field", home.sponsorsTag);
-  setValue("home-sponsors-title-field", home.sponsorsTitle);
-  setValue("home-sponsors-desc-field", home.sponsorsDescription);
-  setValue("home-sponsors-cta-label", home.sponsorsCtaLabel);
-  setValue("home-sponsors-cta-href", home.sponsorsCtaHref);
-  setValue("home-cta-tag-field", home.ctaTag);
-  setValue("home-cta-title-field", home.ctaTitle);
-  setValue("home-cta-highlight-field", home.ctaHighlight);
-  setValue("home-cta-description-field", home.ctaDescription);
-  setValue("home-cta-primary-label-field", home.ctaPrimary?.label);
-  setValue("home-cta-primary-href-field", home.ctaPrimary?.href);
-  setValue("home-cta-secondary-label-field", home.ctaSecondary?.label);
-  setValue("home-cta-secondary-href-field", home.ctaSecondary?.href);
-  setValue("home-quote-text-field", home.quote?.text);
-  setValue("home-quote-attrib-field", home.quote?.attribution);
-
-  buildListEditor("home-programs-list", home.programs || [], [
-    { name: "title", label: "Title" },
-    { name: "badge", label: "Badge" },
-    { name: "description", label: "Description", multiline: true },
-    { name: "ctaLabel", label: "CTA label" },
-    { name: "ctaHref", label: "CTA link" }
-  ]);
-  buildFeaturedPhotosEditor("home-featured-photos", home.featuredPhotos || []);
-
-  const storyBlocks = (home.storyBlocks || []).map((block) => ({
-    ...block,
-    bulletsText: (block.bullets || []).join("\n")
-  }));
-  buildListEditor("home-story-list", storyBlocks, [
-    { name: "tag", label: "Tag" },
-    { name: "title", label: "Title" },
-    { name: "summary", label: "Summary", multiline: true },
-    { name: "bulletsText", label: "Bullets (one per line)", multiline: true }
-  ]);
-
-  buildListEditor("news-list", data.news, [
-    { name: "title", label: "Title" },
-    { name: "date", label: "Date" },
-    { name: "summary", label: "Summary", multiline: true },
-    { name: "url", label: "Link" }
-  ]);
-
-  buildListEditor("quick-links-list", data.quickLinks, [
-    { name: "label", label: "Label" },
-    { name: "href", label: "URL" }
-  ]);
-
-  buildSponsorsEditor("sponsor-list", data.sponsors);
-
-  buildGalleryEditor("gallery-list", data.gallery || []);
-
-  // Load site images previews
-  const heroImg = data.images?.heroBackground;
-  const logoImg = data.images?.logo;
-  if (heroImg) {
-    const heroPreview = document.getElementById('hero-image-preview');
-    const heroPlaceholder = document.getElementById('hero-image-placeholder');
-    if (heroPreview) {
-      heroPreview.src = heroImg;
-      heroPreview.classList.remove('hidden');
+  const applyAdminFilter = () => {
+    const tabBar = document.getElementById("admin-tabs");
+    if (!tabBar) return;
+    const tabs = Array.from(tabBar.querySelectorAll("[data-admin-tab]"));
+    const storedTab = localStorage.getItem("adminActiveTab") || "all";
+    const validTabs = tabs.map((tab) => tab.dataset.adminTab);
+    const activeTab = validTabs.includes(storedTab) ? storedTab : "all";
+    if (activeTab !== storedTab) {
+      localStorage.setItem("adminActiveTab", activeTab);
     }
-    if (heroPlaceholder) heroPlaceholder.classList.add('hidden');
-  }
-  if (logoImg) {
-    const logoPreview = document.getElementById('logo-image-preview');
-    const logoPlaceholder = document.getElementById('logo-image-placeholder');
-    if (logoPreview) {
-      logoPreview.src = logoImg;
-      logoPreview.classList.remove('hidden');
+    const blocks = Array.from(document.querySelectorAll("[data-admin-page]"));
+    const groups = Array.from(document.querySelectorAll("[data-admin-group]"));
+    tabs.forEach((tab) => {
+      tab.classList.toggle("admin-tab--active", tab.dataset.adminTab === activeTab);
+    });
+    blocks.forEach((block) => {
+      const pages = (block.dataset.adminPage || "")
+        .split(/\s+/)
+        .map((page) => page.trim())
+        .filter(Boolean);
+      const show = activeTab === "all" || pages.includes(activeTab);
+      block.classList.toggle("hidden", !show);
+    });
+    groups.forEach((group) => {
+      const hasVisibleChild = group.querySelector("[data-admin-page]:not(.hidden)");
+      group.classList.toggle("hidden", !hasVisibleChild);
+    });
+  };
+
+  const initAdminTabs = () => {
+    const tabBar = document.getElementById("admin-tabs");
+    if (!tabBar) return;
+    if (tabBar.dataset.bound) {
+      applyAdminFilter();
+      return;
     }
-    if (logoPlaceholder) logoPlaceholder.classList.add('hidden');
-  }
-
-  // About
-  setValue("about-hero-tag-field", aboutPage.heroTag);
-  setValue("about-hero-title-field", aboutPage.heroTitle);
-  setValue("about-hero-highlight-field", aboutPage.heroHighlight);
-  setValue("about-history-title-field", aboutPage.historyTitle);
-  setValue("about-values-title-field", aboutPage.valuesTitle);
-  setValue("about-life-title-field", aboutPage.lifeMembersTitle);
-  setValue("about-intro-field", data.about.intro);
-  setValue("about-history-field", data.about.history);
-  setValue("about-values-field", (data.about.values || []).join("\n"));
-  setValue("about-members-field", (data.about.lifeMembers || []).join("\n"));
-  setValue("about-life-desc-field", aboutPage.lifeDescription);
-  setValue("about-contact-tag-field", aboutPage.contactTag);
-  setValue("about-contact-title-field", aboutPage.contactTitle);
-  setValue("about-contact-highlight-field", aboutPage.contactHighlight);
-  setValue("about-contact-cta-label", aboutPage.contactCtaLabel);
-  setValue("about-contact-cta-href", aboutPage.contactCtaHref);
-  setValue("about-contact-desc-field", aboutPage.contactDescription);
-  setValue("about-extra-tag-field", aboutPage.extraTag);
-  setValue("about-extra-title-field", aboutPage.extraTitle);
-  setValue("about-extra-text-field", aboutPage.extraText);
-  setValue("about-snapshot-title-field", data.about.snapshotTitle);
-  setValue("about-snapshot-subtitle-field", data.about.snapshotSubtitle);
-  buildListEditor("about-snapshot-stats-list", data.about.snapshotStats || [], [
-    { name: "value", label: "Number" },
-    { name: "label", label: "Label" },
-    { name: "detail", label: "Detail", multiline: true }
-  ]);
-  setValue("about-pillars-title-field", data.about.pillarsTitle);
-  setValue("about-pillars-subtitle-field", data.about.pillarsSubtitle);
-  buildListEditor("about-pillars-list", data.about.pillars || [], [
-    { name: "title", label: "Title" },
-    { name: "description", label: "Description", multiline: true }
-  ]);
-  setValue("about-initiatives-title-field", data.about.initiativesTitle);
-  setValue("about-initiatives-subtitle-field", data.about.initiativesSubtitle);
-  buildListEditor("about-initiatives-list", data.about.initiatives || [], [
-    { name: "title", label: "Title" },
-    { name: "tag", label: "Tag" },
-    { name: "description", label: "Description", multiline: true }
-  ]);
-  buildSimplePhotoEditor("about-photos-list", data.about.photos || []);
-
-  // Join
-  setValue("join-hero-tag-field", joinPage.heroTag);
-  setValue("join-hero-title-field", joinPage.heroTitle);
-  setValue("join-hero-highlight-field", joinPage.heroHighlight);
-  setValue("join-hero-description-field", joinPage.heroDescription);
-  setValue("join-help-tag-field", joinPage.helpTag);
-  setValue("join-help-title-field", joinPage.helpTitle);
-  setValue("join-help-text-field", joinPage.helpText);
-  setValue("join-help-cta-label-field", joinPage.helpCtaLabel);
-  setValue("join-help-cta-href-field", joinPage.helpCtaHref);
-  setValue("join-signup-label-field", joinPage.signUpLabel);
-  setValue("join-signup-href-field", joinPage.signUpHref);
-
-  const joinStreams = (joinPage.streams || []).map((stream) => ({
-    ...stream,
-    stepsText: (stream.steps || []).join("\n")
-  }));
-  buildListEditor("join-streams-list", joinStreams, [
-    { name: "id", label: "Anchor (no #)" },
-    { name: "title", label: "Title" },
-    { name: "badge", label: "Badge" },
-    { name: "description", label: "Description", multiline: true },
-    { name: "stepsText", label: "Steps (one per line)", multiline: true }
-  ]);
-
-  // Merch
-  setValue("merch-hero-tag-field", merchPage.heroTag);
-  setValue("merch-hero-title-field", merchPage.heroTitle);
-  setValue("merch-hero-highlight-field", merchPage.heroHighlight);
-  setValue("merch-store-tag-field", merchPage.storeTag);
-  setValue("merch-store-title-field", merchPage.storeTitle);
-  setValue("merch-store-highlight-field", merchPage.storeHighlight);
-  setValue("merch-blurb-field", data.merch.blurb);
-  setValue("merch-store-description-field", merchPage.storeDescription);
-  setValue("merch-store-field", data.merch.storeUrl);
-  setValue("merch-pillars-field", (merchPage.pillars || []).join("\n"));
-  setValue("merch-cta-label-field", merchPage.ctaLabel);
-
-  // Coaches
-  setValue("coaches-hero-tag-field", coachesPage.heroTag);
-  setValue("coaches-hero-title-field", coachesPage.heroTitle);
-  setValue("coaches-hero-highlight-field", coachesPage.heroHighlight);
-  setValue("coaches-blurb-field", data.coaches.blurb);
-  const resourceDefaults =
-    coachesPage.resources && coachesPage.resources.length
-      ? coachesPage.resources
-      : [
-          { title: "Coaching Guide", description: "", ctaLabel: "Open guide", href: data.coaches?.guideUrl || "" },
-          { title: "Templates", description: "", ctaLabel: "Download templates", href: data.coaches?.templatesUrl || "" }
-        ];
-  buildListEditor("coaches-resources-list", resourceDefaults, [
-    { name: "title", label: "Title" },
-    { name: "description", label: "Description", multiline: true },
-    { name: "ctaLabel", label: "CTA label" },
-    { name: "href", label: "Link" }
-  ]);
-  setValue("coaches-cta-tag-field", coachesPage.ctaTag);
-  setValue("coaches-cta-title-field", coachesPage.ctaTitle);
-  setValue("coaches-cta-highlight-field", coachesPage.ctaHighlight);
-  setValue("coaches-cta-label-field", coachesPage.ctaLabel);
-  setValue("coaches-cta-href-field", coachesPage.ctaHref);
-  setValue("coaches-cta-description-field", coachesPage.ctaDescription);
-
-  // Sponsors page copy
-  setValue("sponsors-hero-tag-field", sponsorsPage.heroTag);
-  setValue("sponsors-hero-title-field", sponsorsPage.heroTitle);
-  setValue("sponsors-hero-highlight-field", sponsorsPage.heroHighlight);
-  setValue("sponsors-hero-desc-field", sponsorsPage.heroDescription);
-  setValue("sponsors-cta-tag-field", sponsorsPage.ctaTag);
-  setValue("sponsors-cta-title-field", sponsorsPage.ctaTitle);
-  setValue("sponsors-cta-highlight-field", sponsorsPage.ctaHighlight);
-  setValue("sponsors-cta-label-field", sponsorsPage.ctaLabel);
-  setValue("sponsors-cta-href-field", sponsorsPage.ctaHref);
-  setValue("sponsors-cta-desc-field", sponsorsPage.ctaDescription);
-  setValue("sponsors-features-field", (sponsorsPage.features || []).join("\n"));
-
-  // Gallery page copy
-  setValue("gallery-hero-tag-field", galleryPage.heroTag);
-  setValue("gallery-hero-title-field", galleryPage.heroTitle);
-  setValue("gallery-hero-highlight-field", galleryPage.heroHighlight);
-  setValue("gallery-hero-description-field", galleryPage.heroDescription);
-  setValue("gallery-order-field", galleryPage.orderMode || "fixed");
-  setValue("gallery-all-label-field", galleryPage.allLabel);
-  setValue("gallery-empty-title-field", galleryPage.emptyTitle);
-  setValue("gallery-empty-desc-field", galleryPage.emptyDescription);
-
-  initCustomDropdowns();
-}
-
-function setValue(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.value = value ?? "";
-}
-
-function attachAdminHandlers() {
-  const saveBtn = document.getElementById("save-admin");
-  const resetBtn = document.getElementById("reset-admin");
-  const toast = document.getElementById("admin-toast");
-  const exportBtn = document.getElementById("export-json");
-  const importBtn = document.getElementById("import-json");
-  const importInput = document.getElementById("import-json-input");
-  const saveModal = document.getElementById("save-confirm-modal");
-  const saveModalClose = document.getElementById("save-confirm-close");
-  const galleryBulkBtn = document.getElementById("gallery-bulk-upload");
-  const galleryBulkInput = document.getElementById("gallery-bulk-input");
-
-  galleryBulkBtn?.addEventListener("click", () => galleryBulkInput?.click());
-  galleryBulkInput?.addEventListener("change", (event) => {
-    const files = event.target.files;
-    handleGalleryBulkUpload(files);
-    event.target.value = "";
-  });
-
-  saveBtn?.addEventListener("click", async () => {
-    const data = loadSiteData();
-    if (!data.pages) data.pages = {};
-    const pages = data.pages;
-    const home = pages.home || (pages.home = {});
-    const aboutPage = pages.about || (pages.about = {});
-    const joinPage = pages.join || (pages.join = {});
-    const merchPage = pages.merch || (pages.merch = {});
-    const coachesPage = pages.coaches || (pages.coaches = {});
-    const sponsorsPage = pages.sponsors || (pages.sponsors = {});
-    const galleryPage = pages.gallery || (pages.gallery = {});
-    if (!data.navigation) data.navigation = {};
-    if (!data.footer) data.footer = {};
-    if (!data.about) data.about = {};
-    const get = (id) => (document.getElementById(id)?.value || "").trim();
-
-    data.hero.headline = document.getElementById("hero-headline").value.trim();
-    data.hero.subhead = document.getElementById("hero-subhead").value.trim();
-    data.hero.primaryCta.label = document.getElementById("hero-primary-label").value.trim();
-    data.hero.primaryCta.href = document.getElementById("hero-primary-href").value.trim();
-    data.hero.secondaryCta.label = document.getElementById("hero-secondary-label").value.trim();
-    data.hero.secondaryCta.href = document.getElementById("hero-secondary-href").value.trim();
-
-    data.club.tagline = document.getElementById("club-tagline").value.trim();
-    data.club.homeIntro = document.getElementById("club-intro").value.trim();
-
-    data.navigation.links = collectList("nav-links-list", ["label", "href", "key"].map((name) => ({ name })));
-    data.navigation.adminLabel = get("nav-admin-label-field") || "Admin";
-
-    data.footer.quickLinks = collectList("footer-links-list", ["label", "href"].map((name) => ({ name })));
-    data.footer.tagline = get("footer-tagline-field");
-    data.footer.note = get("footer-note-field");
-    data.footer.quickLinksTitle = get("footer-quick-title-field");
-    data.footer.connectTitle = get("footer-connect-title-field");
-    data.footer.connectLinks = collectList("footer-connect-list", ["label", "href"].map((name) => ({ name })));
-
-    home.heroKicker = get("home-hero-kicker-field");
-    home.heroTitle = get("home-hero-title-field");
-    home.heroHighlight = get("home-hero-highlight-field");
-    home.programsTag = get("home-programs-tag-field");
-    home.programsTitle = get("home-programs-title-field");
-    home.storyTag = get("home-story-tag-field");
-    home.storyTitle = get("home-story-title-field");
-    home.storySubtitle = get("home-story-subtitle-field");
-    home.galleryTag = get("home-gallery-tag-field");
-    home.galleryTitle = get("home-gallery-title-field");
-    home.gallerySubtitle = get("home-gallery-subtitle-field");
-    home.newsTag = get("home-news-tag-field");
-    home.newsTitle = get("home-news-title-field");
-    home.linksTag = get("home-links-tag-field");
-    home.linksTitle = get("home-links-title-field");
-    home.linksCardTitle = get("home-links-card-title-field");
-    home.linksCardText = get("home-links-card-text-field");
-    home.sponsorsTag = get("home-sponsors-tag-field");
-    home.sponsorsTitle = get("home-sponsors-title-field");
-    home.sponsorsDescription = get("home-sponsors-desc-field");
-    home.sponsorsCtaLabel = get("home-sponsors-cta-label");
-    home.sponsorsCtaHref = get("home-sponsors-cta-href");
-    home.ctaTag = get("home-cta-tag-field");
-    home.ctaTitle = get("home-cta-title-field");
-    home.ctaHighlight = get("home-cta-highlight-field");
-    home.ctaDescription = get("home-cta-description-field");
-    home.ctaPrimary = {
-      label: get("home-cta-primary-label-field"),
-      href: get("home-cta-primary-href-field")
-    };
-    home.ctaSecondary = {
-      label: get("home-cta-secondary-label-field"),
-      href: get("home-cta-secondary-href-field")
-    };
-    home.quote = {
-      text: get("home-quote-text-field"),
-      attribution: get("home-quote-attrib-field")
-    };
-    home.programs = collectList("home-programs-list", [
-      { name: "title" },
-      { name: "badge" },
-      { name: "description" },
-      { name: "ctaLabel" },
-      { name: "ctaHref" }
-    ]).filter((p) => p.title || p.description || p.ctaLabel || p.ctaHref);
-    home.featuredPhotos = collectFeaturedPhotos("home-featured-photos");
-    home.storyBlocks = collectList("home-story-list", [
-      { name: "tag" },
-      { name: "title" },
-      { name: "summary" },
-      { name: "bulletsText" }
-    ])
-      .map((block) => ({
-        tag: block.tag || "",
-        title: block.title || "",
-        summary: block.summary || "",
-        bullets: parseLines(block.bulletsText || "")
-      }))
-      .filter((block) => block.title || block.summary || (block.bullets && block.bullets.length));
-
-    data.news = collectList("news-list", ["title", "date", "summary", "url"].map((name) => ({ name })));
-    data.quickLinks = collectList("quick-links-list", ["label", "href"].map((name) => ({ name })));
-    data.sponsors = collectSponsors("sponsor-list");
-    
-    // Collect gallery photos
-    data.gallery = collectGalleryList();
-    
-    // Save uploaded images
-    if (!data.images) data.images = {};
-    if (window.pendingImages) {
-      if (window.pendingImages.heroBackground) {
-        data.images.heroBackground = window.pendingImages.heroBackground;
-      }
-      if (window.pendingImages.logo) {
-        data.images.logo = window.pendingImages.logo;
-      }
-      window.pendingImages = {};
-    }
-
-    data.about.intro = document.getElementById("about-intro-field").value.trim();
-    data.about.history = document.getElementById("about-history-field").value.trim();
-    data.about.values = document.getElementById("about-values-field").value
-      .split("\n")
-      .map((v) => v.trim())
-      .filter(Boolean);
-    data.about.lifeMembers = document.getElementById("about-members-field").value
-      .split("\n")
-      .map((v) => v.trim())
-      .filter(Boolean);
-    data.about.snapshotTitle = get("about-snapshot-title-field");
-    data.about.snapshotSubtitle = get("about-snapshot-subtitle-field");
-    data.about.snapshotStats = collectList("about-snapshot-stats-list", [
-      { name: "value" },
-      { name: "label" },
-      { name: "detail" }
-    ]).filter((item) => item.value || item.label || item.detail);
-    data.about.pillarsTitle = get("about-pillars-title-field");
-    data.about.pillarsSubtitle = get("about-pillars-subtitle-field");
-    data.about.pillars = collectList("about-pillars-list", [
-      { name: "title" },
-      { name: "description" }
-    ]).filter((item) => item.title || item.description);
-    data.about.initiativesTitle = get("about-initiatives-title-field");
-    data.about.initiativesSubtitle = get("about-initiatives-subtitle-field");
-    data.about.initiatives = collectList("about-initiatives-list", [
-      { name: "title" },
-      { name: "tag" },
-      { name: "description" }
-    ]).filter((item) => item.title || item.tag || item.description);
-    data.about.photos = collectSimplePhotoList("about-photos-list");
-    aboutPage.heroTag = get("about-hero-tag-field");
-    aboutPage.heroTitle = get("about-hero-title-field");
-    aboutPage.heroHighlight = get("about-hero-highlight-field");
-    aboutPage.historyTitle = get("about-history-title-field");
-    aboutPage.valuesTitle = get("about-values-title-field");
-    aboutPage.lifeMembersTitle = get("about-life-title-field");
-    aboutPage.contactTag = get("about-contact-tag-field");
-    aboutPage.contactTitle = get("about-contact-title-field");
-    aboutPage.contactHighlight = get("about-contact-highlight-field");
-    aboutPage.contactCtaLabel = get("about-contact-cta-label");
-    aboutPage.contactCtaHref = get("about-contact-cta-href");
-    aboutPage.contactDescription = get("about-contact-desc-field");
-    aboutPage.extraTag = get("about-extra-tag-field");
-    aboutPage.extraTitle = get("about-extra-title-field");
-    aboutPage.extraText = get("about-extra-text-field");
-    aboutPage.lifeDescription = get("about-life-desc-field");
-
-    joinPage.heroTag = get("join-hero-tag-field");
-    joinPage.heroTitle = get("join-hero-title-field");
-    joinPage.heroHighlight = get("join-hero-highlight-field");
-    joinPage.heroDescription = get("join-hero-description-field");
-    joinPage.helpTag = get("join-help-tag-field");
-    joinPage.helpTitle = get("join-help-title-field");
-    joinPage.helpText = get("join-help-text-field");
-    joinPage.helpCtaLabel = get("join-help-cta-label-field");
-    joinPage.helpCtaHref = get("join-help-cta-href-field");
-    joinPage.signUpLabel = get("join-signup-label-field");
-    joinPage.signUpHref = get("join-signup-href-field");
-    const joinStreamsRaw = collectList("join-streams-list", [
-      { name: "id" },
-      { name: "title" },
-      { name: "badge" },
-      { name: "description" },
-      { name: "stepsText" }
-    ]);
-    joinPage.streams = joinStreamsRaw
-      .map((stream) => ({
-        id: stream.id || "",
-        title: stream.title || "",
-        badge: stream.badge || "",
-        description: stream.description || "",
-        steps: parseLines(stream.stepsText || "")
-      }))
-      .filter((stream) => stream.title || stream.description || (stream.steps && stream.steps.length));
-    data.join.u8u10 = joinPage.streams[0]?.description || "";
-    data.join.juniors = joinPage.streams[1]?.description || "";
-
-    data.merch.blurb = document.getElementById("merch-blurb-field").value.trim();
-    data.merch.storeUrl = document.getElementById("merch-store-field").value.trim();
-    merchPage.heroTag = get("merch-hero-tag-field");
-    merchPage.heroTitle = get("merch-hero-title-field");
-    merchPage.heroHighlight = get("merch-hero-highlight-field");
-    merchPage.storeTag = get("merch-store-tag-field");
-    merchPage.storeTitle = get("merch-store-title-field");
-    merchPage.storeHighlight = get("merch-store-highlight-field");
-    merchPage.storeDescription = get("merch-store-description-field");
-    merchPage.pillars = parseLines(get("merch-pillars-field"));
-    merchPage.ctaLabel = get("merch-cta-label-field");
-
-    data.coaches.blurb = document.getElementById("coaches-blurb-field").value.trim();
-    coachesPage.heroTag = get("coaches-hero-tag-field");
-    coachesPage.heroTitle = get("coaches-hero-title-field");
-    coachesPage.heroHighlight = get("coaches-hero-highlight-field");
-    coachesPage.resources = collectList("coaches-resources-list", [
-      { name: "title" },
-      { name: "description" },
-      { name: "ctaLabel" },
-      { name: "href" }
-    ]).filter((item) => item.title || item.description || item.href);
-    data.coaches.guideUrl = coachesPage.resources?.[0]?.href || "";
-    data.coaches.templatesUrl = coachesPage.resources?.[1]?.href || "";
-    coachesPage.ctaTag = get("coaches-cta-tag-field");
-    coachesPage.ctaTitle = get("coaches-cta-title-field");
-    coachesPage.ctaHighlight = get("coaches-cta-highlight-field");
-    coachesPage.ctaLabel = get("coaches-cta-label-field");
-    coachesPage.ctaHref = get("coaches-cta-href-field");
-    coachesPage.ctaDescription = get("coaches-cta-description-field");
-
-    sponsorsPage.heroTag = get("sponsors-hero-tag-field");
-    sponsorsPage.heroTitle = get("sponsors-hero-title-field");
-    sponsorsPage.heroHighlight = get("sponsors-hero-highlight-field");
-    sponsorsPage.heroDescription = get("sponsors-hero-desc-field");
-    sponsorsPage.ctaTag = get("sponsors-cta-tag-field");
-    sponsorsPage.ctaTitle = get("sponsors-cta-title-field");
-    sponsorsPage.ctaHighlight = get("sponsors-cta-highlight-field");
-    sponsorsPage.ctaLabel = get("sponsors-cta-label-field");
-    sponsorsPage.ctaHref = get("sponsors-cta-href-field");
-    sponsorsPage.ctaDescription = get("sponsors-cta-desc-field");
-    sponsorsPage.features = parseLines(get("sponsors-features-field"));
-
-    galleryPage.heroTag = get("gallery-hero-tag-field");
-    galleryPage.heroTitle = get("gallery-hero-title-field");
-    galleryPage.heroHighlight = get("gallery-hero-highlight-field");
-    galleryPage.heroDescription = get("gallery-hero-description-field");
-    galleryPage.orderMode = get("gallery-order-field") || "fixed";
-    galleryPage.allLabel = get("gallery-all-label-field");
-    galleryPage.emptyTitle = get("gallery-empty-title-field");
-    galleryPage.emptyDescription = get("gallery-empty-desc-field");
-
-    const localResult = saveSiteData(data);
-    const localStatus = localResult?.ok
-      ? (localResult.truncated ? "truncated" : "ok")
-      : "failed";
-
-    // Try pushing to the server API
-    try {
-      const token = await ensureApiToken();
-      await fetch(`${getApiBase()}/api/content`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(data)
-      }).then((res) => {
-        if (res.status === 401) {
-          localStorage.removeItem("adminApiToken");
-        }
-        if (!res.ok) {
-          throw new Error(`Save failed ${res.status}`);
-        }
-      });
-      localStorage.removeItem("clubSiteData");
-      localStorage.removeItem("clubSiteDataFetchedAt");
-      if (localStatus === "failed") {
-        showToast(toast, "Saved to server. Local cache could not be updated (browser storage full).");
-      } else if (localStatus === "truncated") {
-        showToast(toast, "Saved to server. Local cache trimmed to fit storage (large images not cached).");
-      } else {
-        showToast(toast, "Saved to server. Refresh public pages to see changes.");
-      }
-      if (saveModal) {
-        saveModal.classList.remove("hidden");
-        saveModal.classList.add("flex");
-      }
-    } catch (err) {
-      console.warn("Server save failed; data saved locally only", err);
-      if (localStatus === "failed") {
-        showToast(toast, "Save failed. Browser storage is full and the server update failed.");
-      } else if (localStatus === "truncated") {
-        showToast(toast, "Saved locally without large images. Server update failed.");
-      } else {
-        showToast(toast, "Saved locally. Server update failed.");
-      }
-    }
-  });
-
-  exportBtn?.addEventListener("click", () => {
-    const data = loadSiteData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "site-data.json";
-    link.click();
-    URL.revokeObjectURL(url);
-  });
-
-  importBtn?.addEventListener("click", () => importInput?.click());
-  importInput?.addEventListener("change", (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const parsed = JSON.parse(reader.result);
-        const importResult = saveSiteData(parsed);
-        hydrateAdminForms();
-        if (importResult?.ok) {
-          showToast(
-            toast,
-            importResult.truncated
-              ? "Imported data applied (large images omitted to fit storage)."
-              : "Imported data applied."
-          );
-        } else {
-          showToast(toast, "Import failed. Browser storage is full.");
-        }
-      } catch (err) {
-        alert("Invalid JSON file.");
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = "";
-  });
-
-  resetBtn?.addEventListener("click", () => {
-    if (confirm("Are you sure you want to reset all content to defaults?")) {
-      resetSiteData();
-      hydrateAdminForms();
-      showToast(toast, "Reset to default content.");
-    }
-  });
-
-  saveModalClose?.addEventListener("click", () => {
-    if (saveModal) {
-      saveModal.classList.add("hidden");
-      saveModal.classList.remove("flex");
-    }
-  });
-}
-
-function showToast(el, message) {
-  if (!el) return;
-  el.textContent = message;
-  el.classList.remove("hidden");
-  el.style.display = "inline-block";
-  setTimeout(() => {
-    el.classList.add("hidden");
-    el.style.display = "";
-  }, 3000);
-}
-
-window.addEventListener("DOMContentLoaded", () => {
-  const unlockPromise =
-    localStorage.getItem("adminAccess") === "granted" && isAdminSessionValid()
-      ? Promise.resolve()
-      : new Promise((resolve) => window.addEventListener("admin:unlocked", resolve, { once: true }));
-
-  Promise.resolve(checkAdminPassword())
-    .catch(() => {})
-    .finally(() => {
-      unlockPromise.then(() => {
-        hydrateAdminForms();
-        attachAdminHandlers();
+    tabBar.dataset.bound = "true";
+    const tabs = Array.from(tabBar.querySelectorAll("[data-admin-tab]"));
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const key = tab.dataset.adminTab || "all";
+        localStorage.setItem("adminActiveTab", key);
+        applyAdminFilter();
       });
     });
-});
+    applyAdminFilter();
+  };
 
-window.addEventListener("sitecontent:updated", () => {
-  hydrateAdminForms();
-});
+  const listConfigs = {
+    news: {
+      containerId: "news-list",
+      path: ["news"],
+      itemLabel: "News item",
+      previewKey: "image",
+      autoDateField: "date",
+      defaultItem: { title: "", date: "", summary: "", url: "", image: "", imageAlt: "" },
+      fields: [
+        { key: "title", label: "Title", placeholder: "Headline" },
+        { key: "date", label: "Date (pick)", placeholder: "YYYY-MM-DD", inputType: "date" },
+        { key: "summary", label: "Summary", type: "textarea", rows: 2, fullWidth: true },
+        { key: "url", label: "Link", placeholder: "join.html" },
+        { key: "image", label: "Image upload (Optional)", type: "image", placeholder: "Click to upload announcement image", fullWidth: true },
+        { key: "imageAlt", label: "Image alt", placeholder: "Alt text" }
+      ]
+    },
+    gallery: {
+      containerId: "gallery-list",
+      path: ["gallery"],
+      itemLabel: "Photo",
+      previewKey: "src",
+      layout: "grid-3",
+      defaultItem: { src: "", caption: "", category: "" },
+      fields: [
+        { key: "src", label: "Image upload", type: "image", placeholder: "Click to upload photo", fullWidth: true },
+        { key: "caption", label: "Caption", placeholder: "Caption" },
+        { key: "category", label: "Category", placeholder: "Teams" }
+      ]
+    },
+    quickLinks: {
+      containerId: "quick-links-list",
+      path: ["quickLinks"],
+      itemLabel: "Quick link",
+      defaultItem: { label: "", href: "" },
+      fields: [
+        { key: "label", label: "Label", placeholder: "Fixtures" },
+        { key: "href", label: "URL", placeholder: "https://example.com" }
+      ]
+    },
+    sponsors: {
+      containerId: "sponsor-list",
+      path: ["sponsors"],
+      itemLabel: "Sponsor",
+      previewKey: "logo",
+      defaultItem: { name: "", logo: "", url: "" },
+      fields: [
+        { key: "name", label: "Name", placeholder: "Sponsor name" },
+        { key: "logo", label: "Logo upload", type: "image", placeholder: "Click to upload logo", fullWidth: true },
+        { key: "url", label: "Link", placeholder: "https://..." }
+      ]
+    },
+    homePrograms: {
+      containerId: "home-programs-list",
+      path: ["pages", "home", "programs"],
+      itemLabel: "Program",
+      previewKey: "image",
+      defaultItem: { title: "", badge: "", description: "", ctaLabel: "", ctaHref: "", image: "", imageAlt: "" },
+      fields: [
+        { key: "title", label: "Title", placeholder: "Program title" },
+        { key: "badge", label: "Badge", placeholder: "Badge" },
+        { key: "description", label: "Description", type: "textarea", rows: 3, fullWidth: true },
+        { key: "ctaLabel", label: "CTA label", placeholder: "Learn more" },
+        { key: "ctaHref", label: "CTA link", placeholder: "join.html#u8s" },
+        { key: "image", label: "Image upload", type: "image", placeholder: "Click to upload program photo", fullWidth: true },
+        { key: "imageAlt", label: "Image alt", placeholder: "Alt text" }
+      ]
+    },
+    aboutAwards: {
+      containerId: "about-awards-list",
+      path: ["pages", "about", "awardsBlocks"],
+      itemLabel: "Awards block",
+      defaultItem: { tag: "", title: "", summary: "", bullets: [] },
+      fields: [
+        { key: "tag", label: "Tag", placeholder: "Awards" },
+        { key: "title", label: "Title", placeholder: "Celebrating our people" },
+        { key: "summary", label: "Summary", type: "textarea", rows: 2, fullWidth: true },
+        { key: "bullets", label: "Bullets (one per line)", type: "textarea", list: true, rows: 3, fullWidth: true }
+      ]
+    },
+    homeFeatured: {
+      containerId: "home-featured-list",
+      path: ["pages", "home", "featuredPhotos"],
+      itemLabel: "Featured photo",
+      previewKey: "src",
+      defaultItem: { src: "", title: "", subtitle: "" },
+      fields: [
+        { key: "src", label: "Image upload", type: "image", placeholder: "Click to upload photo", fullWidth: true },
+        { key: "title", label: "Title", placeholder: "Optional title" },
+        { key: "subtitle", label: "Subtitle", placeholder: "Optional subtitle" }
+      ]
+    },
+    aboutHistory: {
+      containerId: "about-history-timeline-list",
+      path: ["about", "historyTimeline"],
+      itemLabel: "Timeline item",
+      previewKey: "image",
+      layout: "grid-2",
+      defaultItem: { year: "", title: "", description: "", image: "", imageAlt: "" },
+      fields: [
+        { key: "year", label: "Era label", placeholder: "1960s" },
+        { key: "title", label: "Title", placeholder: "Milestone" },
+        { key: "description", label: "Description", type: "textarea", rows: 3, fullWidth: true },
+        { key: "image", label: "Image upload", type: "image", placeholder: "Click to upload timeline image", fullWidth: true },
+        { key: "imageAlt", label: "Image alt", placeholder: "Alt text" }
+      ]
+    },
+    lifeMembers: {
+      containerId: "about-life-members-list",
+      path: ["about", "lifeMembers"],
+      itemLabel: "Life member",
+      previewKey: "photo",
+      layout: "grid-2",
+      defaultItem: { name: "", bio: "", photo: "" },
+      fields: [
+        { key: "name", label: "Name", placeholder: "Name" },
+        { key: "photo", label: "Photo upload", type: "image", placeholder: "Click to upload portrait", fullWidth: true },
+        { key: "bio", label: "Bio", type: "textarea", rows: 2, fullWidth: true }
+      ]
+    },
+    spotlights: {
+      containerId: "about-spotlights-list",
+      path: ["about", "spotlights"],
+      itemLabel: "Spotlight",
+      previewKey: "photo",
+      defaultItem: { name: "", role: "", blurb: "", photo: "", video: "", poster: "" },
+      fields: [
+        { key: "name", label: "Name", placeholder: "Name" },
+        { key: "role", label: "Role", placeholder: "Role" },
+        { key: "blurb", label: "Blurb", type: "textarea", rows: 2, fullWidth: true },
+        { key: "photo", label: "Photo upload", type: "image", placeholder: "Click to upload spotlight photo", fullWidth: true },
+        { key: "video", label: "Video URL", placeholder: "https://..." },
+        { key: "poster", label: "Video poster upload", type: "image", placeholder: "Click to upload poster", fullWidth: true }
+      ]
+    },
+    aboutFaqs: {
+      containerId: "about-faqs-list",
+      path: ["about", "faqs"],
+      itemLabel: "FAQ",
+      defaultItem: { question: "", answer: "" },
+      fields: [
+        { key: "question", label: "Question", placeholder: "Question" },
+        { key: "answer", label: "Answer", type: "textarea", rows: 2, fullWidth: true }
+      ]
+    },
+    coachesResources: {
+      containerId: "coaches-resources-list",
+      path: ["pages", "coaches", "resources"],
+      itemLabel: "Resource",
+      defaultItem: { title: "", description: "", ctaLabel: "", href: "" },
+      fields: [
+        { key: "title", label: "Title", placeholder: "Guide" },
+        { key: "description", label: "Description", type: "textarea", rows: 2, fullWidth: true },
+        { key: "ctaLabel", label: "CTA label", placeholder: "Open guide" },
+        { key: "href", label: "Link", placeholder: "https://..." }
+      ]
+    },
+    navLinks: {
+      containerId: "nav-links-list",
+      path: ["navigation", "links"],
+      itemLabel: "Nav link",
+      defaultItem: { label: "", href: "", key: "" },
+      fields: [
+        { key: "label", label: "Label", placeholder: "Home" },
+        { key: "href", label: "URL", placeholder: "index.html" },
+        { key: "key", label: "Key", placeholder: "home" }
+      ]
+    },
+    footerQuickLinks: {
+      containerId: "footer-quick-links-list",
+      path: ["footer", "quickLinks"],
+      itemLabel: "Footer link",
+      defaultItem: { label: "", href: "" },
+      fields: [
+        { key: "label", label: "Label", placeholder: "Join the club" },
+        { key: "href", label: "URL", placeholder: "join.html" }
+      ]
+    },
+    footerConnectLinks: {
+      containerId: "footer-connect-links-list",
+      path: ["footer", "connectLinks"],
+      itemLabel: "Connect link",
+      defaultItem: { label: "", href: "" },
+      fields: [
+        { key: "label", label: "Label", placeholder: "Contact us" },
+        { key: "href", label: "URL", placeholder: "about.html#contact" }
+      ]
+    }
+  };
+
+  const bindButtons = () => {
+    const saveBtn = document.getElementById("save-admin");
+    const resetBtn = document.getElementById("reset-admin");
+    const exportBtn = document.getElementById("export-json");
+    const importBtn = document.getElementById("import-json");
+    const importInput = document.getElementById("import-json-input");
+
+    if (saveBtn && !saveBtn.dataset.bound) {
+      saveBtn.dataset.bound = "true";
+      saveBtn.addEventListener("click", async () => {
+        const result = saveSiteData(state.data);
+        if (!result.ok) {
+          showToast("Unable to save locally.", true);
+          return;
+        }
+        state.dirty = false;
+        if (confirmModal) {
+          confirmModal.classList.remove("hidden");
+          confirmModal.classList.add("flex");
+        } else {
+          showToast("Changes saved.");
+        }
+        try {
+          const password = localStorage.getItem("adminPassword") || "";
+          if (!password) {
+            showToast("Missing admin password. Please re-login.", true);
+            return;
+          }
+          const resp = await fetch(contentUrl, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Password": password
+            },
+            body: JSON.stringify(state.data)
+          });
+          if (!resp.ok) throw new Error("Remote save failed");
+        } catch (err) {
+          showToast("Saved locally. Remote save failed.", true);
+        }
+      });
+    }
+
+    if (confirmClose && !confirmClose.dataset.bound) {
+      confirmClose.dataset.bound = "true";
+      confirmClose.addEventListener("click", () => {
+        confirmModal?.classList.add("hidden");
+        confirmModal?.classList.remove("flex");
+      });
+    }
+
+    if (resetBtn && !resetBtn.dataset.bound) {
+      resetBtn.dataset.bound = "true";
+      resetBtn.addEventListener("click", () => {
+        resetSiteData();
+        state.data = loadSiteData();
+        state.dirty = false;
+        renderAll();
+        showToast("Changes reset.");
+      });
+    }
+
+    if (exportBtn && !exportBtn.dataset.bound) {
+      exportBtn.dataset.bound = "true";
+      exportBtn.addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state.data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "site-content.json";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+      });
+    }
+
+    if (importBtn && importInput && !importBtn.dataset.bound) {
+      importBtn.dataset.bound = "true";
+      importBtn.addEventListener("click", () => importInput.click());
+      importInput.addEventListener("change", () => {
+        const file = importInput.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const parsed = JSON.parse(reader.result?.toString() || "{}");
+            state.data = deepMerge(defaultSiteData, parsed);
+            state.data.__hasOverrides = true;
+            renderAll();
+            markDirty();
+            showToast("Content loaded. Save to apply.");
+          } catch (err) {
+            showToast("Invalid JSON file.", true);
+          }
+        };
+        reader.readAsText(file);
+        importInput.value = "";
+      });
+    }
+  };
+
+  const renderAll = () => {
+    bindTextField("hero-headline", ["hero", "headline"]);
+    bindTextField("hero-subhead", ["hero", "subhead"]);
+    bindTextField("hero-primary-label", ["hero", "primaryCta", "label"]);
+    bindTextField("hero-primary-href", ["hero", "primaryCta", "href"]);
+    bindTextField("hero-secondary-label", ["hero", "secondaryCta", "label"]);
+    bindTextField("hero-secondary-href", ["hero", "secondaryCta", "href"]);
+
+    bindTextField("club-name", ["club", "name"]);
+    bindTextField("club-short-name", ["club", "shortName"]);
+    bindTextField("club-tagline", ["club", "tagline"]);
+
+    bindTextField("nav-admin-label-field", ["navigation", "adminLabel"]);
+    bindTextField("footer-tagline-field", ["footer", "tagline"]);
+    bindTextField("footer-note-field", ["footer", "note"]);
+    bindTextField("footer-quicklinks-title-field", ["footer", "quickLinksTitle"]);
+    bindTextField("footer-connect-title-field", ["footer", "connectTitle"]);
+
+    bindTextField("home-hero-kicker-field", ["pages", "home", "heroKicker"]);
+    bindTextField("home-hero-title-field", ["pages", "home", "heroTitle"]);
+    bindTextField("home-hero-highlight-field", ["pages", "home", "heroHighlight"]);
+    bindTextField("home-programs-tag-field", ["pages", "home", "programsTag"]);
+    bindTextField("home-programs-title-field", ["pages", "home", "programsTitle"]);
+    bindTextField("about-awards-tag-field", ["pages", "about", "awardsTag"]);
+    bindTextField("about-awards-title-field", ["pages", "about", "awardsTitle"]);
+    bindTextField("about-awards-subtitle-field", ["pages", "about", "awardsSubtitle"]);
+    bindTextField("home-gallery-tag-field", ["pages", "home", "galleryTag"]);
+    bindTextField("home-gallery-title-field", ["pages", "home", "galleryTitle"]);
+    bindTextField("home-gallery-subtitle-field", ["pages", "home", "gallerySubtitle"]);
+    bindTextField("home-news-tag-field", ["pages", "home", "newsTag"]);
+    bindTextField("home-news-title-field", ["pages", "home", "newsTitle"]);
+    bindTextField("home-links-tag-field", ["pages", "home", "linksTag"]);
+    bindTextField("home-links-title-field", ["pages", "home", "linksTitle"]);
+    bindTextField("home-links-card-title-field", ["pages", "home", "linksCardTitle"]);
+    bindTextField("home-links-card-text-field", ["pages", "home", "linksCardText"]);
+    bindTextField("home-sponsors-tag-field", ["pages", "home", "sponsorsTag"]);
+    bindTextField("home-sponsors-title-field", ["pages", "home", "sponsorsTitle"]);
+    bindTextField("home-sponsors-desc-field", ["pages", "home", "sponsorsDescription"]);
+    bindTextField("home-sponsors-cta-label", ["pages", "home", "sponsorsCtaLabel"]);
+    bindTextField("home-sponsors-cta-href", ["pages", "home", "sponsorsCtaHref"]);
+    bindTextField("home-cta-tag-field", ["pages", "home", "ctaTag"]);
+    bindTextField("home-cta-title-field", ["pages", "home", "ctaTitle"]);
+    bindTextField("home-cta-highlight-field", ["pages", "home", "ctaHighlight"]);
+    bindTextField("home-cta-description-field", ["pages", "home", "ctaDescription"]);
+    bindTextField("home-cta-primary-label-field", ["pages", "home", "ctaPrimary", "label"]);
+    bindTextField("home-cta-primary-href-field", ["pages", "home", "ctaPrimary", "href"]);
+    bindTextField("home-cta-secondary-label-field", ["pages", "home", "ctaSecondary", "label"]);
+    bindTextField("home-cta-secondary-href-field", ["pages", "home", "ctaSecondary", "href"]);
+    bindTextField("home-cta-tertiary-label-field", ["pages", "home", "ctaTertiary", "label"]);
+    bindTextField("home-cta-tertiary-href-field", ["pages", "home", "ctaTertiary", "href"]);
+    bindTextField("home-quote-text-field", ["pages", "home", "quote", "text"]);
+    bindTextField("home-quote-attrib-field", ["pages", "home", "quote", "attribution"]);
+
+    bindTextField("about-hero-tag-field", ["pages", "about", "heroTag"]);
+    bindTextField("about-hero-title-field", ["pages", "about", "heroTitle"]);
+    bindTextField("about-hero-highlight-field", ["pages", "about", "heroHighlight"]);
+    bindTextField("about-history-title-field", ["pages", "about", "historyTitle"]);
+    bindTextField("about-values-title-field", ["pages", "about", "valuesTitle"]);
+    bindTextField("about-life-title-field", ["pages", "about", "lifeMembersTitle"]);
+    bindTextField("about-intro-field", ["about", "intro"]);
+    bindTextField("about-history-field", ["about", "history"]);
+    bindTextField("about-values-field", ["about", "values"], { list: true });
+    bindTextField("about-values-link-label-field", ["pages", "about", "valuesDocLabel"]);
+    bindTextField("about-values-link-url-field", ["pages", "about", "valuesDocUrl"]);
+    bindTextField("about-life-desc-field", ["pages", "about", "lifeDescription"]);
+    bindTextField("about-contact-tag-field", ["pages", "about", "contactTag"]);
+    bindTextField("about-contact-title-field", ["pages", "about", "contactTitle"]);
+    bindTextField("about-contact-highlight-field", ["pages", "about", "contactHighlight"]);
+    bindTextField("about-contact-cta-label", ["pages", "about", "contactCtaLabel"]);
+    bindTextField("about-contact-cta-href", ["pages", "about", "contactCtaHref"]);
+    bindTextField("about-contact-desc-field", ["pages", "about", "contactDescription"]);
+    bindTextField("about-extra-tag-field", ["pages", "about", "extraTag"]);
+    bindTextField("about-extra-title-field", ["pages", "about", "extraTitle"]);
+    bindTextField("about-extra-text-field", ["pages", "about", "extraText"]);
+    bindTextField("about-faq-tag-field", ["pages", "about", "faqTag"]);
+    bindTextField("about-faq-title-field", ["pages", "about", "faqTitle"]);
+    bindTextField("about-faq-subtitle-field", ["pages", "about", "faqSubtitle"]);
+    bindTextField("about-highlight-video-field", ["about", "highlightVideo"]);
+    bindTextField("about-highlight-alt-field", ["about", "highlightAlt"]);
+
+    bindTextField("join-hero-tag-field", ["pages", "join", "heroTag"]);
+    bindTextField("join-hero-title-field", ["pages", "join", "heroTitle"]);
+    bindTextField("join-hero-highlight-field", ["pages", "join", "heroHighlight"]);
+    bindTextField("join-hero-description-field", ["pages", "join", "heroDescription"]);
+    bindTextField("join-quote-tag-field", ["pages", "join", "quoteTag"]);
+    bindTextField("join-quote-attrib-field", ["pages", "join", "quoteAttribution"]);
+    bindTextField("join-quote-text-field", ["pages", "join", "quoteText"]);
+    bindTextField("join-feature-alt-field", ["pages", "join", "featureAlt"]);
+    bindTextField("join-help-tag-field", ["pages", "join", "helpTag"]);
+    bindTextField("join-help-title-field", ["pages", "join", "helpTitle"]);
+    bindTextField("join-help-cta-label-field", ["pages", "join", "helpCtaLabel"]);
+    bindTextField("join-help-cta-href-field", ["pages", "join", "helpCtaHref"]);
+    bindTextField("join-help-text-field", ["pages", "join", "helpText"]);
+    bindTextField("join-signup-label-field", ["pages", "join", "signUpLabel"]);
+    bindTextField("join-signup-href-field", ["pages", "join", "signUpHref"]);
+
+    bindTextField("training-hero-tag-field", ["pages", "training", "heroTag"]);
+    bindTextField("training-hero-title-field", ["pages", "training", "heroTitle"]);
+    bindTextField("training-hero-highlight-field", ["pages", "training", "heroHighlight"]);
+    bindTextField("training-hero-description-field", ["pages", "training", "heroDescription"]);
+    bindTextField("training-season-tag-field", ["pages", "training", "seasonTag"]);
+    bindTextField("training-season-title-field", ["pages", "training", "seasonTitle"]);
+    bindTextField("training-season-description-field", ["pages", "training", "seasonDescription"]);
+    bindTextField("training-schedule-tag-field", ["pages", "training", "scheduleTag"]);
+    bindTextField("training-schedule-title-field", ["pages", "training", "scheduleTitle"]);
+    bindTextField("training-schedule-description-field", ["pages", "training", "scheduleDescription"]);
+    bindTextField("training-schedule-cta-label-field", ["pages", "training", "scheduleCtaLabel"]);
+    bindTextField("training-schedule-cta-href-field", ["pages", "training", "scheduleCtaHref"]);
+    bindTextField("training-locations-tag-field", ["pages", "training", "locationsTag"]);
+    bindTextField("training-locations-title-field", ["pages", "training", "locationsTitle"]);
+    bindTextField("training-locations-field", ["pages", "training", "locations"], { list: true });
+
+    bindTextField("gallery-hero-tag-field", ["pages", "gallery", "heroTag"]);
+    bindTextField("gallery-hero-title-field", ["pages", "gallery", "heroTitle"]);
+    bindTextField("gallery-hero-highlight-field", ["pages", "gallery", "heroHighlight"]);
+    bindTextField("gallery-hero-description-field", ["pages", "gallery", "heroDescription"]);
+    bindTextField("gallery-all-label-field", ["pages", "gallery", "allLabel"]);
+    bindTextField("gallery-empty-title-field", ["pages", "gallery", "emptyTitle"]);
+    bindTextField("gallery-empty-desc-field", ["pages", "gallery", "emptyDescription"]);
+
+    bindTextField("sponsors-hero-tag-field", ["pages", "sponsors", "heroTag"]);
+    bindTextField("sponsors-hero-title-field", ["pages", "sponsors", "heroTitle"]);
+    bindTextField("sponsors-hero-highlight-field", ["pages", "sponsors", "heroHighlight"]);
+    bindTextField("sponsors-hero-desc-field", ["pages", "sponsors", "heroDescription"]);
+    bindTextField("sponsors-cta-tag-field", ["pages", "sponsors", "ctaTag"]);
+    bindTextField("sponsors-cta-title-field", ["pages", "sponsors", "ctaTitle"]);
+    bindTextField("sponsors-cta-highlight-field", ["pages", "sponsors", "ctaHighlight"]);
+    bindTextField("sponsors-cta-label-field", ["pages", "sponsors", "ctaLabel"]);
+    bindTextField("sponsors-cta-href-field", ["pages", "sponsors", "ctaHref"]);
+    bindTextField("sponsors-cta-desc-field", ["pages", "sponsors", "ctaDescription"]);
+    bindTextField("sponsors-features-field", ["pages", "sponsors", "features"], { list: true });
+
+    bindTextField("merch-hero-tag-field", ["pages", "merch", "heroTag"]);
+    bindTextField("merch-hero-title-field", ["pages", "merch", "heroTitle"]);
+    bindTextField("merch-hero-highlight-field", ["pages", "merch", "heroHighlight"]);
+    bindTextField("merch-store-tag-field", ["pages", "merch", "storeTag"]);
+    bindTextField("merch-store-title-field", ["pages", "merch", "storeTitle"]);
+    bindTextField("merch-store-highlight-field", ["pages", "merch", "storeHighlight"]);
+    bindTextField("merch-blurb-field", ["merch", "blurb"]);
+    bindTextField("merch-store-description-field", ["pages", "merch", "storeDescription"]);
+    bindTextField("merch-store-field", ["merch", "storeUrl"]);
+    bindTextField("merch-pillars-field", ["pages", "merch", "pillars"], { list: true });
+    bindTextField("merch-cta-label-field", ["pages", "merch", "ctaLabel"]);
+    bindTextField("merch-supplier-tag-field", ["pages", "merch", "supplierTag"]);
+    bindTextField("merch-supplier-name-field", ["merch", "supplier", "name"]);
+    bindTextField("merch-supplier-url-field", ["merch", "supplier", "url"]);
+    bindTextField("merch-supplier-note-field", ["merch", "supplierNote"]);
+    bindTextField("merch-intro-field", ["merch", "intro"]);
+    bindTextField("merch-essentials-tag-field", ["pages", "merch", "essentialsTag"]);
+    bindTextField("merch-essentials-title-field", ["pages", "merch", "essentialsTitle"]);
+    bindTextField("merch-essentials-field", ["merch", "essentials"], { list: true });
+    bindTextField("merch-important-tag-field", ["pages", "merch", "importantTag"]);
+    bindTextField("merch-important-title-field", ["pages", "merch", "importantTitle"]);
+    bindTextField("merch-important-text-field", ["merch", "importantText"]);
+
+    bindTextField("coaches-hero-tag-field", ["pages", "coaches", "heroTag"]);
+    bindTextField("coaches-hero-title-field", ["pages", "coaches", "heroTitle"]);
+    bindTextField("coaches-hero-highlight-field", ["pages", "coaches", "heroHighlight"]);
+    bindTextField("coaches-blurb-field", ["coaches", "blurb"]);
+    bindTextField("coaches-cta-tag-field", ["pages", "coaches", "ctaTag"]);
+    bindTextField("coaches-cta-title-field", ["pages", "coaches", "ctaTitle"]);
+    bindTextField("coaches-cta-highlight-field", ["pages", "coaches", "ctaHighlight"]);
+    bindTextField("coaches-cta-label-field", ["pages", "coaches", "ctaLabel"]);
+    bindTextField("coaches-cta-href-field", ["pages", "coaches", "ctaHref"]);
+    bindTextField("coaches-cta-description-field", ["pages", "coaches", "ctaDescription"]);
+
+    initDropdown("gallery-order-field", ["pages", "gallery", "orderMode"]);
+
+    initListEditor(listConfigs.news);
+    initListEditor(listConfigs.gallery);
+    initListEditor(listConfigs.quickLinks);
+    initListEditor(listConfigs.sponsors);
+    initListEditor(listConfigs.homePrograms);
+    initListEditor(listConfigs.aboutAwards);
+    initListEditor(listConfigs.homeFeatured);
+    initListEditor(listConfigs.aboutHistory);
+    initListEditor(listConfigs.lifeMembers);
+    initListEditor(listConfigs.spotlights);
+    initListEditor(listConfigs.aboutFaqs);
+    initListEditor(listConfigs.coachesResources);
+    initListEditor(listConfigs.navLinks);
+    initListEditor(listConfigs.footerQuickLinks);
+    initListEditor(listConfigs.footerConnectLinks);
+
+    initJoinStreamsEditor();
+    initImageFields();
+    initBulkGalleryUpload();
+    ensureFieldLabels();
+    initAdminTabs();
+  };
+
+  const init = () => {
+    state.data = loadSiteData();
+    renderAll();
+    bindButtons();
+  };
+
+  document.addEventListener("DOMContentLoaded", init);
+  window.addEventListener("admin:unlocked", () => {
+    state.data = loadSiteData();
+    renderAll();
+  });
+  window.addEventListener("sitecontent:updated", () => {
+    state.data = loadSiteData();
+    renderAll();
+  });
+})();

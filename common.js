@@ -250,26 +250,78 @@ function renderNews(targetId) {
   if (!hasOverrides()) return;
   const el = document.getElementById(targetId);
   if (!el) return;
-  const news = window.siteContent.news ?? [];
-  el.innerHTML = news
+  const news = Array.isArray(window.siteContent.news) ? window.siteContent.news : [];
+  const items = news.filter((item) =>
+    item && (item.title || item.summary || item.date || item.url)
+  );
+  const formatDate = (value) => {
+    const raw = (value ?? "").toString().trim();
+    if (!raw) return "";
+    const parsed = new Date(raw);
+    if (Number.isNaN(parsed.getTime())) return raw;
+    return parsed.toLocaleDateString("en-AU", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  };
+  if (!items.length) {
+    el.innerHTML = `
+      <article class="news-card glass rounded-2xl p-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-white/40">No updates</span>
+          <span class="inline-flex items-center gap-1.5 text-xs text-primary">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+            Coming soon
+          </span>
+        </div>
+        <h3 class="text-lg font-bold text-white">More news is on the way</h3>
+        <p class="text-sm text-white/60 leading-relaxed">Check back soon for the latest updates from West Basketball.</p>
+      </article>
+    `;
+    return;
+  }
+  el.innerHTML = items
     .map(
-      (item) => `
-        <article class="glass card-hover rounded-2xl p-6 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs text-white/40">${item.date ?? ""}</span>
-            <span class="inline-flex items-center gap-1.5 text-xs text-primary">
-              <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-              Latest
-            </span>
-          </div>
-          <h3 class="text-lg font-bold text-white">${item.title ?? "Update"}</h3>
-          <p class="text-sm text-white/60 leading-relaxed">${formatMultiline(item.summary ?? "")}</p>
-          <a class="inline-flex items-center gap-2 text-sm text-primary font-medium group" href="${item.url ?? "#"}">
-            Read more
-            <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-          </a>
-        </article>
-      `
+      (item) => {
+        const image = (item.image || item.imageSrc || item.photo || "").toString().trim();
+        const imageAlt = (item.imageAlt || item.title || "Announcement image").toString().trim();
+        const date = formatDate(item.date ?? "");
+        const url = (item.url ?? "").toString().trim();
+        const hasImage = Boolean(image);
+        const metaText = date || "Announcement";
+        const readMore = url
+          ? `
+            <a class="inline-flex items-center gap-2 text-sm text-primary font-medium group" href="${escapeHtml(url)}">
+              Read more
+              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+            </a>
+          `
+          : "";
+        const mediaMarkup = hasImage
+          ? `
+            <div class="news-card__media relative aspect-[4/3] overflow-hidden bg-black/40 md:w-64 md:flex-shrink-0">
+              <img src="${escapeHtml(image)}" alt="${escapeHtml(imageAlt)}" class="w-full h-full object-cover" loading="lazy" decoding="async" />
+            </div>
+          `
+          : "";
+        return `
+          <article class="news-card glass rounded-2xl overflow-hidden group">
+            <div class="md:flex md:items-stretch">
+              <div class="flex-1 p-6 space-y-3">
+                <div class="news-card__meta">
+                  <span class="news-card__dot"></span>
+                  <span>${escapeHtml(metaText)}</span>
+                </div>
+                <h3 class="text-lg font-bold text-white">${escapeHtml(item.title ?? "Update")}</h3>
+                <p class="text-sm text-white/60 leading-relaxed">${formatMultiline(item.summary ?? "")}</p>
+                ${readMore}
+              </div>
+              ${mediaMarkup ? `<div class="border-t border-white/10 md:border-t-0 md:border-l md:border-white/10">${mediaMarkup}</div>` : ""}
+            </div>
+          </article>
+        `;
+      }
     )
     .join("\n");
 }
@@ -290,13 +342,14 @@ function renderSponsors(targetId) {
 }
 
 function renderAboutDetails() {
-  if (!hasOverrides()) return;
   const data = window.siteContent.about ?? {};
   const aboutPage = window.siteContent.pages?.about ?? {};
   const homePage = window.siteContent.pages?.home ?? {};
   const intro = document.getElementById("about-intro");
   const history = document.getElementById("about-history");
   const values = document.getElementById("about-values");
+  const valuesLink = document.getElementById("about-values-link");
+  const valuesLinkLabel = document.getElementById("about-values-link-label");
   const lifeMembers = document.getElementById("about-life-members");
   const photos = document.getElementById("about-photos");
   const heroTag = document.getElementById("about-hero-tag");
@@ -318,16 +371,17 @@ function renderAboutDetails() {
   const extraTag = document.getElementById("about-extra-tag");
   const extraTitle = document.getElementById("about-extra-title");
   const featureImage = document.getElementById("about-feature-image");
+  const spotlightList = document.getElementById("about-spotlight-list");
   const pillarsTitle = document.getElementById("about-pillars-title");
   const pillarsSubtitle = document.getElementById("about-pillars-subtitle");
   const pillars = document.getElementById("about-pillars");
   const initiativesTitle = document.getElementById("about-initiatives-title");
   const initiativesSubtitle = document.getElementById("about-initiatives-subtitle");
   const initiatives = document.getElementById("about-initiatives");
-  const storyTag = document.getElementById("home-story-tag");
-  const storyTitle = document.getElementById("home-story-title");
-  const storySubtitle = document.getElementById("home-story-subtitle");
-  const storyContainer = document.getElementById("home-story-blocks");
+  const awardsTag = document.getElementById("about-awards-tag");
+  const awardsTitle = document.getElementById("about-awards-title");
+  const awardsSubtitle = document.getElementById("about-awards-subtitle");
+  const awardsContainer = document.getElementById("about-awards-blocks");
   const faqSection = document.getElementById("about-faqs");
   const faqTag = document.getElementById("about-faq-tag");
   const faqTitle = document.getElementById("about-faq-title");
@@ -337,7 +391,102 @@ function renderAboutDetails() {
   if (heroTitle) heroTitle.textContent = aboutPage.heroTitle ?? "About";
   if (heroHighlight) heroHighlight.textContent = aboutPage.heroHighlight ?? "West Basketball";
   if (intro) intro.innerHTML = formatMultiline(data.intro ?? "");
-  if (history) history.innerHTML = formatMultiline(data.history ?? "");
+  if (history) {
+    if (history.dataset.layout === "branch-timeline") {
+      const rawHistory = (data.history ?? "").toString().trim();
+      const timeline = Array.isArray(data.historyTimeline) ? data.historyTimeline : [];
+      const splitHistory = (value) =>
+        value
+          .split(/\n+/)
+          .map((line) => line.trim())
+          .filter(Boolean);
+      const sentenceSplit = (value) =>
+        value
+          .split(/(?<=[.!?])\s+/)
+          .map((sentence) => sentence.trim())
+          .filter(Boolean);
+      let historyItems = timeline.length ? timeline : splitHistory(rawHistory);
+      if (!timeline.length) {
+        if (historyItems.length === 1) {
+          const sentences = sentenceSplit(historyItems[0]);
+          if (sentences.length > 1) {
+            const chunkSize = Math.ceil(sentences.length / 4);
+            historyItems = Array.from({ length: 4 }, (_, idx) =>
+              sentences.slice(idx * chunkSize, (idx + 1) * chunkSize).join(" ")
+            ).filter(Boolean);
+          }
+        }
+        if (historyItems.length > 4) {
+          historyItems = [
+            ...historyItems.slice(0, 3),
+            historyItems.slice(3).join(" ")
+          ];
+        }
+      }
+      const photosList = Array.isArray(data.photos) ? data.photos.filter(Boolean) : [];
+      const normalizedItems = historyItems
+        .map((item, index) => {
+          if (typeof item === "string") {
+            return { text: item, index };
+          }
+          if (!item || typeof item !== "object") return null;
+          return {
+            label: item.label ?? item.year ?? item.era ?? "",
+            title: item.title ?? "",
+            text: item.text ?? item.body ?? item.summary ?? item.description ?? "",
+            photo: item.photo ?? item.image ?? "",
+            photoAlt: item.photoAlt ?? item.imageAlt ?? "",
+            index
+          };
+        })
+        .filter((item) => item && (item.text || item.title));
+      if (normalizedItems.length) {
+        const mediaSizes = ["size-wide", "size-square", "size-tall", "size-wide"];
+        const textSizes = ["size-compact", "size-roomy", "size-compact", "size-roomy"];
+        history.innerHTML = `
+          <div class="history-branch__rail" data-timeline-parallax="true" data-speed="0.08"></div>
+          ${normalizedItems
+          .map((item, idx) => {
+            const label = (item.label ?? "").toString().trim() || `Era ${idx + 1}`;
+            const title = (item.title ?? "").toString().trim() || "Club milestone";
+            const text = (item.text ?? "").toString().trim();
+            const rawPhoto = (item.photo ?? "").toString().trim();
+            const photo = rawPhoto || photosList[idx % (photosList.length || 1)] || "images/logo.png";
+            const altText = (item.photoAlt || title || "Club history").toString().trim();
+            const itemClass = idx % 2 === 1 ? "history-branch__item history-branch__item--right" : "history-branch__item history-branch__item--left";
+            const imageSideClass = idx % 2 === 1 ? "history-branch__card--right" : "history-branch__card--left";
+            const textSideClass = idx % 2 === 1 ? "history-branch__card--left" : "history-branch__card--right";
+            const mediaSize = mediaSizes[idx % mediaSizes.length];
+            const textSize = textSizes[idx % textSizes.length];
+            return `
+              <article class="${itemClass}">
+                <span class="history-branch__dot"></span>
+                <div class="history-branch__media-card ${imageSideClass} ${mediaSize}">
+                  <div class="history-branch__media">
+                    <img src="${escapeHtml(photo)}" alt="${escapeHtml(altText)}" loading="lazy" />
+                  </div>
+                </div>
+                <div class="history-branch__text-card ${textSideClass} ${textSize}">
+                  <div class="history-branch__body">
+                    <p class="history-branch__year">${escapeHtml(label)}</p>
+                    <h3 class="history-branch__title">${escapeHtml(title)}</h3>
+                    ${text ? `<p class="history-branch__text">${formatMultiline(text)}</p>` : ""}
+                  </div>
+                </div>
+              </article>
+            `;
+          })
+          .join("\n")}
+        `;
+      } else {
+        history.innerHTML = "";
+      }
+    } else if (history.dataset.layout === "era-browser") {
+      // Handled by about.html scoped script for the era browser layout.
+    } else {
+      history.innerHTML = formatMultiline(data.history ?? "");
+    }
+  }
   if (historyTitle) historyTitle.textContent = aboutPage.historyTitle ?? "Our History";
   if (valuesTitle) valuesTitle.textContent = aboutPage.valuesTitle ?? "Our Values";
   if (lifeTitle) lifeTitle.textContent = aboutPage.lifeMembersTitle ?? "Life Members";
@@ -351,14 +500,20 @@ function renderAboutDetails() {
     contactCta.setAttribute("data-contact-trigger", "true");
     contactCta.classList.add("contact-modal-trigger");
   }
-  if (storyTag) storyTag.textContent = homePage.storyTag ?? "Our Club";
-  if (storyTitle) storyTitle.textContent = homePage.storyTitle ?? "More than game day";
-  if (storySubtitle) storySubtitle.innerHTML = formatMultiline(homePage.storySubtitle ?? "");
-  if (storyContainer) {
-    const storyBlocks = homePage.storyBlocks ?? [];
-    storyContainer.innerHTML = storyBlocks
-      .map(
-        (block) => `
+  const awardsData = {
+    tag: aboutPage.awardsTag ?? homePage.storyTag ?? "2025 Season",
+    title: aboutPage.awardsTitle ?? homePage.storyTitle ?? "Awards & Results",
+    subtitle: aboutPage.awardsSubtitle ?? homePage.storySubtitle ?? "",
+    blocks: Array.isArray(aboutPage.awardsBlocks)
+      ? aboutPage.awardsBlocks
+      : homePage.storyBlocks ?? []
+  };
+  if (awardsTag) awardsTag.textContent = awardsData.tag ?? "";
+  if (awardsTitle) awardsTitle.textContent = awardsData.title ?? "";
+  if (awardsSubtitle) awardsSubtitle.innerHTML = formatMultiline(awardsData.subtitle ?? "");
+  if (awardsContainer) {
+    const storyBlocks = awardsData.blocks ?? [];
+    const renderCard = (block) => `
         <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
           <span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">${escapeHtml(block.tag || "Story")}</span>
           <h3 class="text-2xl font-bold text-white">${escapeHtml(block.title || "")}</h3>
@@ -371,14 +526,149 @@ function renderAboutDetails() {
               : ""
           }
         </article>
-      `
-      )
-      .join("\n");
+      `;
+    const renderDefault = () => storyBlocks.map((block) => renderCard(block)).join("\n");
+    const layout = awardsContainer.dataset.layout;
+    if (layout === "awards") {
+      const normalize = (value) => (value || "").toString().toLowerCase();
+      const findBlock = (predicate) => storyBlocks.find((block) => block && predicate(block));
+      const awardsBlock = findBlock(
+        (block) => /award/.test(normalize(block.tag)) || /award/.test(normalize(block.title))
+      );
+      const winnersBlock = findBlock(
+        (block) => /winner/.test(normalize(block.title)) || /champion/.test(normalize(block.tag))
+      );
+      const runnersBlock = findBlock(
+        (block) => /runner/.test(normalize(block.title)) || /finalist/.test(normalize(block.tag))
+      );
+      const usedBlocks = new Set([awardsBlock, winnersBlock, runnersBlock]);
+      const remaining = storyBlocks.filter((block) => !usedBlocks.has(block));
+      const wrapBlock = remaining[0];
+      const extraBlocks = remaining.slice(1);
+      const canRenderAwardsLayout = awardsBlock && winnersBlock && runnersBlock && wrapBlock;
+      const splitAwardLine = (line) => {
+        const parts = line.split(":");
+        if (parts.length < 2) return { label: line.trim(), value: "" };
+        const label = parts.shift().trim();
+        const value = parts.join(":").trim();
+        return { label, value };
+      };
+      const splitPlacementLine = (line) => {
+        const match = line.match(/^(U\d+\s+Div\d+)\s+(.+)$/i);
+        if (!match) return { division: "", team: line.trim() };
+        return { division: match[1].trim(), team: match[2].trim() };
+      };
+      const renderBadge = (text) =>
+        text
+          ? `<span class="inline-flex items-center text-xs uppercase tracking-[0.2em] text-primary bg-primary/10 border border-primary/30 rounded-full px-3 py-1">${escapeHtml(text)}</span>`
+          : "";
+      const renderAwardsRows = (lines) =>
+        lines
+          .map((line) => {
+            const { label, value } = splitAwardLine(line);
+            const valueHtml = value
+              ? `<span class="text-primary font-semibold whitespace-nowrap">${escapeHtml(value)}</span>`
+              : "";
+            return `
+              <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/5 border border-white/10 px-4 py-3">
+                <span class="text-white/70">${escapeHtml(label)}</span>
+                ${valueHtml}
+              </div>
+            `;
+          })
+          .join("");
+      const renderPlacementList = (lines) => {
+        if (!lines.length) return "";
+        return `
+          <div class="grid sm:grid-cols-2 gap-2 text-sm">
+            ${lines
+              .map((line) => {
+                const { division, team } = splitPlacementLine(line);
+                if (!division) {
+                  return `
+                    <div class="rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                      <span class="text-white/80">${escapeHtml(team)}</span>
+                    </div>
+                  `;
+                }
+                return `
+                  <div class="flex items-center justify-between gap-3 rounded-full bg-white/5 border border-white/10 px-4 py-2">
+                    <span class="text-xs uppercase tracking-wide text-white/50">${escapeHtml(division)}</span>
+                    <span class="text-white font-semibold">${escapeHtml(team)}</span>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        `;
+      };
+      const renderSummaryCard = (block, useAwardsRows) => {
+        const bullets = Array.isArray(block.bullets) ? block.bullets : [];
+        const listMarkup = useAwardsRows
+          ? `<div class="space-y-3 text-sm">${renderAwardsRows(bullets)}</div>`
+          : bullets.length
+            ? `<ul class="space-y-2 text-sm text-white/70 list-disc list-inside">` +
+              bullets.map((line) => `<li>${escapeHtml(line)}</li>`).join("") +
+              `</ul>`
+            : "";
+        return `
+          <article class="glass card-hover rounded-3xl p-6 space-y-4 h-full text-left">
+            ${renderBadge(block.tag || "Story")}
+            <h3 class="text-2xl font-bold text-white">${escapeHtml(block.title || "")}</h3>
+            <p class="text-white/60 leading-relaxed">${formatMultiline(block.summary || "")}</p>
+            ${listMarkup}
+          </article>
+        `;
+      };
+      const renderPlacementColumn = (block, extraClass) => `
+        <div class="space-y-4 ${extraClass || ""}">
+          <div class="flex items-center gap-3">
+            ${renderBadge(block.tag || "")}
+            <h3 class="text-2xl font-bold text-white">${escapeHtml(block.title || "")}</h3>
+          </div>
+          <p class="text-white/60 leading-relaxed">${formatMultiline(block.summary || "")}</p>
+          ${renderPlacementList(Array.isArray(block.bullets) ? block.bullets : [])}
+        </div>
+      `;
+      if (canRenderAwardsLayout) {
+        const extrasMarkup = extraBlocks.length
+          ? `
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              ${extraBlocks.map((block) => renderCard(block)).join("\n")}
+            </div>
+          `
+          : "";
+        awardsContainer.innerHTML = `
+          <div class="grid md:grid-cols-2 gap-6">
+            ${renderSummaryCard(awardsBlock, true)}
+            ${renderSummaryCard(wrapBlock, false)}
+          </div>
+          <div class="glass rounded-3xl p-6 md:p-8">
+            <div class="grid lg:grid-cols-2 gap-8">
+              ${renderPlacementColumn(winnersBlock, "")}
+              ${renderPlacementColumn(runnersBlock, "lg:border-l lg:border-white/10 lg:pl-8")}
+            </div>
+          </div>
+          ${extrasMarkup}
+        `;
+      } else {
+        awardsContainer.innerHTML = renderDefault();
+      }
+    } else {
+      awardsContainer.innerHTML = renderDefault();
+    }
   }
   if (values) {
     values.innerHTML = (data.values ?? [])
       .map((val) => `<li class="px-4 py-3 rounded-xl glass text-white">${val}</li>`)
       .join("\n");
+  }
+  if (valuesLink) {
+    const docUrl = (aboutPage.valuesDocUrl ?? "").toString().trim();
+    const docLabel = (aboutPage.valuesDocLabel ?? "Full document").toString().trim();
+    if (valuesLinkLabel) valuesLinkLabel.textContent = docLabel || "Full document";
+    valuesLink.classList.toggle("hidden", !docUrl);
+    if (docUrl) valuesLink.href = docUrl;
   }
   if (extraText) {
     const textContent = aboutPage.extraText ?? data.extraText ?? data.history ?? data.intro ?? "";
@@ -386,15 +676,89 @@ function renderAboutDetails() {
   }
   if (extraTag) extraTag.textContent = aboutPage.extraTag ?? "Club Story";
   if (extraTitle) extraTitle.textContent = aboutPage.extraTitle ?? "Why We Play";
+  const highlightFallback =
+    data.highlightPhoto ||
+    data.highlightPoster ||
+    (Array.isArray(data.photos) && data.photos[0]) ||
+    "images/logo.png";
+  if (spotlightList) {
+    const spotlights = Array.isArray(data.spotlights) ? data.spotlights : [];
+    const fallbackSpotlight = {
+      name: aboutPage.extraTitle ?? "Spotlight",
+      role: aboutPage.extraTag ?? "",
+      blurb: aboutPage.extraText ?? "",
+      photo: highlightFallback,
+      video: data.highlightVideo ?? "",
+      poster: data.highlightPoster ?? ""
+    };
+    const spotlightEntries = spotlights.length ? spotlights : [fallbackSpotlight];
+    spotlightList.innerHTML = spotlightEntries
+      .map((entry) => {
+        const name = (entry.name ?? entry.title ?? "").toString().trim();
+        const role = (entry.role ?? entry.label ?? "").toString().trim();
+        const blurb = (entry.blurb ?? entry.text ?? entry.description ?? "").toString().trim();
+        const photo = (entry.photo ?? entry.image ?? "").toString().trim() || "images/logo.png";
+        const video = (entry.video ?? "").toString().trim();
+        const poster = (entry.poster ?? photo).toString().trim() || photo;
+        const mediaMarkup = video
+          ? `<video class="w-full h-full object-cover" controls playsinline preload="metadata" poster="${escapeHtml(poster)}">
+              <source src="${escapeHtml(video)}" type="video/mp4">
+            </video>`
+          : `<img src="${escapeHtml(photo)}" alt="${escapeHtml(name || "Spotlight highlight")}" loading="lazy" />`;
+        return `
+          <article class="spotlight-card">
+            <div class="spotlight-media">
+              ${mediaMarkup}
+            </div>
+            <div class="spotlight-body">
+              ${role ? `<span class="spotlight-role">${escapeHtml(role)}</span>` : ""}
+              ${name ? `<h3 class="text-xl font-semibold text-white mt-2">${escapeHtml(name)}</h3>` : ""}
+              ${blurb ? `<p class="text-white/60 mt-3">${formatMultiline(blurb)}</p>` : ""}
+            </div>
+          </article>
+        `;
+      })
+      .join("\n");
+  }
   if (featureImage) {
-    const highlightPhoto = data.highlightPhoto || (Array.isArray(data.photos) && data.photos[0]) || "images/logo.png";
-    featureImage.innerHTML = `
-      <img src="${highlightPhoto}" alt="Club highlight" class="w-full h-auto max-h-[420px] object-contain bg-black/40" loading="lazy" />
-    `;
+    const highlightPhoto = highlightFallback;
+    const highlightVideo = (data.highlightVideo ?? "").toString().trim();
+    const highlightPoster = (data.highlightPoster ?? highlightPhoto).toString().trim() || highlightPhoto;
+    const highlightAlt = (data.highlightAlt ?? aboutPage.extraTitle ?? "Club spotlight").toString().trim();
+    if (highlightVideo) {
+      featureImage.innerHTML = `
+        <video class="w-full h-auto max-h-[480px] object-cover bg-black/40" controls playsinline preload="metadata" poster="${escapeHtml(highlightPoster)}">
+          <source src="${escapeHtml(highlightVideo)}" type="video/mp4">
+        </video>
+      `;
+    } else {
+      featureImage.innerHTML = `
+        <img src="${escapeHtml(highlightPhoto)}" alt="${escapeHtml(highlightAlt)}" class="w-full h-auto max-h-[480px] object-cover bg-black/40" loading="lazy" />
+      `;
+    }
   }
   if (lifeMembers) {
-    lifeMembers.innerHTML = (data.lifeMembers ?? [])
-      .map((member) => `<li class="text-white/80">${member}</li>`)
+    const members = data.lifeMembers ?? [];
+    lifeMembers.innerHTML = members
+      .map((member) => {
+        if (typeof member === "string") {
+          return `<div class="glass rounded-2xl p-4 text-white/80">${escapeHtml(member)}</div>`;
+        }
+        const name = (member?.name ?? "").toString().trim();
+        const bio = (member?.bio ?? "").toString().trim();
+        const photo = (member?.photo ?? "images/logo.png").toString().trim() || "images/logo.png";
+        return `
+          <article class="group glass rounded-2xl overflow-hidden border border-white/10">
+            <div class="aspect-[4/5] overflow-hidden bg-black/40">
+              <img src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+            </div>
+            <div class="p-4">
+              <h3 class="text-lg font-semibold text-white">${escapeHtml(name)}</h3>
+              ${bio ? `<p class="text-sm text-white/60 mt-2">${formatMultiline(bio)}</p>` : ""}
+            </div>
+          </article>
+        `;
+      })
       .join("\n");
   }
   const faqs = (data.faqs ?? []).filter((item) => item.question || item.answer);
@@ -764,13 +1128,7 @@ function initContactModal() {
     document.head.appendChild(style);
   }
 
-  const resolveContactApiBase = () => {
-    if (window.CONTACT_API_BASE) return window.CONTACT_API_BASE;
-    if (location.port && location.port !== "8000") {
-      return `${location.protocol}//${location.hostname}:8000`;
-    }
-    return "";
-  };
+  const resolveContactUrl = () => "https://site-content-worker.simontroup27.workers.dev/contact";
 
   const modal = document.createElement("div");
   modal.id = "contact-modal";
@@ -913,15 +1271,15 @@ function initContactModal() {
     setStatus("", "");
 
     try {
-      const apiBase = (resolveContactApiBase() || "").replace(/\/$/, "");
-      const resp = await fetch(`${apiBase}/api/contact`, {
+      const contactUrl = resolveContactUrl();
+      const resp = await fetch(contactUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, message, subject })
       });
-      const data = await resp.json().catch(() => ({}));
-      if (!resp.ok || data.error) {
-        throw new Error(data.error || "Unable to send your message right now.");
+      const text = await resp.text();
+      if (!resp.ok) {
+        throw new Error(text || "Unable to send your message right now.");
       }
       showState("success");
     } catch (err) {
