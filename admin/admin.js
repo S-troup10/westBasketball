@@ -291,6 +291,27 @@
               </div>
             `;
           }
+          if (field.type === "file") {
+            const inputId = `${config.containerId}-${index}-${field.key}`;
+            const nameKey = `${field.key}Name`;
+            const fileName = (data[nameKey] || "").toString();
+            const hasValue = Boolean(displayValue);
+            const uploadCopy = field.placeholder || "Click to upload file";
+            return `
+              <div class="${wrapperClass}">
+                ${fieldLabel}
+                <label class="image-upload-area border-2 border-dashed border-white/20 rounded-xl p-4 text-center hover:border-primary/50 transition-colors cursor-pointer block" for="${escapeAttr(inputId)}">
+                  <div data-file-name="${escapeAttr(field.key)}" class="${hasValue ? "" : "hidden"} text-sm text-white/70 mb-2 truncate">${escapeHtml(fileName || "File uploaded")}</div>
+                  <div data-image-placeholder="${escapeAttr(field.key)}" class="${hasValue ? "hidden" : ""} space-y-2 upload-placeholder">
+                    <svg class="w-8 h-8 mx-auto text-white/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    <p class="text-sm text-white/50">${escapeHtml(uploadCopy)}</p>
+                  </div>
+                </label>
+                <input type="file" id="${escapeAttr(inputId)}" data-field="${escapeAttr(field.key)}" data-image-input="true" data-field-kind="file" accept="${escapeAttr(field.accept || "*/*")}" class="hidden" />
+                <button type="button" class="text-xs text-white/50 hover:text-white" data-action="clear-image" data-field="${escapeAttr(field.key)}">Clear file</button>
+              </div>
+            `;
+          }
           return `
             <div class="${wrapperClass}">
               ${fieldLabel}
@@ -367,28 +388,43 @@
         const itemEl = input.closest("[data-item-index]");
         if (!itemEl) return;
         const field = input.dataset.field;
+        const isFileKind = input.dataset.fieldKind === "file";
         const index = Number(itemEl.dataset.itemIndex);
         const files = input.files;
         if (!files || !files.length) return;
         const file = files[0];
+        if (isFileKind && file.size > 2 * 1024 * 1024) {
+          showToast("That file is over 2MB — consider using the link field instead.", true);
+        }
         const reader = new FileReader();
         reader.onload = (e) => {
           const src = e.target?.result?.toString() || "";
           const items = getItems();
           const item = normalizeItem(items[index]);
           item[field] = src;
+          if (isFileKind) item[`${field}Name`] = file.name;
           items[index] = denormalizeItem(item);
           setItems(items);
-          updateInlinePreview(
-            itemEl.querySelector(`[data-image-preview="${field}"]`),
-            itemEl.querySelector(`[data-image-placeholder="${field}"]`),
-            src
-          );
-          updateInlinePreview(
-            itemEl.querySelector(`[data-preview-key="${field}"]`),
-            itemEl.querySelector(`[data-preview-placeholder="${field}"]`),
-            src
-          );
+          if (isFileKind) {
+            const nameEl = itemEl.querySelector(`[data-file-name="${field}"]`);
+            const placeholderEl = itemEl.querySelector(`[data-image-placeholder="${field}"]`);
+            if (nameEl) {
+              nameEl.textContent = file.name;
+              nameEl.classList.remove("hidden");
+            }
+            if (placeholderEl) placeholderEl.classList.add("hidden");
+          } else {
+            updateInlinePreview(
+              itemEl.querySelector(`[data-image-preview="${field}"]`),
+              itemEl.querySelector(`[data-image-placeholder="${field}"]`),
+              src
+            );
+            updateInlinePreview(
+              itemEl.querySelector(`[data-preview-key="${field}"]`),
+              itemEl.querySelector(`[data-preview-placeholder="${field}"]`),
+              src
+            );
+          }
           input.value = "";
         };
         reader.readAsDataURL(file);
@@ -421,8 +457,16 @@
           const field = event.target.dataset.field;
           const item = normalizeItem(items[index]);
           item[field] = "";
+          if (`${field}Name` in item) item[`${field}Name`] = "";
           items[index] = denormalizeItem(item);
           setItems(items);
+          const nameEl = itemEl.querySelector(`[data-file-name="${field}"]`);
+          if (nameEl) {
+            nameEl.textContent = "";
+            nameEl.classList.add("hidden");
+            const placeholderEl = itemEl.querySelector(`[data-image-placeholder="${field}"]`);
+            if (placeholderEl) placeholderEl.classList.remove("hidden");
+          }
           updateInlinePreview(
             itemEl.querySelector(`[data-image-preview="${field}"]`),
             itemEl.querySelector(`[data-image-placeholder="${field}"]`),
@@ -967,6 +1011,19 @@
         { key: "imageAlt", label: "Image alt", placeholder: "Alt text" }
       ]
     },
+    aboutDocuments: {
+      containerId: "about-documents-list",
+      path: ["about", "documents"],
+      itemLabel: "Document",
+      layout: "grid-2",
+      defaultItem: { title: "", description: "", file: "", fileName: "", url: "" },
+      fields: [
+        { key: "title", label: "Title", placeholder: "1987 Club Newsletter" },
+        { key: "description", label: "Note", placeholder: "Season wrap-up" },
+        { key: "file", label: "Document upload", type: "file", accept: ".pdf,image/*", placeholder: "Click to upload PDF or scan", fullWidth: true },
+        { key: "url", label: "Or link (for large files)", placeholder: "https://..." }
+      ]
+    },
     lifeMembers: {
       containerId: "about-life-members-list",
       path: ["about", "lifeMembers"],
@@ -1209,6 +1266,7 @@
     bindTextField("about-hero-title-field", ["pages", "about", "heroTitle"]);
     bindTextField("about-hero-highlight-field", ["pages", "about", "heroHighlight"]);
     bindTextField("about-history-title-field", ["pages", "about", "historyTitle"]);
+    bindTextField("about-documents-title-field", ["pages", "about", "documentsTitle"]);
     bindTextField("about-values-title-field", ["pages", "about", "valuesTitle"]);
     bindTextField("about-life-title-field", ["pages", "about", "lifeMembersTitle"]);
     bindTextField("about-intro-field", ["about", "intro"]);
@@ -1328,6 +1386,7 @@
     initListEditor(listConfigs.aboutAwards);
     initListEditor(listConfigs.homeFeatured);
     initListEditor(listConfigs.aboutHistory);
+    initListEditor(listConfigs.aboutDocuments);
     initListEditor(listConfigs.lifeMembers);
     initListEditor(listConfigs.spotlights);
     initListEditor(listConfigs.aboutFaqs);

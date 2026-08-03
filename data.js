@@ -139,6 +139,7 @@ const defaultSiteData = {
         image: "images/prezq.jpg"
       }
     ],
+    documents: [],
     lifeMembers: [
       { name: "Andrew Smith", bio: "Andrew has been a steady hand behind the scenes, supporting junior development and club growth year after year.", photo: "images/life-member.jpg" },
       { name: "Karen Audet", bio: "Karen is known for her tireless volunteering and her commitment to a welcoming club culture for every family.", photo: "images/life-member.jpg" },
@@ -317,6 +318,7 @@ const defaultSiteData = {
       heroTitle: "About",
       heroHighlight: "West Basketball",
       historyTitle: "Our History",
+      documentsTitle: "Historical Documents",
       valuesTitle: "West Values",
       lifeMembersTitle: "Life Members",
       lifeDescription: "Honouring the people who have shaped West Basketball.",
@@ -729,6 +731,15 @@ function stripDataUrls(data) {
 
   if (clone.about && Array.isArray(clone.about.photos)) {
     clone.about.photos = clone.about.photos.filter((src) => !isDataUrl(src));
+  }
+
+  if (clone.about && Array.isArray(clone.about.documents)) {
+    clone.about.documents = clone.about.documents.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const copy = { ...item };
+      if (isDataUrl(copy.file)) delete copy.file;
+      return copy;
+    });
   }
 
   if (Array.isArray(clone.news)) {

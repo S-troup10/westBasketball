@@ -46,6 +46,46 @@
     .spotlight-media video { width: 100%; height: 100%; object-fit: cover; }
     .spotlight-body { padding: 1.25rem 1.5rem 1.5rem; }
     .spotlight-role { text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.7rem; color: rgba(255,255,255,0.55); }
+    .doc-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(6,10,14,0.65);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+      padding: 1.25rem 1.5rem;
+    }
+    .doc-card__icon {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(16,185,129,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #10b981;
+    }
+    .doc-card__title { font-size: 1.05rem; font-weight: 600; color: #f8fafc; }
+    .doc-card__desc { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 0.35rem; }
+    .doc-card__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+    .doc-card__actions a,
+    .doc-card__actions button {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 999px;
+      padding: 0.35rem 0.85rem;
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    .doc-card__actions a:hover,
+    .doc-card__actions button:hover { color: #fff; border-color: rgba(16,185,129,0.5); }
     .history-branch { position: relative; display: flex; flex-direction: column; gap: 3rem; }
     .history-branch__rail {
       position: absolute;
@@ -66,6 +106,7 @@
       grid-template-columns: minmax(0, 1fr) 72px minmax(0, 1fr);
       align-items: center;
     }
+    .history-branch__item > * { grid-row: 1; }
     .history-branch__dot {
       grid-column: 2;
       width: 14px;
@@ -83,9 +124,11 @@
       box-shadow: 0 25px 55px rgba(0,0,0,0.35);
       position: relative;
       transition: transform 0.6s ease, opacity 0.6s ease;
+      width: 100%;
+      max-width: 440px;
     }
-    .history-branch__media { aspect-ratio: 16 / 9; overflow: hidden; background: #050505; border-radius: 22px; }
-    .history-branch__media img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.02); }
+    .history-branch__media { overflow: hidden; background: #050505; border-radius: 22px; }
+    .history-branch__media img { display: block; width: 100%; height: auto; }
     .history-branch__body { padding: 1.25rem 1.5rem 1.5rem; }
     .history-branch__year { text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.75rem; color: rgba(255,255,255,0.55); }
     .history-branch__title { font-size: 1.35rem; font-weight: 600; color: #f8fafc; margin-top: 0.5rem; }
@@ -106,20 +149,13 @@
     .history-branch__card--right::after { left: -72px; }
     .history-branch__item { opacity: 1; transform: none; }
     .history-branch__item.is-visible { opacity: 1; transform: none; }
-    .history-branch__media-card.size-wide { max-width: 460px; }
-    .history-branch__media-card.size-tall { max-width: 360px; }
-    .history-branch__media-card.size-square { max-width: 320px; }
-    .history-branch__media-card.size-tall .history-branch__media { aspect-ratio: 3 / 4; }
-    .history-branch__media-card.size-square .history-branch__media { aspect-ratio: 1 / 1; }
-    .history-branch__text-card.size-compact { max-width: 360px; }
-    .history-branch__text-card.size-roomy { max-width: 460px; }
-    .history-branch__text-card.size-roomy .history-branch__body { padding: 1.5rem 1.75rem 1.75rem; }
     @media (max-width: 900px) {
       .history-branch__rail { left: 18px; }
       .history-branch__item { grid-template-columns: 36px minmax(0, 1fr); gap: 1.5rem; }
+      .history-branch__item > * { grid-row: auto; }
       .history-branch__dot { grid-column: 1; }
       .history-branch__card--left,
-      .history-branch__card--right { grid-column: 2; justify-self: stretch; }
+      .history-branch__card--right { grid-column: 2; justify-self: stretch; max-width: none; }
       .history-branch__card--left::after,
       .history-branch__card--right::after { display: none; }
     }
@@ -233,12 +269,12 @@
           <div class="history-branch__rail" data-timeline-parallax="true" data-speed="0.08"></div>
           <article class="history-branch__item history-branch__item--left">
             <span class="history-branch__dot"></span>
-            <div class="history-branch__media-card history-branch__card--left size-wide">
+            <div class="history-branch__media-card history-branch__card--left">
               <div class="history-branch__media">
                 <img src="images/prez.jpg" alt="Club milestone" loading="lazy" />
               </div>
             </div>
-            <div class="history-branch__text-card history-branch__card--right size-compact">
+            <div class="history-branch__text-card history-branch__card--right">
               <div class="history-branch__body">
                 <p class="history-branch__year">1960s</p>
                 <h3 class="history-branch__title">Club foundations</h3>
@@ -250,7 +286,7 @@
           </article>
           <article class="history-branch__item history-branch__item--right">
             <span class="history-branch__dot"></span>
-            <div class="history-branch__text-card history-branch__card--left size-roomy">
+            <div class="history-branch__text-card history-branch__card--left">
               <div class="history-branch__body">
                 <p class="history-branch__year">1980s</p>
                 <h3 class="history-branch__title">Community growth</h3>
@@ -259,7 +295,7 @@
                 </p>
               </div>
             </div>
-            <div class="history-branch__media-card history-branch__card--right size-square">
+            <div class="history-branch__media-card history-branch__card--right">
               <div class="history-branch__media">
                 <img src="images/U12-Knights.jpg" alt="Club milestone" loading="lazy" />
               </div>
@@ -267,12 +303,12 @@
           </article>
           <article class="history-branch__item history-branch__item--left">
             <span class="history-branch__dot"></span>
-            <div class="history-branch__media-card history-branch__card--left size-tall">
+            <div class="history-branch__media-card history-branch__card--left">
               <div class="history-branch__media">
                 <img src="images/mini-hoops.jpg" alt="Club milestone" loading="lazy" />
               </div>
             </div>
-            <div class="history-branch__text-card history-branch__card--right size-compact">
+            <div class="history-branch__text-card history-branch__card--right">
               <div class="history-branch__body">
                 <p class="history-branch__year">2000s</p>
                 <h3 class="history-branch__title">Pathways emerge</h3>
@@ -284,7 +320,7 @@
           </article>
           <article class="history-branch__item history-branch__item--right">
             <span class="history-branch__dot"></span>
-            <div class="history-branch__text-card history-branch__card--left size-roomy">
+            <div class="history-branch__text-card history-branch__card--left">
               <div class="history-branch__body">
                 <p class="history-branch__year">Today</p>
                 <h3 class="history-branch__title">Pride and momentum</h3>
@@ -293,13 +329,25 @@
                 </p>
               </div>
             </div>
-            <div class="history-branch__media-card history-branch__card--right size-wide">
+            <div class="history-branch__media-card history-branch__card--right">
               <div class="history-branch__media">
                 <img src="images/prezq.jpg" alt="Club milestone" loading="lazy" />
               </div>
             </div>
           </article>
         </div>
+      </div>
+    </section>
+
+    <section id="about-documents-section" class="py-16 px-6 relative overflow-hidden hidden">
+      <div class="max-w-6xl mx-auto relative">
+        <div class="section-fade mb-10 flex items-center gap-3">
+          <div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+          <h2 id="about-documents-title" class="text-3xl md:text-4xl font-bold text-white">Historical Documents</h2>
+        </div>
+        <div id="about-documents-list" class="grid md:grid-cols-2 gap-4 section-fade"></div>
       </div>
     </section>
 
@@ -584,39 +632,39 @@
               <h2 id="about-life-title" class="text-2xl font-bold text-white">Life Members</h2>
             </div>
             <p id="about-life-description" class="text-white/60 mb-6">Honouring the people who have shaped West Basketball.</p>
-            <div id="about-life-members" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <article class="group glass rounded-2xl overflow-hidden border border-white/10">
-                <div class="aspect-[4/5] overflow-hidden bg-black/40">
+            <div id="about-life-members" class="grid sm:grid-cols-2 gap-6">
+              <article class="group glass rounded-2xl overflow-hidden border border-white/10 flex items-start">
+                <div class="w-28 sm:w-36 flex-shrink-0 aspect-square overflow-hidden bg-black/40">
                   <img src="images/life-member.jpg" alt="Andrew Smith" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                 </div>
-                <div class="p-4">
+                <div class="p-4 flex-1 min-w-0">
                   <h3 class="text-lg font-semibold text-white">Andrew Smith</h3>
                   <p class="text-sm text-white/60 mt-2">Andrew has been a steady hand behind the scenes, supporting junior development and club growth year after year.</p>
                 </div>
               </article>
-              <article class="group glass rounded-2xl overflow-hidden border border-white/10">
-                <div class="aspect-[4/5] overflow-hidden bg-black/40">
+              <article class="group glass rounded-2xl overflow-hidden border border-white/10 flex items-start">
+                <div class="w-28 sm:w-36 flex-shrink-0 aspect-square overflow-hidden bg-black/40">
                   <img src="images/life-member.jpg" alt="Karen Audet" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                 </div>
-                <div class="p-4">
+                <div class="p-4 flex-1 min-w-0">
                   <h3 class="text-lg font-semibold text-white">Karen Audet</h3>
                   <p class="text-sm text-white/60 mt-2">Karen is known for her tireless volunteering and her commitment to a welcoming club culture for every family.</p>
                 </div>
               </article>
-              <article class="group glass rounded-2xl overflow-hidden border border-white/10">
-                <div class="aspect-[4/5] overflow-hidden bg-black/40">
+              <article class="group glass rounded-2xl overflow-hidden border border-white/10 flex items-start">
+                <div class="w-28 sm:w-36 flex-shrink-0 aspect-square overflow-hidden bg-black/40">
                   <img src="images/life-member.jpg" alt="Eric Harvey" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                 </div>
-                <div class="p-4">
+                <div class="p-4 flex-1 min-w-0">
                   <h3 class="text-lg font-semibold text-white">Eric Harvey</h3>
                   <p class="text-sm text-white/60 mt-2">Eric has guided countless players and coaches, championing high standards and a love for the game.</p>
                 </div>
               </article>
-              <article class="group glass rounded-2xl overflow-hidden border border-white/10">
-                <div class="aspect-[4/5] overflow-hidden bg-black/40">
+              <article class="group glass rounded-2xl overflow-hidden border border-white/10 flex items-start">
+                <div class="w-28 sm:w-36 flex-shrink-0 aspect-square overflow-hidden bg-black/40">
                   <img src="images/life-member.jpg" alt="Larry Davidson" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                 </div>
-                <div class="p-4">
+                <div class="p-4 flex-1 min-w-0">
                   <h3 class="text-lg font-semibold text-white">Larry Davidson</h3>
                   <p class="text-sm text-white/60 mt-2">Larry has played a key role in keeping the club strong, mentoring teams and supporting community initiatives.</p>
                 </div>
