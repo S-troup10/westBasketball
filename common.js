@@ -441,8 +441,6 @@ function renderAboutDetails() {
         })
         .filter((item) => item && (item.text || item.title));
       if (normalizedItems.length) {
-        const mediaSizes = ["size-wide", "size-square", "size-tall", "size-wide"];
-        const textSizes = ["size-compact", "size-roomy", "size-compact", "size-roomy"];
         history.innerHTML = `
           <div class="history-branch__rail" data-timeline-parallax="true" data-speed="0.08"></div>
           ${normalizedItems
@@ -456,17 +454,15 @@ function renderAboutDetails() {
             const itemClass = idx % 2 === 1 ? "history-branch__item history-branch__item--right" : "history-branch__item history-branch__item--left";
             const imageSideClass = idx % 2 === 1 ? "history-branch__card--right" : "history-branch__card--left";
             const textSideClass = idx % 2 === 1 ? "history-branch__card--left" : "history-branch__card--right";
-            const mediaSize = mediaSizes[idx % mediaSizes.length];
-            const textSize = textSizes[idx % textSizes.length];
             return `
               <article class="${itemClass}">
                 <span class="history-branch__dot"></span>
-                <div class="history-branch__media-card ${imageSideClass} ${mediaSize}">
+                <div class="history-branch__media-card ${imageSideClass}">
                   <div class="history-branch__media">
                     <img src="${escapeHtml(photo)}" alt="${escapeHtml(altText)}" loading="lazy" />
                   </div>
                 </div>
-                <div class="history-branch__text-card ${textSideClass} ${textSize}">
+                <div class="history-branch__text-card ${textSideClass}">
                   <div class="history-branch__body">
                     <p class="history-branch__year">${escapeHtml(label)}</p>
                     <h3 class="history-branch__title">${escapeHtml(title)}</h3>
@@ -748,11 +744,11 @@ function renderAboutDetails() {
         const bio = (member?.bio ?? "").toString().trim();
         const photo = (member?.photo ?? "images/logo.png").toString().trim() || "images/logo.png";
         return `
-          <article class="group glass rounded-2xl overflow-hidden border border-white/10">
-            <div class="aspect-[4/5] overflow-hidden bg-black/40">
+          <article class="group glass rounded-2xl overflow-hidden border border-white/10 flex items-start">
+            <div class="w-28 sm:w-36 flex-shrink-0 aspect-square overflow-hidden bg-black/40">
               <img src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
             </div>
-            <div class="p-4">
+            <div class="p-4 flex-1 min-w-0">
               <h3 class="text-lg font-semibold text-white">${escapeHtml(name)}</h3>
               ${bio ? `<p class="text-sm text-white/60 mt-2">${formatMultiline(bio)}</p>` : ""}
             </div>
@@ -778,6 +774,64 @@ function renderAboutDetails() {
       .join("\n");
   }
   if (faqSection) faqSection.classList.toggle("hidden", !faqs.length);
+  const documentsSection = document.getElementById("about-documents-section");
+  const documentsTitle = document.getElementById("about-documents-title");
+  const documentsList = document.getElementById("about-documents-list");
+  const documents = (data.documents ?? []).filter((item) => item && (item.title || item.file || item.url));
+  if (documentsTitle) documentsTitle.textContent = aboutPage.documentsTitle ?? "Historical Documents";
+  if (documentsList) {
+    documentsList.innerHTML = documents
+      .map((item, idx) => {
+        const title = (item.title ?? "").toString().trim() || `Document ${idx + 1}`;
+        const description = (item.description ?? "").toString().trim();
+        const fileName = (item.fileName ?? "").toString().trim() || title;
+        const hasFile = typeof item.file === "string" && item.file.trim().startsWith("data:");
+        const hasUrl = typeof item.url === "string" && item.url.trim();
+        const actions = [];
+        if (hasFile) {
+          actions.push(
+            `<button type="button" data-open-doc="${idx}">View</button>`,
+            `<a href="${escapeHtml(item.file)}" download="${escapeHtml(fileName)}">Download</a>`
+          );
+        } else if (hasUrl) {
+          actions.push(`<a href="${escapeHtml(item.url)}" target="_blank" rel="noopener">View</a>`);
+        }
+        return `
+          <article class="doc-card">
+            <div class="doc-card__icon">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            <div>
+              <p class="doc-card__title">${escapeHtml(title)}</p>
+              ${description ? `<p class="doc-card__desc">${escapeHtml(description)}</p>` : ""}
+              ${actions.length ? `<div class="doc-card__actions">${actions.join("")}</div>` : ""}
+            </div>
+          </article>
+        `;
+      })
+      .join("\n");
+    documentsList.querySelectorAll("[data-open-doc]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const item = documents[Number(btn.dataset.openDoc)];
+        if (!item || !item.file) return;
+        try {
+          const [meta, base64] = item.file.split(",");
+          const mimeMatch = /data:(.*?);base64/.exec(meta || "");
+          const mime = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+          const binary = atob(base64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+          const blob = new Blob([bytes], { type: mime });
+          const blobUrl = URL.createObjectURL(blob);
+          window.open(blobUrl, "_blank", "noopener");
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+        } catch (err) {
+          console.warn("Could not open document", err);
+        }
+      });
+    });
+  }
+  if (documentsSection) documentsSection.classList.toggle("hidden", !documents.length);
   if (photos) {
     photos.innerHTML = (data.photos ?? [])
       .map(
