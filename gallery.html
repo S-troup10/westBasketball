@@ -7,24 +7,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
-          colors: {
-            primary: '#10b981',
-            accent: '#06d6a0',
-            dark: '#0a0a0a',
-            darker: '#050505',
-            light: '#f8fafc'
-          }
-        }
-      }
-    };
-  </script>
-  <link rel="stylesheet" href="parallax-bg.css" />
+  <link rel="stylesheet" href="styles.css" />
+
+<link rel="stylesheet" href="parallax-bg.css" />
   <style>
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
     .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
@@ -38,8 +23,8 @@
       from { opacity: 0; transform: translateY(16px) scale(0.98); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
-    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
-    .section-fade { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+    .nav-blur { background: rgba(10,10,10,0.88); backdrop-filter: blur(10px); }
+    .section-fade { opacity: 0; transform: translateY(16px); transition: opacity .35s ease, transform .35s ease; }
     .section-fade.visible { opacity: 1; transform: translateY(0); }
     .lightbox { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 1000; align-items: center; justify-content: center; }
     .lightbox.active { display: flex; }
@@ -99,7 +84,7 @@
 </head>
 <body class="text-light min-h-screen">
   <!-- Parallax background -->
-  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden bg-scene">
     <!-- Base gradient wash -->
     <div class="absolute inset-0"
       style="background:
@@ -117,7 +102,6 @@
 
       <!-- Mid -->
       <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
-      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
       <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
 
       <!-- Details -->
@@ -127,7 +111,6 @@
 
       <!-- Bokeh smear layers -->
       <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
-      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
 
       <!-- Foreground shards -->
       <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
@@ -354,6 +337,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      initScrollReveal();
       renderNav('gallery');
       renderFooter();
       if (hasOverrides()) {
@@ -364,21 +348,7 @@
       updateFilteredGallery();
       checkEmptyGallery();
       filterGallery(currentFilter);
-
-      const fadeSections = document.querySelectorAll('.section-fade');
-      if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add('visible');
-            }
-          });
-        }, { threshold: 0.1 });
-
-        fadeSections.forEach(el => observer.observe(el));
-      } else {
-        fadeSections.forEach(el => el.classList.add('visible'));
-      }
+      initScrollReveal();
     });
 
     function updateFilteredGallery() {
@@ -505,6 +475,7 @@
       updateFilteredGallery();
       checkEmptyGallery();
       filterGallery(currentFilter);
+      initScrollReveal();
     });
   </script>
 </body>

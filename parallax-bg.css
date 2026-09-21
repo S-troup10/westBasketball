@@ -9,10 +9,32 @@
 }
 
 .parallax-layer{
-  will-change: transform, filter, opacity;
   transform: translate3d(0,0,0);
   pointer-events:none;
 }
+
+/* Promotes the decorative background to its own GPU compositor layer,
+   isolated from the mix-blend-mode stack inside it. Without this the
+   browser can end up re-blending/re-rasterizing the whole layered scene
+   on every scroll frame instead of compositing it once and reusing it. */
+.bg-scene{
+  isolation: isolate;
+  transform: translateZ(0);
+  contain: paint;
+}
+
+/* Shared UI chrome — identical across most pages, kept in one place
+   instead of copy-pasted per page. Pages with their own variant of any
+   of these (e.g. gallery.html) define a local override after this file
+   in their <style> block, which wins on source order. */
+.glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); }
+.nav-blur { background: rgba(10,10,10,0.88); backdrop-filter: blur(10px); }
+.gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.glow { box-shadow: 0 0 40px rgba(16,185,129, 0.3); }
+.btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16,185,129, 0.4); }
+.card-hover { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.card-hover:hover { transform: translateY(-8px) scale(1.02); }
 
 html{
   scrollbar-width: thin;
@@ -133,7 +155,7 @@ html{
 .nebula{
   opacity:.40;
   mix-blend-mode: screen;
-  filter: blur(28px);
+  filter: blur(14px);
   mask-image:
     radial-gradient(1200px 700px at 35% 35%, black 0 55%, transparent 75%),
     radial-gradient(1100px 650px at 70% 55%, black 0 50%, transparent 76%),
@@ -167,7 +189,7 @@ html{
 .fog-bands{
   opacity:.20;
   mix-blend-mode: soft-light;
-  filter: blur(14px);
+  filter: blur(8px);
   background:
     linear-gradient(to bottom,
       transparent 0%,
@@ -217,7 +239,7 @@ html{
 .chroma{
   opacity:.16;
   mix-blend-mode: color-dodge;
-  filter: blur(18px);
+  filter: blur(10px);
   background:
     radial-gradient(900px 520px at 30% 35%, rgba(22,163,74,.10), transparent 70%),
     radial-gradient(900px 520px at 68% 42%, rgba(239,68,68,.08), transparent 72%);
@@ -229,7 +251,7 @@ html{
 .bokeh-smear{
   opacity:.075;
   mix-blend-mode: screen;
-  filter: blur(18px);
+  filter: blur(10px);
   background:
     conic-gradient(from 210deg at 20% 45%,
       transparent 0 10%,
@@ -258,7 +280,7 @@ html{
 }
 .bokeh-smear.bokeh-b{
   opacity:.06;
-  filter: blur(22px);
+  filter: blur(12px);
   background:
     conic-gradient(from 120deg at 70% 40%,
       transparent 0 14%,
@@ -286,6 +308,17 @@ html{
 
 @media (prefers-reduced-motion: reduce){
   .parallax-layer{ transform: none !important; filter:none !important; opacity: 1 !important; }
+}
+
+.float-slow, .float-slower { content-visibility: auto; }
+.float-slow { animation: float 14s ease-in-out infinite; }
+.float-slower { animation: float 18s ease-in-out infinite; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-18px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .float-slow, .float-slower { animation: none; }
 }
 
 @media (max-width: 900px){

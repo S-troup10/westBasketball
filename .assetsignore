@@ -1,0 +1,15 @@
+.env
+.env.*
+.git
+.gitignore
+.assetsignore
+node_modules
+wrangler.js
+wrangler.jsonc
+wrangler.toml
+server.py
+site-data.db
+*.db
+*.sqlite
+*.sqlite3
+.DS_Store

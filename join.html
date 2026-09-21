@@ -9,38 +9,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
-          colors: {
-            primary: '#10b981',
-            accent: '#06d6a0',
-            dark: '#0a0a0a',
-            darker: '#050505',
-            light: '#f8fafc'
-          },
-          boxShadow: {
-            soft: '0 18px 60px rgba(0,0,0,.55)',
-            glow: '0 0 60px rgba(16,185,129,.22)'
-          }
-        }
-      }
-    };
-  </script>
+  <link rel="stylesheet" href="styles.css" />
 
-  <link rel="stylesheet" href="parallax-bg.css" />
+<link rel="stylesheet" href="parallax-bg.css" />
   <style>
     :root { color-scheme: dark; }
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
 
     /* glass */
     .glass {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border: 1px solid rgba(255,255,255,.10);
     }
 
@@ -56,9 +36,9 @@
     }
 
     .nav-blur {
-      background: rgba(10,10,10,.72);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background: rgba(10,10,10,.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     /* nicer focus */
@@ -86,7 +66,7 @@
     .btn-secondary:active { background: rgba(255,255,255,.07); }
 
     /* reveal */
-    .section-fade { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
+    .section-fade { opacity: 0; transform: translateY(16px); transition: opacity .35s ease, transform .35s ease; }
     .section-fade.visible { opacity: 1; transform: translateY(0); }
 
     .programs-showcase {
@@ -348,7 +328,7 @@
 
 <body class="text-light min-h-screen">
   <!-- Parallax background -->
-  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden bg-scene">
     <!-- Base gradient wash -->
     <div class="absolute inset-0"
       style="background:
@@ -366,7 +346,6 @@
 
       <!-- Mid -->
       <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
-      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
       <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
 
       <!-- Details -->
@@ -376,7 +355,6 @@
 
       <!-- Bokeh smear layers -->
       <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
-      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
 
       <!-- Foreground shards -->
       <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
@@ -489,7 +467,7 @@
 
             <article id="u10s" class="program-tile program-anchor">
               <div class="program-tile__media">
-                <img class="program-tile__image" src="images/u10s.jpg" alt="U10s players" loading="eager" decoding="async" />
+                <img class="program-tile__image" src="images/u10s.jpg" alt="U10s players" loading="lazy" decoding="async" />
                 <span class="program-tile__tag">U10s</span>
               </div>
               <div class="program-tile__body">
@@ -510,7 +488,7 @@
             <div class="program-block">
               <article id="winter-junior" class="program-tile program-anchor">
                 <div class="program-tile__media">
-                  <img class="program-tile__image" src="images/U14-West-Raiders.jpg" alt="Winter junior competition players" loading="eager" decoding="async" />
+                  <img class="program-tile__image" src="images/U14-West-Raiders.jpg" alt="Winter junior competition players" loading="lazy" decoding="async" />
                   <span class="program-tile__tag">Winter</span>
                 </div>
                 <div class="program-tile__body">
@@ -585,7 +563,7 @@
 
             <article id="summer-junior" class="program-tile program-anchor">
               <div class="program-tile__media">
-                <img class="program-tile__image" src="images/U12-Knights.jpg" alt="Summer junior competition players" loading="eager" decoding="async" />
+                <img class="program-tile__image" src="images/U12-Knights.jpg" alt="Summer junior competition players" loading="lazy" decoding="async" />
                 <span class="program-tile__tag">Summer</span>
               </div>
               <div class="program-tile__body">
@@ -605,7 +583,7 @@
 
             <article id="development-programs" class="program-tile program-anchor">
               <div class="program-tile__media">
-                <img class="program-tile__image" src="images/prez.jpg" alt="Development programs" loading="eager" decoding="async" />
+                <img class="program-tile__image" src="images/prez.jpg" alt="Development programs" loading="lazy" decoding="async" />
                 <span class="program-tile__tag">Programs</span>
               </div>
               <div class="program-tile__body">
@@ -625,7 +603,7 @@
 
             <article id="referee-pathways" class="program-tile program-anchor">
               <div class="program-tile__media">
-                <img class="program-tile__image" src="images/awards.jpg" alt="Referee pathways" loading="eager" decoding="async" />
+                <img class="program-tile__image" src="images/awards.jpg" alt="Referee pathways" loading="lazy" decoding="async" />
                 <span class="program-tile__tag">Referees</span>
               </div>
               <div class="program-tile__body">
@@ -830,7 +808,7 @@
                   <div class="program-block">
                     <article ${anchorAttr} class="program-tile program-anchor">
                       <div class="program-tile__media">
-                        <img class="program-tile__image" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" loading="eager" decoding="async" />
+                        <img class="program-tile__image" src="${escapeHtml(imageSrc)}" alt="${escapeHtml(imageAlt)}" loading="${index === 0 ? 'eager' : 'lazy'}" decoding="async" />
                         <span class="program-tile__tag">${escapeHtml(badge)}</span>
                       </div>
                       <div class="program-tile__body">
@@ -903,25 +881,14 @@
       }
 
       document.addEventListener('DOMContentLoaded', () => {
+      initScrollReveal();
         renderNav('join');
         renderFooter();
         renderJoinContent();
         initContactModal();
         bindJoinFaqToggles();
-
-        const fadeSections = document.querySelectorAll('.section-fade');
-        if ('IntersectionObserver' in window) {
-          const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('visible');
-          });
-        }, { threshold: 0.12 });
-
-        fadeSections.forEach(el => observer.observe(el));
-      } else {
-        fadeSections.forEach(el => el.classList.add('visible'));
-      }
-    });
+        initScrollReveal();
+      });
 
       window.addEventListener('sitecontent:updated', () => {
         renderNav('join');
@@ -929,6 +896,7 @@
         renderJoinContent();
         initContactModal();
         bindJoinFaqToggles();
+        initScrollReveal();
       });
     </script>
 </body>

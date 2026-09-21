@@ -7,34 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
-          colors: {
-            primary: '#10b981',
-            accent: '#06d6a0',
-            danger: '#ef4444',
-            dark: '#0a0a0a',
-            darker: '#050505',
-            light: '#f8fafc'
-          }
-        }
-      }
-    };
-  </script>
-  <link rel="stylesheet" href="parallax-bg.css" />
+  <link rel="stylesheet" href="styles.css" />
+
+<link rel="stylesheet" href="parallax-bg.css" />
   <style>
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
-    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-    .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16,185,129, 0.4); }
     .btn-danger { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); transition: all 0.3s ease; }
     .btn-danger:hover { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.5); }
-    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
     .input-field { 
       background: rgba(255,255,255,0.05); 
       border: 1px solid rgba(255,255,255,0.1); 
@@ -96,7 +75,7 @@
 </head>
 <body class="text-light min-h-screen">
   <!-- Parallax background -->
-  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden bg-scene">
     <!-- Base gradient wash -->
     <div class="absolute inset-0"
       style="background:

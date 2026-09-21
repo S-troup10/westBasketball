@@ -9,37 +9,17 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
-          colors: {
-            primary: '#10b981',
-            accent: '#06d6a0',
-            dark: '#0a0a0a',
-            darker: '#050505',
-            light: '#f8fafc'
-          },
-          boxShadow: {
-            soft: '0 18px 60px rgba(0,0,0,.55)',
-            glow: '0 0 60px rgba(16,185,129,.22)'
-          }
-        }
-      }
-    };
-  </script>
+  <link rel="stylesheet" href="styles.css" />
 
-  <link rel="stylesheet" href="parallax-bg.css" />
+<link rel="stylesheet" href="parallax-bg.css" />
   <style>
     :root { color-scheme: dark; }
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
 
     .glass {
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.05));
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       border: 1px solid rgba(255,255,255,.10);
     }
 
@@ -51,9 +31,9 @@
     }
 
     .nav-blur {
-      background: rgba(10,10,10,.72);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      background: rgba(10,10,10,.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
 
     :focus-visible {
@@ -70,7 +50,7 @@
     .btn-primary:hover { filter: brightness(1.03); box-shadow: 0 18px 55px rgba(16,185,129,.28); }
     .btn-primary:active { filter: brightness(.98); }
 
-    .section-fade { opacity: 0; transform: translateY(28px); transition: opacity .7s ease, transform .7s ease; }
+    .section-fade { opacity: 0; transform: translateY(16px); transition: opacity .35s ease, transform .35s ease; }
     .section-fade.visible { opacity: 1; transform: translateY(0); }
 
     .blob { filter: blur(60px); opacity: .65; }
@@ -83,7 +63,7 @@
 
 <body class="text-light min-h-screen">
   <!-- Parallax background -->
-  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden bg-scene">
     <!-- Base gradient wash -->
     <div class="absolute inset-0"
       style="background:
@@ -101,7 +81,6 @@
 
       <!-- Mid -->
       <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
-      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
       <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
 
       <!-- Details -->
@@ -111,7 +90,6 @@
 
       <!-- Bokeh smear layers -->
       <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
-      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
 
       <!-- Foreground shards -->
       <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
@@ -285,29 +263,18 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      initScrollReveal();
       renderNav('training');
       renderFooter();
       renderTrainingContent();
-
-      const fadeSections = document.querySelectorAll('.section-fade');
-      if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('visible');
-          });
-        }, { threshold: 0.12 });
-
-        fadeSections.forEach(el => observer.observe(el));
-      } else {
-        fadeSections.forEach(el => el.classList.add('visible'));
-      }
-
+      initScrollReveal();
     });
 
     window.addEventListener('sitecontent:updated', () => {
       renderNav('training');
       renderFooter();
       renderTrainingContent();
+      initScrollReveal();
     });
   </script>
 </body>

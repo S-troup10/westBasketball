@@ -7,45 +7,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Outfit', 'ui-sans-serif', 'system-ui'] },
-          colors: {
-            primary: '#10b981',
-            accent: '#06d6a0',
-            dark: '#0a0a0a',
-            darker: '#050505',
-            light: '#f8fafc'
-          }
-        }
-      }
-    };
-  </script>
-  <link rel="stylesheet" href="parallax-bg.css" />
+  <link rel="stylesheet" href="styles.css" />
+
+<link rel="stylesheet" href="parallax-bg.css" />
   <style>
     body { background: #0a0a0a; color: #f8fafc; overflow-x: hidden; }
-    .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
-    .gradient-text { background: linear-gradient(135deg, #10b981 0%, #06d6a0 50%, #34d399 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .glow { box-shadow: 0 0 40px rgba(16,185,129, 0.3); }
-    .btn-primary { background: linear-gradient(135deg, #10b981 0%, #059669 100%); transition: all 0.3s ease; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 40px rgba(16,185,129, 0.4); }
-    .nav-blur { background: rgba(10,10,10,0.8); backdrop-filter: blur(20px); }
-    .section-fade { opacity: 0; transform: translateY(40px); transition: all 0.8s ease-out; }
+    .section-fade { opacity: 0; transform: translateY(16px); transition: opacity .35s ease, transform .35s ease; }
     .section-fade.visible { opacity: 1; transform: translateY(0); }
-    .float-slow { animation: float 14s ease-in-out infinite; }
-    .float-slower { animation: float 18s ease-in-out infinite; }
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-18px); }
-    }
   </style>
 </head>
 <body class="text-light min-h-screen">
   <!-- Parallax background -->
-  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden">
+  <div aria-hidden="true" class="fixed inset-0 -z-50 overflow-hidden bg-scene">
     <!-- Base gradient wash -->
     <div class="absolute inset-0"
       style="background:
@@ -63,7 +36,6 @@
 
       <!-- Mid -->
       <div class="parallax-layer absolute inset-0 nebula nebula-a" data-depth="0.12" data-mode="drift"></div>
-      <div class="parallax-layer absolute inset-0 nebula nebula-b" data-depth="0.18" data-mode="drift"></div>
       <div class="parallax-layer absolute inset-0 chroma" data-depth="0.14" data-mode="float"></div>
 
       <!-- Details -->
@@ -73,7 +45,6 @@
 
       <!-- Bokeh smear layers -->
       <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-a" data-depth="0.76" data-mode="smear"></div>
-      <div class="parallax-layer absolute inset-0 bokeh-smear bokeh-b" data-depth="0.86" data-mode="smear"></div>
 
       <!-- Foreground shards -->
       <div class="parallax-layer absolute left-[12%] top-[18%] h-52 w-52 rotate-12 rounded-[34px] opacity-[.10]"
@@ -216,28 +187,18 @@
   <script src="common.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      initScrollReveal();
       renderNav('merch');
       renderFooter();
       renderMerchContent();
-      
-      const fadeSections = document.querySelectorAll('.section-fade');
-      if ('IntersectionObserver' in window) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('visible');
-          });
-        }, { threshold: 0.1 });
-
-        fadeSections.forEach(el => observer.observe(el));
-      } else {
-        fadeSections.forEach(el => el.classList.add('visible'));
-      }
+      initScrollReveal();
     });
 
     window.addEventListener('sitecontent:updated', () => {
       renderNav('merch');
       renderFooter();
       renderMerchContent();
+      initScrollReveal();
     });
   </script>
 </body>

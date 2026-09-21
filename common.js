@@ -15,7 +15,8 @@ function hasOverrides() {
   return !!(window.siteContent && window.siteContent.__hasOverrides);
 }
 
-function escapeHtml(str = "") {
+function escapeHtml(value = "") {
+  const str = value === null || value === undefined ? "" : String(value);
   return str
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -26,6 +27,35 @@ function escapeHtml(str = "") {
 
 function formatMultiline(text = "") {
   return escapeHtml(text).replace(/\n/g, "<br>");
+}
+
+// Shared scroll-reveal for .section-fade elements. Safe to call repeatedly
+// (e.g. after CMS content loads) — already-bound elements are skipped.
+// A timeout fallback force-reveals content if the observer ever fails to
+// fire, so a reveal bug can never leave a whole page permanently blank.
+function initScrollReveal() {
+  const fadeSections = Array.from(document.querySelectorAll('.section-fade:not([data-reveal-bound])'));
+  if (!fadeSections.length) return;
+  fadeSections.forEach(el => el.setAttribute('data-reveal-bound', 'true'));
+
+  const reveal = (el) => el.classList.add('visible');
+
+  try {
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) reveal(entry.target);
+        });
+      }, { threshold: 0.01, rootMargin: '0px 0px 80px 0px' });
+      fadeSections.forEach(el => observer.observe(el));
+    } else {
+      fadeSections.forEach(reveal);
+    }
+  } catch (err) {
+    fadeSections.forEach(reveal);
+  }
+
+  window.setTimeout(() => fadeSections.forEach(reveal), 1500);
 }
 
 function ensureNavStyles() {
@@ -459,7 +489,7 @@ function renderAboutDetails() {
                 <span class="history-branch__dot"></span>
                 <div class="history-branch__media-card ${imageSideClass}">
                   <div class="history-branch__media">
-                    <img src="${escapeHtml(photo)}" alt="${escapeHtml(altText)}" loading="lazy" />
+                    <img src="${escapeHtml(photo)}" alt="${escapeHtml(altText)}" loading="lazy" decoding="async" />
                   </div>
                 </div>
                 <div class="history-branch__text-card ${textSideClass}">
@@ -700,7 +730,7 @@ function renderAboutDetails() {
           ? `<video class="w-full h-full object-cover" controls playsinline preload="metadata" poster="${escapeHtml(poster)}">
               <source src="${escapeHtml(video)}" type="video/mp4">
             </video>`
-          : `<img src="${escapeHtml(photo)}" alt="${escapeHtml(name || "Spotlight highlight")}" loading="lazy" />`;
+          : `<img src="${escapeHtml(photo)}" alt="${escapeHtml(name || "Spotlight highlight")}" loading="lazy" decoding="async" />`;
         return `
           <article class="spotlight-card">
             <div class="spotlight-media">
@@ -729,7 +759,7 @@ function renderAboutDetails() {
       `;
     } else {
       featureImage.innerHTML = `
-        <img src="${escapeHtml(highlightPhoto)}" alt="${escapeHtml(highlightAlt)}" class="w-full h-auto max-h-[480px] object-cover bg-black/40" loading="lazy" />
+        <img src="${escapeHtml(highlightPhoto)}" alt="${escapeHtml(highlightAlt)}" class="w-full h-auto max-h-[480px] object-cover bg-black/40" loading="lazy" decoding="async" />
       `;
     }
   }
@@ -746,7 +776,7 @@ function renderAboutDetails() {
         return `
           <article class="group glass rounded-2xl overflow-hidden border border-white/10 flex items-start">
             <div class="w-28 sm:w-36 flex-shrink-0 aspect-square overflow-hidden bg-black/40">
-              <img src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+              <img src="${escapeHtml(photo)}" alt="${escapeHtml(name)}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async" />
             </div>
             <div class="p-4 flex-1 min-w-0">
               <h3 class="text-lg font-semibold text-white">${escapeHtml(name)}</h3>
@@ -785,10 +815,20 @@ function renderAboutDetails() {
         const title = (item.title ?? "").toString().trim() || `Document ${idx + 1}`;
         const description = (item.description ?? "").toString().trim();
         const fileName = (item.fileName ?? "").toString().trim() || title;
-        const hasFile = typeof item.file === "string" && item.file.trim().startsWith("data:");
+        const file = typeof item.file === "string" ? item.file.trim() : "";
+        // Uploads are offloaded to R2 and come back as plain URLs; older
+        // content may still carry an inline data: URL, which needs the
+        // blob-decoding handler below.
+        const hasHostedFile = /^https?:\/\//i.test(file);
+        const hasFile = file.startsWith("data:");
         const hasUrl = typeof item.url === "string" && item.url.trim();
         const actions = [];
-        if (hasFile) {
+        if (hasHostedFile) {
+          actions.push(
+            `<a href="${escapeHtml(file)}" target="_blank" rel="noopener">View</a>`,
+            `<a href="${escapeHtml(file)}" download="${escapeHtml(fileName)}">Download</a>`
+          );
+        } else if (hasFile) {
           actions.push(
             `<button type="button" data-open-doc="${idx}">View</button>`,
             `<a href="${escapeHtml(item.file)}" download="${escapeHtml(fileName)}">Download</a>`
@@ -835,7 +875,7 @@ function renderAboutDetails() {
   if (photos) {
     photos.innerHTML = (data.photos ?? [])
       .map(
-        (src) => `<div class="image-card card-hover"><img src="${src}" alt="Club moment" class="rounded-2xl object-contain w-full h-auto max-h-64 bg-black/40" loading="lazy" /></div>`
+        (src) => `<div class="image-card card-hover"><img src="${src}" alt="Club moment" class="rounded-2xl object-contain w-full h-auto max-h-64 bg-black/40" loading="lazy" decoding="async" /></div>`
       )
       .join("\n");
   }
@@ -1126,7 +1166,7 @@ function renderGallery(targetId) {
         return `
           <div class="gallery-item glass card-hover rounded-2xl overflow-hidden cursor-pointer" onclick="openLightbox(${index})">
             <div class="relative aspect-[4/3] overflow-hidden">
-              <img src="${photo.src}" alt="${escapeHtml(altText)}" class="w-full h-auto max-h-full object-contain bg-black/40 transition-transform duration-500 hover:scale-105" loading="lazy" />
+              <img src="${photo.src}" alt="${escapeHtml(altText)}" class="w-full h-auto max-h-full object-contain bg-black/40 transition-transform duration-500 hover:scale-105" loading="lazy" decoding="async" />
               ${overlay}
             </div>
           </div>`;

@@ -1117,24 +1117,18 @@
     if (saveBtn && !saveBtn.dataset.bound) {
       saveBtn.dataset.bound = "true";
       saveBtn.addEventListener("click", async () => {
-        const result = saveSiteData(state.data);
-        if (!result.ok) {
-          showToast("Unable to save locally.", true);
+        const password = localStorage.getItem("adminPassword") || "";
+        if (!password) {
+          showToast("Missing admin password. Please re-login.", true);
           return;
         }
-        state.dirty = false;
-        if (confirmModal) {
-          confirmModal.classList.remove("hidden");
-          confirmModal.classList.add("flex");
-        } else {
-          showToast("Changes saved.");
-        }
+
+        // The server is the source of truth, so it is saved FIRST. The local
+        // cache is only a preview copy, and it has a ~5MB quota that large
+        // uploads blow straight through — a failure there must never stop the
+        // real save, or the admin gets stuck unable to save (or undo) anything.
+        let remoteOk = false;
         try {
-          const password = localStorage.getItem("adminPassword") || "";
-          if (!password) {
-            showToast("Missing admin password. Please re-login.", true);
-            return;
-          }
           const resp = await fetch(contentUrl, {
             method: "PUT",
             headers: {
@@ -1143,10 +1137,40 @@
             },
             body: JSON.stringify(state.data)
           });
-          if (!resp.ok) throw new Error("Remote save failed");
+          if (!resp.ok) throw new Error(`Remote save failed (${resp.status})`);
+          remoteOk = true;
+          // The worker offloads uploads to R2 and returns the slimmed-down
+          // content. Adopting it keeps big files out of memory and the cache.
+          const processed = await resp.json().catch(() => null);
+          if (processed && typeof processed === "object") {
+            state.data = processed;
+          }
         } catch (err) {
-          showToast("Saved locally. Remote save failed.", true);
+          console.warn("Remote save failed", err);
         }
+
+        const result = saveSiteData(state.data);
+
+        if (!remoteOk) {
+          showToast(
+            result.ok
+              ? "Saved in this browser only — the site was not updated. Check your connection and save again."
+              : "Save failed. Check your connection and try again.",
+            true
+          );
+          return;
+        }
+
+        state.dirty = false;
+        if (!result.ok) {
+          showToast("Saved to the site. This browser's preview cache is full, so reload to see the live version.", true);
+        } else if (confirmModal) {
+          confirmModal.classList.remove("hidden");
+          confirmModal.classList.add("flex");
+        } else {
+          showToast("Changes saved.");
+        }
+        renderAll();
       });
     }
 
